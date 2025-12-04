@@ -31,9 +31,6 @@ export default class CalendarManager {
       if (CalendarRegistry.size === 0) await this.loadDefaultCalendars();
     }
 
-    // Set up hooks
-    this.#registerHooks();
-
     log(3, 'Calendar Manager initialized');
   }
 
@@ -354,38 +351,36 @@ export default class CalendarManager {
   /* -------------------------------------------- */
 
   /**
-   * Register Foundry hooks for calendar management.
-   * @private
+   * Handle updateSetting hook for dnd5e calendar changes.
+   * @param {object} setting - The setting that was updated
+   * @param {object} changes - The changes to the setting
+   * @internal
    */
-  static #registerHooks() {
-    // For dnd5e, listen for calendar changes
-    if (SYSTEM.isDnd5e) {
-      Hooks.on('updateSetting', (setting, changes) => {
-        if (setting.key === 'dnd5e.calendar') {
-          const newCalendarId = changes.value;
+  static onUpdateSetting(setting, changes) {
+    if (setting.key === 'dnd5e.calendar') {
+      const newCalendarId = changes.value;
 
-          // If we triggered this change, skip (we're handling the reload)
-          if (this.#isSwitchingCalendar) {
-            log(3, 'D&D 5e calendar updated (by Calendaria) - reload pending');
-            return;
-          }
+      // If we triggered this change, skip (we're handling the reload)
+      if (this.#isSwitchingCalendar) {
+        log(3, 'D&D 5e calendar updated (by Calendaria) - reload pending');
+        return;
+      }
 
-          // External change - update registry to match
-          log(3, 'D&D 5e calendar updated (externally)');
-          if (newCalendarId) CalendarRegistry.setActive(newCalendarId);
+      // External change - update registry to match
+      log(3, 'D&D 5e calendar updated (externally)');
+      if (newCalendarId) CalendarRegistry.setActive(newCalendarId);
 
-          // Notify user that a reload is recommended for full UI update
-          ui.notifications.warn('Calendar changed. Please reload for full effect.');
-        }
-      });
+      // Notify user that a reload is recommended for full UI update
+      ui.notifications.warn('Calendar changed. Please reload for full effect.');
     }
+  }
 
-    // Save calendars when world closes (for non-dnd5e systems)
-    if (!SYSTEM.isDnd5e) {
-      Hooks.on('closeGame', () => {
-        if (game.user.isGM) this.saveCalendars();
-      });
-    }
+  /**
+   * Handle closeGame hook to save calendars.
+   * @internal
+   */
+  static onCloseGame() {
+    if (game.user.isGM) CalendarManager.saveCalendars();
   }
 
   /* -------------------------------------------- */

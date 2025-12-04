@@ -8,6 +8,7 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
+import NoteManager from '../notes/note-manager.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
@@ -56,7 +57,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   };
 
   get title() {
-    return this.calendar?.name;
+    return this.calendar?.name || '';
   }
 
   /**
@@ -512,28 +513,24 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       hour = 12;
     }
 
-    // Create new journal entry with calendar note page
-    const journal = await JournalEntry.create({
-      name: `Note - ${month}/${day}/${year}`,
-      pages: [
-        {
-          name: 'New Note',
-          type: 'calendaria.calendarnote',
-          system: {
-            startDate: {
-              year: parseInt(year),
-              month: parseInt(month),
-              day: parseInt(day),
-              hour: parseInt(hour),
-              minute: 0
-            }
-          }
+    // Create note using NoteManager (which creates it as a page in the calendar journal)
+    const page = await NoteManager.createNote({
+      name: 'New Note',
+      noteData: {
+        startDate: {
+          year: parseInt(year),
+          month: parseInt(month),
+          day: parseInt(day),
+          hour: parseInt(hour),
+          minute: 0
         }
-      ]
+      }
     });
 
     // Open the note for editing
-    journal.pages.contents[0].sheet.render(true);
+    if (page) {
+      page.sheet.render(true);
+    }
 
     // Clear the selected time slot
     this._selectedTimeSlot = null;
@@ -562,28 +559,24 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       minute = today.minute ?? 0;
     }
 
-    // Create new journal entry with calendar note page
-    const journal = await JournalEntry.create({
-      name: `Note - ${month + 1}/${day}/${year}`,
-      pages: [
-        {
-          name: 'New Note',
-          type: 'calendaria.calendarnote',
-          system: {
-            startDate: {
-              year: parseInt(year),
-              month: parseInt(month),
-              day: parseInt(day),
-              hour: parseInt(hour),
-              minute: parseInt(minute)
-            }
-          }
+    // Create note using NoteManager (which creates it as a page in the calendar journal)
+    const page = await NoteManager.createNote({
+      name: 'New Note',
+      noteData: {
+        startDate: {
+          year: parseInt(year),
+          month: parseInt(month),
+          day: parseInt(day),
+          hour: parseInt(hour),
+          minute: parseInt(minute)
         }
-      ]
+      }
     });
 
     // Open the note for editing
-    journal.pages.contents[0].sheet.render(true);
+    if (page) {
+      page.sheet.render(true);
+    }
 
     // Clear the selected time slot
     this._selectedTimeSlot = null;
@@ -706,12 +699,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const hour = parseInt(target.dataset.hour);
 
     // Toggle selection - if clicking the same slot, deselect it
-    if (
-      this._selectedTimeSlot?.year === year &&
-      this._selectedTimeSlot?.month === month &&
-      this._selectedTimeSlot?.day === day &&
-      this._selectedTimeSlot?.hour === hour
-    ) {
+    if (this._selectedTimeSlot?.year === year && this._selectedTimeSlot?.month === month && this._selectedTimeSlot?.day === day && this._selectedTimeSlot?.hour === hour) {
       this._selectedTimeSlot = null;
     } else {
       this._selectedTimeSlot = { year, month, day, hour };
