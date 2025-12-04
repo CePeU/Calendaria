@@ -7,7 +7,7 @@
  * @author Tyler
  */
 
-import { MODULE, SETTINGS } from '../constants.mjs';
+import { MODULE, SETTINGS, SYSTEM } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import CalendarRegistry from './calendar-registry.mjs';
 import CalendariaCalendar from './data/calendaria-calendar.mjs';
@@ -24,7 +24,7 @@ export default class CalendarManager {
     log(3, 'Initializing Calendar Manager...');
 
     // Check if we're in a dnd5e game
-    if (game.system.id === 'dnd5e') await this.#initializeDnd5e();
+    if (SYSTEM.isDnd5e) await this.#initializeDnd5e();
     else {
       // For non-dnd5e systems, load from our own settings
       await this.loadCalendars();
@@ -179,7 +179,7 @@ export default class CalendarManager {
     CalendarRegistry.setActive(id);
 
     // For dnd5e, update the system's calendar settings
-    if (game.system.id === 'dnd5e' && game.user.isGM) {
+    if (SYSTEM.isDnd5e && game.user.isGM) {
       try {
         // Set flag to prevent responding to our own change
         this.#isSwitchingCalendar = true;
@@ -318,7 +318,7 @@ export default class CalendarManager {
    */
   static #registerHooks() {
     // For dnd5e, listen for calendar changes
-    if (game.system.id === 'dnd5e') {
+    if (SYSTEM.isDnd5e) {
       Hooks.on('updateSetting', (setting, changes) => {
         if (setting.key === 'dnd5e.calendar') {
           const newCalendarId = changes.value;
@@ -340,7 +340,7 @@ export default class CalendarManager {
     }
 
     // Save calendars when world closes (for non-dnd5e systems)
-    if (game.system.id !== 'dnd5e') {
+    if (!SYSTEM.isDnd5e) {
       Hooks.on('closeGame', () => {
         if (game.user.isGM) this.saveCalendars();
       });

@@ -126,3 +126,27 @@ export const TEMPLATES = {
     CALENDAR_NOTE_FORM: `modules/${MODULE.ID}/templates/sheets/calendar-note-form.hbs`
   }
 };
+
+/**
+ * System utilities and helpers.
+ * Provides convenient access to system-specific checks and integrations.
+ *
+ * @type {Object}
+ */
+export const SYSTEM = {
+  /**
+   * Get the current game system.
+   * @returns {System} The current Foundry VTT system
+   */
+  get current() {
+    return game.system;
+  },
+
+  /**
+   * Check if the current system is D&D 5e.
+   * @returns {boolean} True if running on dnd5e system
+   */
+  get isDnd5e() {
+    return game.system?.id === 'dnd5e';
+  }
+};
