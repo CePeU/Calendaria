@@ -40,6 +40,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       deleteNote: CalendarApplication._onDeleteNote,
       changeView: CalendarApplication._onChangeView,
       selectDay: CalendarApplication._onSelectDay,
+      selectMonth: CalendarApplication._onSelectMonth,
       setAsCurrentDate: CalendarApplication._onSetAsCurrentDate,
       selectTimeSlot: CalendarApplication._onSelectTimeSlot
     },
@@ -216,6 +217,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     let dayIndex = startDayOfWeek;
     for (let day = 1; day <= daysInMonth; day++) {
       const dayNotes = this._getNotesForDay(notes, year, month, day);
+
+      // Check if this day is a festival day
+      const festivalDay = calendar.findFestivalDay({ year, month, dayOfMonth: day - 1 });
+
       currentWeek.push({
         day,
         year,
@@ -223,7 +228,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         isToday: this._isToday(year, month, day),
         isSelected: this._isSelected(year, month, day),
         notes: dayNotes,
-        isOddDay: dayIndex % 2 === 1
+        isOddDay: dayIndex % 2 === 1,
+        isFestival: !!festivalDay,
+        festivalName: festivalDay ? game.i18n.localize(festivalDay.name) : null
       });
       dayIndex++;
 
@@ -622,6 +629,16 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   static async _onChangeView(event, target) {
     const mode = target.dataset.mode;
     this._displayMode = mode;
+    await this.render();
+  }
+
+  static async _onSelectMonth(event, target) {
+    const year = parseInt(target.dataset.year);
+    const month = parseInt(target.dataset.month);
+
+    // Switch to month view and navigate to the selected month
+    this._displayMode = 'month';
+    this.currentDate = { year, month, day: 1 };
     await this.render();
   }
 

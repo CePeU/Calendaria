@@ -30,6 +30,7 @@
   "CALENDARIA.Settings.ResetPosition.Label": "Reset Position",
   "CALENDARIA.Settings.ResetPosition.Name": "Reset Calendar Position",
   "CALENDARIA.Settings.ResetPosition.Success": "Calendar position has been reset.",
+  "CALENDARIA.UI.AddNote": "Add Note",
   "CALENDARIA.UI.Cancel": "Cancel",
   "TYPES.JournalEntryPage.calendaria.calendarnote": "Calendar Note"
 }

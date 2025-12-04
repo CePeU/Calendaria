@@ -84,9 +84,22 @@ export default class CalendarManager {
         calendarData.metadata.description = calendarData.metadata.description || calendarData.description || '5e default calendar';
         calendarData.metadata.author = calendarData.metadata.author || 'dnd5e-system';
 
+        // Extract festivals if they exist in the dnd5e calendar config
+        // Festivals may be in the original config object
+        if (config.festivals && !calendarData.festivals) {
+          calendarData.festivals = config.festivals;
+        }
+
+        // Extract moons if they exist in the dnd5e calendar config
+        if (config.moons && !calendarData.moons) {
+          calendarData.moons = config.moons;
+        }
+
         // Convert dnd5e calendar definition to CalendariaCalendar
         const calendar = new CalendariaCalendar(calendarData);
         CalendarRegistry.register(id, calendar);
+
+        log(3, `Loaded calendar ${id} with ${calendar.festivals?.length ?? 0} festivals and ${calendar.moons?.length ?? 0} moons`);
       } catch (error) {
         log(2, `Error loading dnd5e calendar:`, error);
       }

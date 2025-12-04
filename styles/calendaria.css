@@ -392,11 +392,52 @@
   &.has-notes {
     border-color: var(--calendaria-border);
   }
+
+  &.festival-day {
+    background: linear-gradient(135deg, var(--calendaria-bg) 0%, rgb(74 53 32) 100%);
+    border-color: rgb(212 175 55);
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgb(255 215 0) 50%, transparent);
+      opacity: 0.6;
+    }
+
+    .day-number {
+      color: rgb(255 215 0);
+    }
+  }
 }
 
 .day-number {
   font-weight: bold;
   margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.festival-icon {
+  color: rgb(255 215 0);
+  font-size: 0.75rem;
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .day-notes {
