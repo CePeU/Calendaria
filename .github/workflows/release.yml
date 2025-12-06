@@ -135,12 +135,10 @@ jobs:
     - name: Post to Discord
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        RELEASE_BODY: ${{ steps.release.outputs.body }}
       run: |
         # Get release notes from the release body, or use a default message
-        RELEASE_NOTES="${{ steps.release.outputs.body }}"
-        if [ -z "$RELEASE_NOTES" ]; then
-          RELEASE_NOTES="New release available!"
-        fi
+        RELEASE_NOTES="${RELEASE_BODY:-New release available!}"
 
         JSON_PAYLOAD=$(jq -n \
           --arg title "${{ steps.module.outputs.title }} Release" \
