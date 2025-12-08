@@ -150,7 +150,7 @@ jobs:
           --arg compat_min "${{ steps.module.outputs.compat_min }}" \
           --arg compat_max "${{ steps.module.outputs.compat_max }}" \
           '{
-            content: "<@&1384920094597185556> <@&1384922261408190505>",
+            content: "<@&1384920094597185556> <@&1447730718464806973>",
             embeds: [{
               title: $title,
               description: $release_notes,
