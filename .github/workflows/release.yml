@@ -82,7 +82,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        name: ${{ env.TAG_NAME }}
+        omitNameDuringUpdate: true
         draft: false
         prerelease: true
         omitDraftDuringUpdate: true
@@ -156,9 +156,7 @@ jobs:
               description: $release_notes,
               fields: [
                 {name: "Core Compatibility", value: ($compat_min + " - " + $compat_max), inline: true},
-                {name: "Foundry Package", value: $foundry_url, inline: false},
-                {name: "Release Manifest", value: $release_url, inline: false},
-                {name: "Manual Download", value: $download_url, inline: false}
+                {name: "Foundry Package", value: $foundry_url, inline: false}
               ]
             }]
           }')
