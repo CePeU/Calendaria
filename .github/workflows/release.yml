@@ -141,7 +141,7 @@ jobs:
         RELEASE_NOTES="${RELEASE_BODY:-New release available!}"
 
         JSON_PAYLOAD=$(jq -n \
-          --arg title "${{ steps.module.outputs.title }} Release" \
+          --arg title "${{ steps.module.outputs.title }} v${{ env.VERSION }}" \
           --arg version "${{ env.VERSION }}" \
           --arg foundry_url "https://foundryvtt.com/packages/calendaria" \
           --arg release_url "${{ env.RELEASE_MANIFEST_URL }}" \
@@ -150,16 +150,15 @@ jobs:
           --arg compat_min "${{ steps.module.outputs.compat_min }}" \
           --arg compat_max "${{ steps.module.outputs.compat_max }}" \
           '{
-          content: "<@&1384920094597185556> <@&1384922261408190505>",
+            content: "<@&1384920094597185556> <@&1384922261408190505>",
             embeds: [{
               title: $title,
+              description: $release_notes,
               fields: [
-                {name: "Version", value: $version, inline: true},
                 {name: "Core Compatibility", value: ($compat_min + " - " + $compat_max), inline: true},
                 {name: "Foundry Package", value: $foundry_url, inline: false},
                 {name: "Release Manifest", value: $release_url, inline: false},
-                {name: "Manual Download", value: $download_url, inline: false},
-                {name: "Release Notes", value: $release_notes, inline: false}
+                {name: "Manual Download", value: $download_url, inline: false}
               ]
             }]
           }')
