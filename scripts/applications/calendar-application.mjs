@@ -10,6 +10,7 @@
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
+import { MODULE, SETTINGS } from '../constants.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -151,6 +152,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     // Filter notes for current view
     context.currentMonthNotes = this._getNotesForMonth(context.visibleNotes, currentDate.year, currentDate.month);
 
+    // Moon phases setting for use in calendar data generation
+    context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES);
+
     return context;
   }
 
@@ -197,6 +201,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const weeks = [];
     let currentWeek = [];
 
+    // Check if moon phases should be shown
+    const showMoons = game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES) && calendar.moons?.length;
+
     // Calculate starting day of week for the first day of the month
     // For fantasy calendars (like Harptos with 10-day weeks), months always start on first day of week
     // TODO: Make this configurable via calendar metadata when building calendar configuration UI
@@ -214,6 +221,37 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       // Check if this day is a festival day
       const festivalDay = calendar.findFestivalDay({ year, month, dayOfMonth: day - 1 });
 
+      // Get moon phases for this day
+      let moonPhases = null;
+      if (showMoons) {
+        // Calculate day of year (0-indexed) from month and day
+        let dayOfYear = day - 1;
+        for (let idx = 0; idx < month; idx++) {
+          const m = calendar.months.values[idx];
+          dayOfYear += m.days;
+        }
+
+        // Build complete time components for this day
+        const dayComponents = {
+          year: year - (calendar.years?.yearZero ?? 0),
+          month,
+          day: dayOfYear,
+          hour: 12,
+          minute: 0,
+          second: 0
+        };
+        const dayWorldTime = calendar.componentsToTime(dayComponents);
+        moonPhases = calendar.moons.map((moon, index) => {
+          const phase = calendar.getMoonPhase(index, dayWorldTime);
+          if (!phase) return null;
+          return {
+            moonName: game.i18n.localize(moon.name),
+            phaseName: game.i18n.localize(phase.name),
+            icon: phase.icon
+          };
+        }).filter(Boolean);
+      }
+
       currentWeek.push({
         day,
         year,
@@ -223,7 +261,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         notes: dayNotes,
         isOddDay: dayIndex % 2 === 1,
         isFestival: !!festivalDay,
-        festivalName: festivalDay ? game.i18n.localize(festivalDay.name) : null
+        festivalName: festivalDay ? game.i18n.localize(festivalDay.name) : null,
+        moonPhases
       });
       dayIndex++;
 
@@ -512,8 +551,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         if (isSameDay) return null; // Not multi-day
 
         // Check if this event is visible in the current month
-        const startBeforeOrInMonth =
-          start.year < year || (start.year === year && start.month <= month);
+        const startBeforeOrInMonth = start.year < year || (start.year === year && start.month <= month);
         const endInOrAfterMonth = end.year > year || (end.year === year && end.month >= month);
 
         if (!startBeforeOrInMonth || !endInOrAfterMonth) return null;

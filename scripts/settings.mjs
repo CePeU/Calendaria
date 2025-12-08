@@ -46,6 +46,16 @@ export function registerSettings() {
     default: true
   });
 
+  /** Show moon phases on the calendar UI */
+  game.settings.register(MODULE.ID, SETTINGS.SHOW_MOON_PHASES, {
+    name: 'CALENDARIA.Settings.ShowMoonPhases.Name',
+    hint: 'CALENDARIA.Settings.ShowMoonPhases.Hint',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
   /** Stored calendar configurations and active calendar state */
   game.settings.register(MODULE.ID, SETTINGS.CALENDARS, {
     name: 'Calendar Configurations',

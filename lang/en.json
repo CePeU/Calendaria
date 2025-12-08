@@ -269,6 +269,8 @@
   "CALENDARIA.Settings.ResetPosition.Label": "Reset Position",
   "CALENDARIA.Settings.ResetPosition.Name": "Reset Calendar Position",
   "CALENDARIA.Settings.ResetPosition.Success": "Calendar position has been reset.",
+  "CALENDARIA.Settings.ShowMoonPhases.Hint": "Display moon phase indicators in the calendar header showing the current phase of each configured moon.",
+  "CALENDARIA.Settings.ShowMoonPhases.Name": "Show Moon Phases",
   "CALENDARIA.HUD.LockPosition": "Lock Position",
   "CALENDARIA.HUD.UnlockPosition": "Unlock Position",
   "CALENDARIA.HUD.OpenCalendar": "Open Calendar",

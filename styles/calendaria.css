@@ -300,6 +300,12 @@
   font-size: 1.2rem;
 }
 
+/* Moon Phase Display (inline with day number) */
+.moon-phase {
+  font-size: 12px;
+  line-height: 1;
+}
+
 .calendar-actions {
   display: flex;
   gap: 0.5rem;

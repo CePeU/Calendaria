@@ -77,7 +77,10 @@ export const SETTINGS = {
   POSITION_LOCKED: 'positionLocked',
 
   /** @type {string} User-created custom note categories */
-  CUSTOM_CATEGORIES: 'customCategories'
+  CUSTOM_CATEGORIES: 'customCategories',
+
+  /** @type {string} Whether to show moon phases on the calendar UI */
+  SHOW_MOON_PHASES: 'showMoonPhases'
 };
 
 /**
