@@ -9,18 +9,92 @@
 import { MODULE, SETTINGS } from '../constants.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
+/** @type {number} Double-click detection threshold in milliseconds */
+const DOUBLE_CLICK_THRESHOLD = 400;
+
+/** @type {{time: number, year: number|null, month: number|null, day: number|null}} Click state for double-click detection */
+const clickState = { time: 0, year: null, month: null, day: null };
+
 /**
- * Get all calendar note pages from journal entries.
+ * Convert hex color to hue angle for CSS filter.
+ * @param {string} hex - Hex color (e.g., '#ff0000')
+ * @returns {number} Hue angle in degrees (0-360)
+ */
+function hexToHue(hex) {
+  if (!hex) return 0;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  if (d === 0) return 0;
+  let h;
+  if (max === r) h = ((g - b) / d) % 6;
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+  h = Math.round(h * 60);
+  return h < 0 ? h + 360 : h;
+}
+
+/**
+ * Enrich season data with icon and color based on season name.
+ * @param {object|null} season - Season object with name property
+ * @returns {object|null} Season with icon and color added
+ */
+export function enrichSeasonData(season) {
+  if (!season) return null;
+
+  // Return as-is if already has icon and color
+  if (season.icon && season.color) return season;
+
+  // Map season names to icons and colors
+  const seasonName = game.i18n.localize(season.name).toLowerCase();
+  const enriched = { ...season };
+
+  // Match common season names (English and localized variants)
+  if (seasonName.includes('autumn') || seasonName.includes('fall')) {
+    enriched.icon = enriched.icon || 'fas fa-leaf';
+    enriched.color = enriched.color || '#d2691e';
+  } else if (seasonName.includes('winter')) {
+    enriched.icon = enriched.icon || 'fas fa-snowflake';
+    enriched.color = enriched.color || '#87ceeb';
+  } else if (seasonName.includes('spring')) {
+    enriched.icon = enriched.icon || 'fas fa-seedling';
+    enriched.color = enriched.color || '#90ee90';
+  } else if (seasonName.includes('summer')) {
+    enriched.icon = enriched.icon || 'fas fa-sun';
+    enriched.color = enriched.color || '#ffd700';
+  } else {
+    // Default fallback
+    enriched.icon = enriched.icon || 'fas fa-leaf';
+    enriched.color = enriched.color || '#666666';
+  }
+
+  return enriched;
+}
+
+/**
+ * Get all calendar note pages from journal entries for the active calendar.
  * @returns {JournalEntryPage[]}
  */
 export function getCalendarNotes() {
   const notes = [];
+  const activeCalendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
+
   for (const journal of game.journal) {
     for (const page of journal.pages) {
-      if (page.type === 'calendaria.calendarnote') notes.push(page);
+      if (page.type !== 'calendaria.calendarnote') continue;
+
+      // Filter by calendar ID - check page flags first, then parent journal
+      const noteCalendarId = page.getFlag(MODULE.ID, 'calendarId') || page.parent?.getFlag(MODULE.ID, 'calendarId');
+      if (activeCalendarId && noteCalendarId !== activeCalendarId) continue;
+
+      notes.push(page);
     }
   }
   return notes;
@@ -63,11 +137,7 @@ export function getCurrentViewedDate(calendar = null) {
   const yearZero = calendar?.years?.yearZero ?? 0;
   const dayOfMonth = (components.dayOfMonth ?? 0) + 1;
 
-  return {
-    ...components,
-    year: components.year + yearZero,
-    day: dayOfMonth
-  };
+  return { ...components, year: components.year + yearZero, day: dayOfMonth };
 }
 
 /**
@@ -79,22 +149,22 @@ export function getCurrentViewedDate(calendar = null) {
  * @returns {boolean}
  */
 export function hasNotesOnDay(notes, year, month, day) {
+  const targetDate = { year, month, day };
   return notes.some((page) => {
-    const start = page.system.startDate;
-    const end = page.system.endDate;
-
-    // Check if this day is the start date
-    if (start.year === year && start.month === month && start.day === day) return true;
-
-    // Check multi-day events
-    if (end?.year != null && end?.month != null && end?.day != null) {
-      const startDate = new Date(start.year, start.month, start.day);
-      const endDate = new Date(end.year, end.month, end.day);
-      const checkDate = new Date(year, month, day);
-      if (checkDate >= startDate && checkDate <= endDate) return true;
-    }
-
-    return false;
+    // Build noteData from page.system for recurrence check
+    const noteData = {
+      startDate: page.system.startDate,
+      endDate: page.system.endDate,
+      repeat: page.system.repeat,
+      repeatInterval: page.system.repeatInterval,
+      repeatEndDate: page.system.repeatEndDate,
+      maxOccurrences: page.system.maxOccurrences,
+      moonConditions: page.system.moonConditions,
+      randomConfig: page.system.randomConfig,
+      cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
+      linkedEvent: page.system.linkedEvent
+    };
+    return isRecurringMatch(noteData, targetDate);
   });
 }
 
@@ -141,28 +211,15 @@ export function getFirstMoonPhase(calendar, year, month, day) {
 
   // Calculate day of year
   let dayOfYear = day - 1;
-  for (let idx = 0; idx < month; idx++) {
-    dayOfYear += calendar.months.values[idx].days;
-  }
+  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.months.values[idx].days;
 
-  const dayComponents = {
-    year: year - (calendar.years?.yearZero ?? 0),
-    month,
-    day: dayOfYear,
-    hour: 12,
-    minute: 0,
-    second: 0
-  };
-
+  const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
   const phase = calendar.getMoonPhase(0, dayWorldTime);
-
   if (!phase) return null;
 
-  return {
-    icon: phase.icon,
-    tooltip: `${game.i18n.localize(calendar.moons[0].name)}: ${game.i18n.localize(phase.name)}`
-  };
+  const color = calendar.moons[0].color || null;
+  return { icon: phase.icon, color, hue: color ? hexToHue(color) : null, tooltip: `${game.i18n.localize(calendar.moons[0].name)}: ${game.i18n.localize(phase.name)}` };
 }
 
 /**
@@ -179,30 +236,17 @@ export function getAllMoonPhases(calendar, year, month, day) {
 
   // Calculate day of year
   let dayOfYear = day - 1;
-  for (let idx = 0; idx < month; idx++) {
-    dayOfYear += calendar.months.values[idx].days;
-  }
+  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.months.values[idx].days;
 
-  const dayComponents = {
-    year: year - (calendar.years?.yearZero ?? 0),
-    month,
-    day: dayOfYear,
-    hour: 12,
-    minute: 0,
-    second: 0
-  };
-
+  const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
 
   return calendar.moons
     .map((moon, index) => {
       const phase = calendar.getMoonPhase(index, dayWorldTime);
       if (!phase) return null;
-      return {
-        moonName: game.i18n.localize(moon.name),
-        phaseName: game.i18n.localize(phase.name),
-        icon: phase.icon
-      };
+      const color = moon.color || null;
+      return { moonName: game.i18n.localize(moon.name), phaseName: game.i18n.localize(phase.name), icon: phase.icon, color, hue: color ? hexToHue(color) : null };
     })
     .filter(Boolean);
 }
@@ -253,21 +297,11 @@ export async function setDateTo(year, month, day, calendar = null) {
 
   // Calculate day of year
   let dayOfYear = day - 1;
-  for (let i = 0; i < month; i++) {
-    dayOfYear += calendar.months.values[i].days;
-  }
+  for (let i = 0; i < month; i++) dayOfYear += calendar.months.values[i].days;
 
   // Keep current time of day
   const currentComponents = game.time.components;
-  const newComponents = {
-    year: year - yearZero,
-    month,
-    day: dayOfYear,
-    hour: currentComponents.hour,
-    minute: currentComponents.minute,
-    second: currentComponents.second
-  };
-
+  const newComponents = { year: year - yearZero, month, day: dayOfYear, hour: currentComponents.hour, minute: currentComponents.minute, second: currentComponents.second };
   const newWorldTime = calendar.componentsToTime(newComponents);
   await game.time.advance(newWorldTime - game.time.worldTime);
 }
@@ -281,11 +315,8 @@ export async function setDateTo(year, month, day, calendar = null) {
  */
 export async function createNoteOnDate(year, month, day) {
   const page = await NoteManager.createNote({
-    name: 'New Note',
-    noteData: {
-      startDate: { year, month, day, hour: 12, minute: 0 },
-      endDate: { year, month, day, hour: 13, minute: 0 }
-    }
+    name: game.i18n.localize('CALENDARIA.Note.NewNote'),
+    noteData: { startDate: { year, month, day, hour: 12, minute: 0 }, endDate: { year, month, day, hour: 13, minute: 0 } }
   });
   if (page) page.sheet.render(true, { mode: 'edit' });
   return page;
@@ -475,16 +506,6 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
   });
 }
 
-// Track last click for manual double-click detection
-const clickState = {
-  time: 0,
-  year: null,
-  month: null,
-  day: null
-};
-
-const DOUBLE_CLICK_THRESHOLD = 400; // ms
-
 /**
  * Handle click on a day cell, detecting double-clicks manually.
  * Native dblclick doesn't work because re-render destroys the element between clicks.
@@ -505,11 +526,7 @@ export async function handleDayClick(event, calendar, options = {}) {
   const now = Date.now();
 
   // Check if this is a double-click (same day, within threshold)
-  const isDoubleClick =
-    now - clickState.time < DOUBLE_CLICK_THRESHOLD &&
-    clickState.year === year &&
-    clickState.month === month &&
-    clickState.day === day;
+  const isDoubleClick = now - clickState.time < DOUBLE_CLICK_THRESHOLD && clickState.year === year && clickState.month === month && clickState.day === day;
 
   // Update click state
   clickState.time = now;

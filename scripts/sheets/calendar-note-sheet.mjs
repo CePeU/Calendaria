@@ -8,10 +8,12 @@
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
-import { MODULE, SETTINGS } from '../constants.mjs';
+import { MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { getAllCategories, addCustomCategory, deleteCustomCategory, isCustomCategory } from '../notes/note-data.mjs';
+import { getAllCategories, addCustomCategory, deleteCustomCategory, isCustomCategory, getRepeatOptions } from '../notes/note-data.mjs';
+import { getRecurrenceDescription, generateRandomOccurrences, needsRandomRegeneration } from '../notes/utils/recurrence.mjs';
+import NoteManager from '../notes/note-manager.mjs';
 
 export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applications.sheets.journal.JournalEntryPageSheet) {
   /** View/Edit mode enum. */
@@ -30,14 +32,18 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       reset: this._onReset,
       deleteNote: this._onDeleteNote,
       addCategory: this._onAddCategory,
-      toggleMode: this._onToggleMode
+      toggleMode: this._onToggleMode,
+      addMoonCondition: this._onAddMoonCondition,
+      removeMoonCondition: this._onRemoveMoonCondition,
+      regenerateSeed: this._onRegenerateSeed,
+      clearLinkedEvent: this._onClearLinkedEvent
     },
-    form: { closeOnSubmit: false }
+    form: { submitOnChange: true, closeOnSubmit: false }
   };
 
-  static VIEW_PARTS = { view: { template: 'modules/calendaria/templates/sheets/calendar-note-view.hbs' } };
+  static VIEW_PARTS = { view: { template: TEMPLATES.SHEETS.CALENDAR_NOTE_VIEW } };
 
-  static EDIT_PARTS = { form: { template: 'modules/calendaria/templates/sheets/calendar-note-form.hbs' } };
+  static EDIT_PARTS = { form: { template: TEMPLATES.SHEETS.CALENDAR_NOTE_FORM } };
 
   /** @returns {boolean} Whether currently in view mode. */
   get isViewMode() {
@@ -49,39 +55,28 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     return this._mode === CalendarNoteSheet.MODES.EDIT;
   }
 
-  /** @override */
+  /** @inheritdoc - Set mode BEFORE _configureRenderParts is called. */
+  _configureRenderOptions(options) {
+    if (options.isFirstRender) {
+      if (options.mode === 'view') this._mode = CalendarNoteSheet.MODES.VIEW;
+      else if (options.mode === 'edit' && this.document.isOwner) this._mode = CalendarNoteSheet.MODES.EDIT;
+      else if (this.document.isOwner) this._mode = CalendarNoteSheet.MODES.EDIT;
+      else this._mode = CalendarNoteSheet.MODES.VIEW;
+    }
+    super._configureRenderOptions(options);
+  }
+
+  /** @inheritdoc */
   _configureRenderParts(options) {
     return this.isViewMode ? { ...this.constructor.VIEW_PARTS } : { ...this.constructor.EDIT_PARTS };
   }
 
-  /** @override */
-  async _preFirstRender(context, options) {
-    await super._preFirstRender(context, options);
-
-    // Determine initial mode based on options and permissions
-    // Sidebar/default opens: no mode specified → EDIT for owners, VIEW for observers
-    // Calendar edit action: mode='edit' → EDIT
-    // Chat/other links: mode='view' → VIEW
-    if (options.mode === 'view') {
-      // Explicitly requested view mode (from chat, etc.)
-      this._mode = CalendarNoteSheet.MODES.VIEW;
-    } else if (options.mode === 'edit' && this.document.isOwner) {
-      // Explicitly requested edit mode
-      this._mode = CalendarNoteSheet.MODES.EDIT;
-    } else if (this.document.isOwner) {
-      // Default for owners: EDIT mode (sidebar, etc.)
-      this._mode = CalendarNoteSheet.MODES.EDIT;
-    } else {
-      // Default for observers: VIEW mode
-      this._mode = CalendarNoteSheet.MODES.VIEW;
-    }
-  }
-
-  /** @override */
+  /** @inheritdoc */
   get title() {
     return this.document.name;
   }
 
+  /** @inheritdoc */
   _attachPartListeners(partId, htmlElement, options) {
     super._attachPartListeners(partId, htmlElement, options);
 
@@ -115,6 +110,44 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         this.#showDeleteCategoryMenu(event, categoryId, tag.textContent.trim());
       });
     }
+
+    // Add moon phase filter listener
+    const moonSelect = htmlElement.querySelector('select[name="newMoonCondition.moonIndex"]');
+    const phaseSelect = htmlElement.querySelector('select[name="newMoonCondition.phase"]');
+    if (moonSelect && phaseSelect) {
+      moonSelect.addEventListener('change', () => {
+        const selectedMoon = moonSelect.value;
+        const phaseOptions = phaseSelect.querySelectorAll('option[data-moon]');
+        phaseOptions.forEach((opt) => {
+          opt.hidden = selectedMoon !== '' && opt.dataset.moon !== selectedMoon;
+        });
+        // Reset phase selection if hidden
+        if (phaseSelect.selectedOptions[0]?.hidden) phaseSelect.value = '';
+      });
+    }
+
+    // Add range type select listeners - update document and re-render
+    const rangeTypeSelects = htmlElement.querySelectorAll('.range-type-select');
+    rangeTypeSelects.forEach((select) => {
+      select.addEventListener('change', async () => {
+        const component = select.dataset.rangeType; // 'year', 'month', 'day'
+        const type = select.value;
+        const rangePattern = foundry.utils.deepClone(this.document.system.rangePattern || {});
+
+        // Set initial value based on type
+        if (type === 'any') {
+          rangePattern[component] = [null, null];
+        } else if (type === 'exact') {
+          // Default to 0 for month, 1 for day, current year for year
+          const defaults = { year: new Date().getFullYear(), month: 0, day: 1 };
+          rangePattern[component] = defaults[component];
+        } else if (type === 'range') {
+          rangePattern[component] = [0, 0];
+        }
+
+        await this.document.update({ 'system.rangePattern': rangePattern });
+      });
+    });
   }
 
   /**
@@ -140,12 +173,13 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     }
   }
 
+  /** @inheritdoc */
   _onFirstRender(context, options) {
     super._onFirstRender(context, options);
     this.#renderHeaderControls();
   }
 
-  /** @override */
+  /** @inheritdoc */
   _onRender(context, options) {
     super._onRender(context, options);
     this.#renderHeaderControls();
@@ -175,7 +209,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (this.document.isOwner) {
       const modeBtn = document.createElement('button');
       modeBtn.type = 'button';
-      modeBtn.className = `header-control icon fa-solid ${this.isViewMode ? 'fa-pen' : 'fa-eye'}`;
+      modeBtn.className = `header-control icon fas ${this.isViewMode ? 'fa-pen' : 'fa-eye'}`;
       modeBtn.dataset.action = 'toggleMode';
       modeBtn.dataset.tooltip = this.isViewMode ? 'Edit Note' : 'View Note';
       modeBtn.setAttribute('aria-label', this.isViewMode ? 'Edit Note' : 'View Note');
@@ -187,7 +221,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       // Save button
       const saveBtn = document.createElement('button');
       saveBtn.type = 'button';
-      saveBtn.className = 'header-control icon fa-solid fa-save';
+      saveBtn.className = 'header-control icon fas fa-save';
       saveBtn.dataset.action = 'saveAndClose';
       saveBtn.dataset.tooltip = 'Save & Close';
       saveBtn.setAttribute('aria-label', 'Save & Close');
@@ -196,7 +230,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       // Reset button
       const resetBtn = document.createElement('button');
       resetBtn.type = 'button';
-      resetBtn.className = 'header-control icon fa-solid fa-undo';
+      resetBtn.className = 'header-control icon fas fa-undo';
       resetBtn.dataset.action = 'reset';
       resetBtn.dataset.tooltip = 'Reset Form';
       resetBtn.setAttribute('aria-label', 'Reset Form');
@@ -206,7 +240,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       if (this.document.isOwner && this.document.id) {
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
-        deleteBtn.className = 'header-control icon fa-solid fa-trash';
+        deleteBtn.className = 'header-control icon fas fa-trash';
         deleteBtn.dataset.action = 'deleteNote';
         deleteBtn.dataset.tooltip = 'Delete Note';
         deleteBtn.setAttribute('aria-label', 'Delete Note');
@@ -215,6 +249,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     }
   }
 
+  /** @inheritdoc */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     context.system = this.document.system;
@@ -257,20 +292,126 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.endTimeValue = `${endHour}:${endMinute}`;
 
     // Prepare repeat options with selected state
-    context.repeatOptions = [
-      { value: 'never', label: 'Never', selected: this.document.system.repeat === 'never' },
-      { value: 'daily', label: 'Daily', selected: this.document.system.repeat === 'daily' },
-      { value: 'weekly', label: 'Weekly', selected: this.document.system.repeat === 'weekly' },
-      { value: 'monthly', label: 'Monthly', selected: this.document.system.repeat === 'monthly' },
-      { value: 'yearly', label: 'Yearly', selected: this.document.system.repeat === 'yearly' }
+    const repeatType = this.document.system.repeat;
+    const hasLinkedEvent = !!this.document.system.linkedEvent?.noteId;
+    context.repeatOptions = getRepeatOptions(repeatType);
+
+    // Show repeat options (maxOccurrences) when repeat is not 'never'
+    context.showRepeatOptions = repeatType !== 'never';
+
+    // Prepare moon data for moon conditions UI
+    context.moons =
+      calendar?.moons?.map((moon, index) => ({
+        index,
+        name: game.i18n.localize(moon.name),
+        phases: moon.phases?.map((phase) => ({ name: game.i18n.localize(phase.name), start: phase.start, end: phase.end })) || []
+      })) || [];
+    context.hasMoons = context.moons.length > 0;
+
+    // Prepare existing moon conditions for display
+    context.moonConditions = (this.document.system.moonConditions || []).map((cond, index) => {
+      const moon = context.moons[cond.moonIndex];
+      const matchingPhase = moon?.phases?.find((p) => Math.abs(p.start - cond.phaseStart) < 0.01 && Math.abs(p.end - cond.phaseEnd) < 0.01);
+      return {
+        index,
+        moonIndex: cond.moonIndex,
+        moonName: moon?.name || `Moon ${cond.moonIndex + 1}`,
+        phaseStart: cond.phaseStart,
+        phaseEnd: cond.phaseEnd,
+        phaseName: matchingPhase?.name || 'Custom Range'
+      };
+    });
+    context.showMoonConditions = this.document.system.repeat === 'moon' || this.document.system.moonConditions?.length > 0;
+
+    // Prepare random config context
+    context.showRandomConfig = this.document.system.repeat === 'random';
+    const randomConfig = this.document.system.randomConfig || {};
+    context.randomConfig = {
+      seed: randomConfig.seed ?? Math.floor(Math.random() * 1000000),
+      probability: randomConfig.probability ?? 10,
+      checkInterval: randomConfig.checkInterval ?? 'daily',
+      checkIntervalLabel: randomConfig.checkInterval === 'weekly' ? 'week' : randomConfig.checkInterval === 'monthly' ? 'month' : 'day'
+    };
+    context.randomIntervalOptions = [
+      { value: 'daily', label: 'Day', selected: context.randomConfig.checkInterval === 'daily' },
+      { value: 'weekly', label: 'Week', selected: context.randomConfig.checkInterval === 'weekly' },
+      { value: 'monthly', label: 'Month', selected: context.randomConfig.checkInterval === 'monthly' }
     ];
+
+    // Prepare linked event context
+    context.showLinkedConfig = hasLinkedEvent || this.document.system.repeat === 'linked';
+    const linkedEvent = this.document.system.linkedEvent || {};
+    context.linkedEvent = {
+      noteId: linkedEvent.noteId || '',
+      offset: linkedEvent.offset ?? 0
+    };
+
+    // Get available notes for linking (exclude self)
+    const allNotes = NoteManager.getAllNotes() || [];
+    context.availableNotes = allNotes.filter((note) => note.id !== this.document.id).map((note) => ({ id: note.id, name: note.name, selected: note.id === linkedEvent.noteId }));
+
+    // Get linked note name for display
+    if (linkedEvent.noteId) {
+      const linkedNote = NoteManager.getNote(linkedEvent.noteId);
+      context.linkedNoteName = linkedNote?.name || 'Unknown Event';
+    }
+
+    // Prepare range pattern context
+    context.showRangeConfig = this.document.system.repeat === 'range';
+    const rangePattern = this.document.system.rangePattern || {};
+
+    // Helper to determine range type for a component
+    const getRangeType = (bit) => {
+      if (bit == null || (Array.isArray(bit) && bit[0] === null && bit[1] === null)) return 'any';
+      if (typeof bit === 'number') return 'exact';
+      if (Array.isArray(bit)) return 'range';
+      return 'any';
+    };
+
+    // Year
+    const yearType = getRangeType(rangePattern.year);
+    context.rangeYearAny = yearType === 'any';
+    context.rangeYearExact = yearType === 'exact';
+    context.rangeYearRange = yearType === 'range';
+    context.rangeYearValue = yearType === 'exact' ? rangePattern.year : '';
+    context.rangeYearMin = yearType === 'range' ? (rangePattern.year[0] ?? '') : '';
+    context.rangeYearMax = yearType === 'range' ? (rangePattern.year[1] ?? '') : '';
+
+    // Month
+    const monthType = getRangeType(rangePattern.month);
+    context.rangeMonthAny = monthType === 'any';
+    context.rangeMonthExact = monthType === 'exact';
+    context.rangeMonthRange = monthType === 'range';
+    const rangeMonthValue = monthType === 'exact' ? rangePattern.month : null;
+    const rangeMonthMin = monthType === 'range' ? rangePattern.month[0] : null;
+    const rangeMonthMax = monthType === 'range' ? rangePattern.month[1] : null;
+
+    // Build month options for dropdowns
+    const months = calendar?.months?.values || [];
+    context.monthOptions = months.map((m, idx) => ({
+      index: idx,
+      name: game.i18n.localize(m.name),
+      selected: rangeMonthValue === idx,
+      selectedMin: rangeMonthMin === idx,
+      selectedMax: rangeMonthMax === idx
+    }));
+
+    // Day
+    const dayType = getRangeType(rangePattern.day);
+    context.rangeDayAny = dayType === 'any';
+    context.rangeDayExact = dayType === 'exact';
+    context.rangeDayRange = dayType === 'range';
+    context.rangeDayValue = dayType === 'exact' ? rangePattern.day : '';
+    context.rangeDayMin = dayType === 'range' ? (rangePattern.day[0] ?? '') : '';
+    context.rangeDayMax = dayType === 'range' ? (rangePattern.day[1] ?? '') : '';
 
     // Prepare category options with selected state
     const selectedCategories = this.document.system.categories || [];
-    context.categoryOptions = getAllCategories().map((cat) => ({
-      ...cat,
-      selected: selectedCategories.includes(cat.id)
-    }));
+    context.categoryOptions = getAllCategories().map((cat) => ({ ...cat, selected: selectedCategories.includes(cat.id) }));
+
+    // Prepare available macros for selection
+    const currentMacro = this.document.system.macro || '';
+    context.availableMacros = game.macros.contents.map((m) => ({ id: m.id, name: m.name, selected: m.id === currentMacro }));
 
     // View mode specific context
     context.isViewMode = this.isViewMode;
@@ -294,118 +435,118 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       context.hasEndTime = this.document.system.endDate?.hour !== undefined || this.document.system.endDate?.minute !== undefined;
 
       // Repeat label for view mode
-      const repeatLabels = { never: null, daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly' };
+      const repeatLabels = { never: null, daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly', moon: 'Moon Phase' };
       context.repeatLabel = repeatLabels[this.document.system.repeat] || null;
+
+      // Moon conditions display for view mode
+      if (this.document.system.moonConditions?.length > 0) context.moonConditionsDisplay = getRecurrenceDescription(this.document.system);
     }
 
     return context;
   }
 
   _onChangeForm(formConfig, event) {
+    const target = event.target;
+
+    // Update hidden time inputs BEFORE form submission
+    if (target?.name === 'system.startDate.time' || target?.name === 'system.endDate.time') {
+      const [hour, minute] = target.value.split(':').map(Number);
+      if (!isNaN(hour) && !isNaN(minute)) {
+        const prefix = target.name.includes('startDate') ? 'system.startDate' : 'system.endDate';
+        this.element.querySelector(`input[name="${prefix}.hour"]`).value = hour;
+        this.element.querySelector(`input[name="${prefix}.minute"]`).value = minute;
+      }
+    }
+
+    // Let Foundry handle form submission
     super._onChangeForm(formConfig, event);
 
-    // Convert date input (yyyy-mm-dd) to individual components
-    if (event.target?.name === 'system.startDate.date') {
-      const [year, month, day] = event.target.value.split('-').map(Number);
-      if (year && month && day) {
-        // Create hidden inputs or update the form data directly
-        const form = event.target.closest('form');
-        const updateField = (name, value) => {
-          let input = form.querySelector(`input[name="${name}"]`);
-          if (!input) {
-            input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            form.appendChild(input);
-          }
-          input.value = value;
-        };
-
-        updateField('system.startDate.year', year);
-        updateField('system.startDate.month', month - 1); // Convert to 0-indexed
-        updateField('system.startDate.day', day);
-      }
+    // Cosmetic: disable time inputs when All Day is checked
+    if (target?.name === 'system.allDay') {
+      this.element.querySelector('input[name="system.startDate.time"]').disabled = target.checked;
+      this.element.querySelector('input[name="system.endDate.time"]').disabled = target.checked;
     }
 
-    // Convert end date input (yyyy-mm-dd) to individual components
-    if (event.target?.name === 'system.endDate.date') {
-      const form = event.target.closest('form');
-      const updateField = (name, value) => {
-        let input = form.querySelector(`input[name="${name}"]`);
-        if (!input) {
-          input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = name;
-          form.appendChild(input);
-        }
-        input.value = value;
-      };
-
-      if (event.target.value) {
-        const [year, month, day] = event.target.value.split('-').map(Number);
-        if (year && month && day) {
-          updateField('system.endDate.year', year);
-          updateField('system.endDate.month', month - 1); // Convert to 0-indexed
-          updateField('system.endDate.day', day);
-        }
-      } else {
-        // Clear end date if input is cleared
-        updateField('system.endDate.year', '');
-        updateField('system.endDate.month', '');
-        updateField('system.endDate.day', '');
-      }
-    }
-
-    // Convert time input (HH:mm) to individual components
-    if (event.target?.name === 'system.startDate.time' || event.target?.name === 'system.endDate.time') {
-      const [hour, minute] = event.target.value.split(':').map(Number);
-      if (!isNaN(hour) && !isNaN(minute)) {
-        const form = event.target.closest('form');
-        const prefix = event.target.name.includes('startDate') ? 'system.startDate' : 'system.endDate';
-        const updateField = (name, value) => {
-          let input = form.querySelector(`input[name="${name}"]`);
-          if (!input) {
-            input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            form.appendChild(input);
-          }
-          input.value = value;
-        };
-
-        updateField(`${prefix}.hour`, hour);
-        updateField(`${prefix}.minute`, minute);
-      }
-    }
-
-    // Handle All Day checkbox to disable/enable time inputs
-    if (event.target?.name === 'system.allDay') {
-      const form = event.target.closest('form');
-      const startTimeInput = form.querySelector('input[name="system.startDate.time"]');
-      const endTimeInput = form.querySelector('input[name="system.endDate.time"]');
-      if (startTimeInput) startTimeInput.disabled = event.target.checked;
-      if (endTimeInput) endTimeInput.disabled = event.target.checked;
-    }
-
-    // Handle color changes to update icon preview
-    if (event.target?.name === 'system.color') {
-      const form = event.target.closest('form');
-      const color = event.target.value;
-
-      // Update Font Awesome icon color
-      const iconPreview = form.querySelector('.icon-picker i.icon-preview');
-      if (iconPreview) {
-        iconPreview.style.color = color;
-      }
-
-      // Update image color using CSS filter (works best with SVGs)
-      const imgPreview = form.querySelector('.icon-picker img.icon-preview');
+    // Cosmetic: update icon color preview
+    if (target?.name === 'system.color') {
+      const iconPreview = this.element.querySelector('.icon-picker i.icon-preview');
+      if (iconPreview) iconPreview.style.color = target.value;
+      const imgPreview = this.element.querySelector('.icon-picker img.icon-preview');
       if (imgPreview) {
-        // Use drop-shadow trick to colorize the image
-        imgPreview.style.filter = `drop-shadow(0px 1000px 0 ${color})`;
+        imgPreview.style.filter = `drop-shadow(0px 1000px 0 ${target.value})`;
         imgPreview.style.transform = 'translateY(-1000px)';
       }
     }
+  }
+
+  /**
+   * Process form data to convert range pattern UI fields into proper structure.
+   * @param {Event} event - Form submission event
+   * @param {HTMLFormElement} form - The form element
+   * @param {FormDataExtended} formData - Extended form data
+   * @inheritdoc
+   */
+  _processFormData(event, form, formData) {
+    const data = super._processFormData(event, form, formData);
+    const repeatType = data.system?.repeat;
+
+    // Clear type-specific config when switching repeat types
+    // linkedEvent - null when not 'linked', or null if noteId is empty
+    if (repeatType !== 'linked') data.system.linkedEvent = null;
+    else if (data.system.linkedEvent && !data.system.linkedEvent.noteId) data.system.linkedEvent = null;
+
+    // randomConfig - null when not 'random'
+    if (repeatType !== 'random') data.system.randomConfig = null;
+
+    // moonConditions - clear when not 'moon' (preserve existing if switching to moon)
+    if (repeatType !== 'moon' && data.system.moonConditions === undefined) data.system.moonConditions = [];
+
+    // rangePattern - build from form fields or clear
+    if (repeatType === 'range') {
+      const rangePattern = {};
+
+      // Helper to get range type value from form
+      const getRangeValue = (component) => {
+        const typeSelect = form.querySelector(`select[data-range-type="${component}"]`);
+        if (!typeSelect) return null;
+
+        const type = typeSelect.value;
+        if (type === 'any') return [null, null]; // Wildcard
+
+        if (type === 'exact') {
+          const valueInput =
+            form.querySelector(`input[name="range${component.charAt(0).toUpperCase() + component.slice(1)}"]`) ||
+            form.querySelector(`select[name="range${component.charAt(0).toUpperCase() + component.slice(1)}"]`);
+          if (!valueInput || valueInput.value === '') return null;
+          return Number(valueInput.value);
+        }
+
+        if (type === 'range') {
+          const minInput =
+            form.querySelector(`input[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Min"]`) ||
+            form.querySelector(`select[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Min"]`);
+          const maxInput =
+            form.querySelector(`input[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Max"]`) ||
+            form.querySelector(`select[name="range${component.charAt(0).toUpperCase() + component.slice(1)}Max"]`);
+
+          const min = minInput && minInput.value !== '' ? Number(minInput.value) : null;
+          const max = maxInput && maxInput.value !== '' ? Number(maxInput.value) : null;
+          return [min, max];
+        }
+
+        return null;
+      };
+
+      rangePattern.year = getRangeValue('year');
+      rangePattern.month = getRangeValue('month');
+      rangePattern.day = getRangeValue('day');
+
+      data.system.rangePattern = rangePattern;
+    } else {
+      data.system.rangePattern = null;
+    }
+
+    return data;
   }
 
   /**
@@ -435,9 +576,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
       if (newIcon) {
         const iconElement = target.querySelector('i.icon-preview');
-        if (iconElement) {
-          iconElement.className = `${newIcon} icon-preview`;
-        }
+        if (iconElement) iconElement.className = `${newIcon} icon-preview`;
         const hiddenInput = target.querySelector('input[name="system.icon"]');
         if (hiddenInput) hiddenInput.value = newIcon;
       }
@@ -499,7 +638,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         img.src = 'icons/svg/book.svg';
         img.alt = 'Note Icon';
         img.className = 'icon-preview';
-        // Apply color filter for SVG colorization
         img.style.filter = `drop-shadow(0px 1000px 0 ${color})`;
         img.style.transform = 'translateY(-1000px)';
         icon.replaceWith(img);
@@ -520,7 +658,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    */
   _formatDateDisplay(calendar, year, month, day) {
     if (!calendar || !calendar.months?.values) return `${day} / ${month + 1} / ${year}`;
-
     const monthData = calendar.months.values[month];
     const monthName = monthData?.name ? game.i18n.localize(monthData.name) : `Month ${month + 1}`;
     return `${day} ${monthName}, ${year}`;
@@ -532,29 +669,21 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * @param {HTMLElement} target - The capturing HTML element
    */
   static async _onSelectDate(event, target) {
-    const dateField = target.dataset.dateField; // 'startDate' or 'endDate'
+    const dateField = target.dataset.dateField;
     const form = target.closest('form');
     if (!form) return;
-
-    // Get calendar
     const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar) {
-      ui.notifications.error('No active calendar found');
-      return;
-    }
-
-    // Get current game time as fallback
+    if (!calendar) return;
     const components = game.time.components;
     const yearZero = calendar?.years?.yearZero ?? 0;
     const fallbackYear = components.year + yearZero;
     const fallbackMonth = components.month ?? 0;
-    const fallbackDay = (components.dayOfMonth ?? 0) + 1; // Convert 0-indexed to 1-indexed
+    const fallbackDay = (components.dayOfMonth ?? 0) + 1;
 
     // Get current date values from form (or use calendar's current date as fallback)
     const yearInput = form.querySelector(`input[name="system.${dateField}.year"]`);
     const monthInput = form.querySelector(`input[name="system.${dateField}.month"]`);
     const dayInput = form.querySelector(`input[name="system.${dateField}.day"]`);
-
     const currentYear = parseInt(yearInput?.value) || fallbackYear;
     const parsedMonth = parseInt(monthInput?.value);
     const currentMonth = !isNaN(parsedMonth) ? parsedMonth : fallbackMonth;
@@ -621,11 +750,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       content,
       ok: {
         callback: (event, button) => {
-          return {
-            year: parseInt(button.form.elements.year.value),
-            month: parseInt(button.form.elements.month.value),
-            day: parseInt(button.form.elements.day.value)
-          };
+          return { year: parseInt(button.form.elements.year.value), month: parseInt(button.form.elements.month.value), day: parseInt(button.form.elements.day.value) };
         }
       },
       render: (event, dialog) => {
@@ -673,8 +798,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (!this.document.isOwner) return;
 
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: 'Delete Note' },
-      content: `<p>Delete note "${this.document.name}"?</p>`,
+      window: { title: game.i18n.localize('CALENDARIA.ContextMenu.DeleteNote') },
+      content: `<p>${game.i18n.format('CALENDARIA.ContextMenu.DeleteConfirm', { name: this.document.name })}</p>`,
       rejectClose: false,
       modal: true
     });
@@ -709,7 +834,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
     // Reset title
     const titleInput = form.querySelector('input[name="name"]');
-    if (titleInput) titleInput.value = 'New Note';
+    if (titleInput) titleInput.value = game.i18n.localize('CALENDARIA.Note.NewNote');
 
     // Reset emblem
     const iconInput = form.querySelector('input[name="system.icon"]');
@@ -847,5 +972,131 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
     // Re-render to switch templates
     this.render();
+  }
+
+  /**
+   * Handle add moon condition button click.
+   * @param {PointerEvent} event - The originating click event
+   * @param {HTMLElement} target - The capturing HTML element
+   */
+  static async _onAddMoonCondition(event, target) {
+    const form = target.closest('form');
+    const moonSelect = form?.querySelector('select[name="newMoonCondition.moonIndex"]');
+    const phaseSelect = form?.querySelector('select[name="newMoonCondition.phase"]');
+
+    if (!moonSelect || !phaseSelect) return;
+
+    const moonIndex = parseInt(moonSelect.value);
+    const phaseValue = phaseSelect.value;
+
+    if (isNaN(moonIndex) || !phaseValue) {
+      ui.notifications.warn('Please select a moon and phase');
+      return;
+    }
+
+    // Parse phase value (format: "start-end")
+    const [phaseStart, phaseEnd] = phaseValue.split('-').map(Number);
+
+    // Get current moon conditions
+    const currentConditions = foundry.utils.deepClone(this.document.system.moonConditions || []);
+
+    // Check for duplicate
+    const isDuplicate = currentConditions.some((c) => c.moonIndex === moonIndex && c.phaseStart === phaseStart && c.phaseEnd === phaseEnd);
+    if (isDuplicate) {
+      ui.notifications.warn('This moon condition already exists');
+      return;
+    }
+
+    // Add new condition
+    currentConditions.push({ moonIndex, phaseStart, phaseEnd });
+
+    // Update document
+    await this.document.update({ 'system.moonConditions': currentConditions });
+  }
+
+  /**
+   * Handle remove moon condition button click.
+   * @param {PointerEvent} event - The originating click event
+   * @param {HTMLElement} target - The capturing HTML element
+   */
+  static async _onRemoveMoonCondition(event, target) {
+    const conditionIndex = parseInt(target.dataset.index);
+    if (isNaN(conditionIndex)) return;
+
+    // Get current moon conditions
+    const currentConditions = foundry.utils.deepClone(this.document.system.moonConditions || []);
+
+    // Remove the condition at index
+    currentConditions.splice(conditionIndex, 1);
+
+    // Update document
+    await this.document.update({ 'system.moonConditions': currentConditions });
+  }
+
+  /**
+   * Handle regenerate seed button click.
+   * @param {PointerEvent} event - The originating click event
+   * @param {HTMLElement} target - The capturing HTML element
+   */
+  static async _onRegenerateSeed(event, target) {
+    const newSeed = Math.floor(Math.random() * 1000000);
+    const currentConfig = foundry.utils.deepClone(this.document.system.randomConfig || {});
+    currentConfig.seed = newSeed;
+
+    // Update seed first
+    await this.document.update({ 'system.randomConfig': currentConfig });
+
+    // Regenerate cached occurrences with new seed
+    await this.#regenerateRandomOccurrences();
+  }
+
+  /**
+   * Regenerate cached random occurrences for this note.
+   * Generates occurrences until end of current year (or next year if approaching year end).
+   * @returns {Promise<void>}
+   */
+  async #regenerateRandomOccurrences() {
+    if (this.document.system.repeat !== 'random') return;
+
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar?.months?.values) return;
+
+    const components = game.time.components || {};
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const currentYear = (components.year ?? 0) + yearZero;
+
+    // Check if we need to generate for next year as well
+    const cachedData = this.document.getFlag(MODULE.ID, 'randomOccurrences') || {};
+    const generateNextYear = needsRandomRegeneration({ year: currentYear, occurrences: [] });
+    const targetYear = generateNextYear ? currentYear + 1 : currentYear;
+
+    // Build note data for generation
+    const noteData = { startDate: this.document.system.startDate, randomConfig: this.document.system.randomConfig, repeatEndDate: this.document.system.repeatEndDate };
+
+    // Generate occurrences
+    const occurrences = generateRandomOccurrences(noteData, targetYear);
+
+    // Store in flag
+    await this.document.setFlag(MODULE.ID, 'randomOccurrences', { year: targetYear, generatedAt: Date.now(), occurrences });
+
+    log(2, `Generated ${occurrences.length} random occurrences for ${this.document.name} until year ${targetYear}`);
+  }
+
+  /** @inheritdoc */
+  async _processSubmitData(event, form, submitData, options = {}) {
+    await super._processSubmitData(event, form, submitData, options);
+
+    // After update, regenerate random occurrences if needed
+    if (submitData.system?.repeat === 'random') setTimeout(() => this.#regenerateRandomOccurrences(), 100);
+  }
+
+  /**
+   * Handle clear linked event button click.
+   * @param {PointerEvent} event - The originating click event
+   * @param {HTMLElement} target - The capturing HTML element
+   */
+  static async _onClearLinkedEvent(event, target) {
+    // Clear the linked event
+    await this.document.update({ 'system.linkedEvent': null });
   }
 }

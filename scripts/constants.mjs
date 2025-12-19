@@ -73,6 +73,9 @@ export const SETTINGS = {
   /** @type {string} User-created custom calendar definitions */
   CUSTOM_CALENDARS: 'customCalendars',
 
+  /** @type {string} User overrides for default/built-in calendars */
+  DEFAULT_OVERRIDES: 'defaultOverrides',
+
   /** @type {string} Whether the calendar HUD position is locked */
   POSITION_LOCKED: 'positionLocked',
 
@@ -91,20 +94,43 @@ export const SETTINGS = {
   /** @type {string} Whether to show TimeKeeper HUD on world load */
   SHOW_TIME_KEEPER: 'showTimeKeeper',
 
+  /** @type {string} Whether to show Compact Calendar on world load */
+  SHOW_COMPACT_CALENDAR: 'showCompactCalendar',
+
   /** @type {string} Whether to advance time when combat rounds change */
   ADVANCE_TIME_ON_COMBAT: 'advanceTimeOnCombat',
 
   /** @type {string} Saved position of the compact calendar */
   COMPACT_CALENDAR_POSITION: 'compactCalendarPosition',
 
-  /** @type {string} Whether the compact calendar is open */
-  COMPACT_CALENDAR_OPEN: 'compactCalendarOpen',
-
   /** @type {string} Delay in seconds before auto-hiding compact calendar controls */
   COMPACT_CONTROLS_DELAY: 'compactControlsDelay',
 
   /** @type {string} Sticky states for compact calendar (time controls, sidebar, position) */
-  COMPACT_STICKY_STATES: 'compactStickyStates'
+  COMPACT_STICKY_STATES: 'compactStickyStates',
+
+  /** @type {string} Dev mode - allows deletion of calendar note journals */
+  DEV_MODE: 'devMode',
+
+  /* -------------------------------------------- */
+  /*  Weather Settings                            */
+  /* -------------------------------------------- */
+
+  /** @type {string} Current weather state */
+  CURRENT_WEATHER: 'currentWeather',
+
+  /** @type {string} Custom weather presets created by the GM */
+  CUSTOM_WEATHER_PRESETS: 'customWeatherPresets',
+
+  /** @type {string} Temperature unit preference (celsius or fahrenheit) */
+  TEMPERATURE_UNIT: 'temperatureUnit',
+
+  /* -------------------------------------------- */
+  /*  Macro Triggers                              */
+  /* -------------------------------------------- */
+
+  /** @type {string} Macro trigger configuration object */
+  MACRO_TRIGGERS: 'macroTriggers'
 };
 
 /**
@@ -139,11 +165,16 @@ export const SCENE_FLAGS = {
  * @type {TemplateKeys}
  */
 export const TEMPLATES = {
+  /** @type {string} Foundry generic form footer template */
+  FORM_FOOTER: 'templates/generic/form-footer.hbs',
+
   SETTINGS: {
     /** @type {string} Reset position dialog template */
     RESET_POSITION: `modules/${MODULE.ID}/templates/settings/reset-position.hbs`,
     /** @type {string} Theme editor template */
-    THEME_EDITOR: `modules/${MODULE.ID}/templates/settings/theme-editor.hbs`
+    THEME_EDITOR: `modules/${MODULE.ID}/templates/settings/theme-editor.hbs`,
+    /** @type {string} Macro trigger configuration template */
+    MACRO_TRIGGER_CONFIG: `modules/${MODULE.ID}/templates/settings/macro-trigger-config.hbs`
   },
 
   /** @type {string} Time rotation dial template */
@@ -167,10 +198,14 @@ export const TEMPLATES = {
     /** @type {string} Calendar year view template */
     CALENDAR_YEAR: `modules/${MODULE.ID}/templates/sheets/calendar-year.hbs`,
     /** @type {string} Calendar note form template */
-    CALENDAR_NOTE_FORM: `modules/${MODULE.ID}/templates/sheets/calendar-note-form.hbs`
+    CALENDAR_NOTE_FORM: `modules/${MODULE.ID}/templates/sheets/calendar-note-form.hbs`,
+    /** @type {string} Calendar note view template */
+    CALENDAR_NOTE_VIEW: `modules/${MODULE.ID}/templates/sheets/calendar-note-view.hbs`
   },
 
   EDITOR: {
+    /** @type {string} Calendar editor tab navigation */
+    TAB_NAVIGATION: `modules/${MODULE.ID}/templates/editor/tab-navigation.hbs`,
     /** @type {string} Calendar editor basic info tab */
     TAB_BASIC: `modules/${MODULE.ID}/templates/editor/tab-basic.hbs`,
     /** @type {string} Calendar editor months tab */
@@ -186,8 +221,31 @@ export const TEMPLATES = {
     /** @type {string} Calendar editor moons tab */
     TAB_MOONS: `modules/${MODULE.ID}/templates/editor/tab-moons.hbs`,
     /** @type {string} Calendar editor festivals tab */
-    TAB_FESTIVALS: `modules/${MODULE.ID}/templates/editor/tab-festivals.hbs`
+    TAB_FESTIVALS: `modules/${MODULE.ID}/templates/editor/tab-festivals.hbs`,
+    /** @type {string} Calendar editor cycles tab */
+    TAB_CYCLES: `modules/${MODULE.ID}/templates/editor/tab-cycles.hbs`,
+    /** @type {string} Calendar editor weather tab */
+    TAB_WEATHER: `modules/${MODULE.ID}/templates/editor/tab-weather.hbs`
+  },
+
+  IMPORTER: {
+    /** @type {string} Main importer application template */
+    APP: `modules/${MODULE.ID}/templates/importers/importer-app.hbs`
+  },
+
+  WEATHER: {
+    /** @type {string} Weather picker template */
+    PICKER: `modules/${MODULE.ID}/templates/weather/weather-picker.hbs`
   }
+};
+
+/**
+ * Asset paths used by the module.
+ * @type {Object}
+ */
+export const ASSETS = {
+  /** @type {string} Base path for moon phase icons */
+  MOON_ICONS: `modules/${MODULE.ID}/assets/moon-phases`
 };
 
 /**
@@ -341,6 +399,9 @@ export const HOOKS = {
   /** @type {string} Fired when midday passes */
   MIDDAY: 'calendaria.midday',
 
+  /** @type {string} Fired when any moon's phase changes */
+  MOON_PHASE_CHANGE: 'calendaria.moonPhaseChange',
+
   /* -------------------------------------------- */
   /*  Clock Hooks                                 */
   /* -------------------------------------------- */
@@ -378,7 +439,27 @@ export const HOOKS = {
   PRE_RENDER_CALENDAR: 'calendaria.preRenderCalendar',
 
   /** @type {string} Fired after the calendar UI renders */
-  RENDER_CALENDAR: 'calendaria.renderCalendar'
+  RENDER_CALENDAR: 'calendaria.renderCalendar',
+
+  /* -------------------------------------------- */
+  /*  Importer Hooks                              */
+  /* -------------------------------------------- */
+
+  /** @type {string} Fired when an import operation starts */
+  IMPORT_STARTED: 'calendaria.importStarted',
+
+  /** @type {string} Fired when an import operation completes successfully */
+  IMPORT_COMPLETE: 'calendaria.importComplete',
+
+  /** @type {string} Fired when an import operation fails */
+  IMPORT_FAILED: 'calendaria.importFailed',
+
+  /* -------------------------------------------- */
+  /*  Weather Hooks                               */
+  /* -------------------------------------------- */
+
+  /** @type {string} Fired when weather changes */
+  WEATHER_CHANGE: 'calendaria.weatherChange'
 };
 
 /**
@@ -444,5 +525,8 @@ export const SOCKET_TYPES = {
   NOTE_UPDATE: 'noteUpdate',
 
   /** @type {string} Calendar switch message */
-  CALENDAR_SWITCH: 'calendarSwitch'
+  CALENDAR_SWITCH: 'calendarSwitch',
+
+  /** @type {string} Weather change message */
+  WEATHER_CHANGE: 'weatherChange'
 };

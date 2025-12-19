@@ -10,8 +10,11 @@
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
-import { MODULE, SETTINGS } from '../constants.mjs';
+import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
+import { MODULE, SETTINGS, HOOKS, TEMPLATES } from '../constants.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
+import WeatherManager from '../weather/weather-manager.mjs';
+import { openWeatherPicker } from '../weather/weather-picker.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -21,18 +24,14 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     this._viewedDate = null;
     this._calendarId = options.calendarId || null;
     this._displayMode = 'month';
-    this._selectedDate = null; // Track clicked/selected date
-    this._selectedTimeSlot = null; // Track selected time slot for week view
+    this._selectedDate = null;
+    this._selectedTimeSlot = null;
   }
 
   static DEFAULT_OPTIONS = {
     classes: ['calendaria', 'calendar-application'],
     tag: 'div',
-    window: {
-      contentClasses: ['calendar-application'],
-      icon: 'fas fa-calendar',
-      resizable: false
-    },
+    window: { contentClasses: ['calendar-application'], icon: 'fas fa-calendar', resizable: false },
     actions: {
       navigate: CalendarApplication._onNavigate,
       today: CalendarApplication._onToday,
@@ -44,17 +43,16 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       selectDay: CalendarApplication._onSelectDay,
       selectMonth: CalendarApplication._onSelectMonth,
       setAsCurrentDate: CalendarApplication._onSetAsCurrentDate,
-      selectTimeSlot: CalendarApplication._onSelectTimeSlot
+      selectTimeSlot: CalendarApplication._onSelectTimeSlot,
+      toggleCompact: CalendarApplication._onToggleCompact,
+      openWeatherPicker: CalendarApplication._onOpenWeatherPicker
     },
-    position: {
-      width: 'auto',
-      height: 'auto'
-    }
+    position: { width: 'auto', height: 'auto' }
   };
 
   static PARTS = {
-    header: { template: 'modules/calendaria/templates/sheets/calendar-header.hbs' },
-    content: { template: 'modules/calendaria/templates/sheets/calendar-content.hbs' }
+    header: { template: TEMPLATES.SHEETS.CALENDAR_HEADER },
+    content: { template: TEMPLATES.SHEETS.CALENDAR_CONTENT }
   };
 
   get title() {
@@ -78,7 +76,6 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Use current game time
     const components = game.time.components;
-
     const calendar = this.calendar;
 
     // Adjust year for display (add yearZero offset)
@@ -87,25 +84,11 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     // Use dayOfMonth (0-indexed) converted to 1-indexed day
     const dayOfMonth = (components.dayOfMonth ?? 0) + 1;
 
-    return {
-      ...components,
-      year: components.year + yearZero,
-      day: dayOfMonth
-    };
+    return { ...components, year: components.year + yearZero, day: dayOfMonth };
   }
 
   set viewedDate(date) {
     this._viewedDate = date;
-  }
-
-  /**
-   * Get all calendar note pages
-   * @returns {JournalEntryPage[]}
-   */
-  _getCalendarNotes() {
-    const notes = [];
-    for (const journal of game.journal) for (const page of journal.pages) if (page.type === 'calendaria.calendarnote') notes.push(page);
-    return notes;
   }
 
   async _prepareContext(options) {
@@ -133,10 +116,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     if (this._selectedDate) context.isToday = this._selectedDate.year === todayYear && this._selectedDate.month === todayMonth && this._selectedDate.day === todayDay;
     else context.isToday = viewedDate.year === todayYear && viewedDate.month === todayMonth && viewedDate.day === todayDay;
 
-    // Get notes from journal pages
-    const allNotes = this._getCalendarNotes();
+    // Get notes from journal pages (filtered by active calendar)
+    const allNotes = ViewUtils.getCalendarNotes();
     context.notes = allNotes;
-    context.visibleNotes = allNotes.filter((page) => !page.system.gmOnly || game.user.isGM);
+    context.visibleNotes = ViewUtils.getVisibleNotes(allNotes);
 
     // Generate calendar data based on display mode
     if (calendar) {
@@ -158,6 +141,18 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Moon phases setting for use in calendar data generation
     context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES);
+
+    // Weather badge data
+    context.weather = this._getWeatherContext();
+
+    // Get cycle values for display in header (based on viewed date, not world time)
+    if (calendar.cycles?.length) {
+      const yearZeroOffset = calendar.years?.yearZero ?? 0;
+      const viewedComponents = { year: viewedDate.year - yearZeroOffset, month: viewedDate.month, dayOfMonth: (viewedDate.day ?? 1) - 1, hour: 12, minute: 0, second: 0 };
+      const cycleResult = calendar.getCycleValues(viewedComponents);
+      context.cycleText = cycleResult.text;
+      context.cycleValues = cycleResult.values;
+    }
 
     return context;
   }
@@ -205,10 +200,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES) && calendar.moons?.length;
 
     // Calculate starting day of week for the first day of the month
-    // For fantasy calendars (like Harptos with 10-day weeks), months always start on first day of week
-    // TODO: Make this configurable via calendar metadata when building calendar configuration UI
-    const useFixedMonthStart = daysInWeek === 10 || calendar.years?.firstWeekday === 0;
-    const startDayOfWeek = useFixedMonthStart ? 0 : dayOfWeek({ year, month, day: 1 });
+    // If month has startingWeekday set, use that; otherwise calculate normally
+    const hasFixedStart = monthData?.startingWeekday != null;
+    const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, day: 1 });
 
     // Add empty cells for days before month starts
     for (let i = 0; i < startDayOfWeek; i++) currentWeek.push({ empty: true });
@@ -232,14 +226,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         }
 
         // Build complete time components for this day
-        const dayComponents = {
-          year: year - (calendar.years?.yearZero ?? 0),
-          month,
-          day: dayOfYear,
-          hour: 12,
-          minute: 0,
-          second: 0
-        };
+        const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
         const dayWorldTime = calendar.componentsToTime(dayComponents);
         moonPhases = calendar.moons
           .map((moon, index) => {
@@ -248,7 +235,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
             return {
               moonName: game.i18n.localize(moon.name),
               phaseName: game.i18n.localize(phase.name),
-              icon: phase.icon
+              icon: phase.icon,
+              color: moon.color || null
             };
           })
           .filter(Boolean);
@@ -288,8 +276,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       week.multiDayEvents = allMultiDayEvents.filter((e) => e.weekIndex === weekIndex);
     });
 
-    // Get current season and era
-    const currentSeason = calendar.getCurrentSeason?.();
+    // Get season and era for the viewed month (use mid-month day for accuracy)
+    const viewedComponents = { month, dayOfMonth: Math.floor(daysInMonth / 2) };
+    const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
 
     return {
@@ -385,12 +374,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Generate time slots (1-hour increments for 24-hour view)
     const timeSlots = [];
-    for (let hour = 0; hour < 24; hour++) {
-      timeSlots.push({
-        label: hour.toString(),
-        hour: hour
-      });
-    }
+    for (let hour = 0; hour < 24; hour++) timeSlots.push({ label: hour.toString(), hour: hour });
 
     // Create event blocks for week view
     const eventBlocks = this._createEventBlocks(notes, days);
@@ -402,13 +386,13 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Calculate week number (approximate: day of year / days per week)
     let dayOfYear = day;
-    for (let m = 0; m < month; m++) {
-      dayOfYear += calendar.months?.values?.[m]?.days || 0;
-    }
+    for (let m = 0; m < month; m++) dayOfYear += calendar.months?.values?.[m]?.days || 0;
     const weekNumber = Math.ceil(dayOfYear / daysInWeek);
 
-    // Get current season and era
-    const currentSeason = calendar.getCurrentSeason?.();
+    // Get season and era for the viewed week (use mid-week day)
+    const midWeekDay = days[Math.floor(days.length / 2)];
+    const viewedComponents = { month: midWeekDay?.month ?? month, dayOfMonth: (midWeekDay?.day ?? day) - 1 };
+    const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
 
     return {
@@ -435,11 +419,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    */
   _generateYearData(calendar, date) {
     const { year } = date;
-
-    // Create a 3x3 grid of years
-    // Current year should be at position [1][1] (center of grid)
     const yearGrid = [];
-    const startYear = year - 4; // 4 years before current
+    const startYear = year - 4;
 
     for (let row = 0; row < 3; row++) {
       const yearRow = [];
@@ -467,8 +448,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       yearGrid.push(yearRow);
     }
 
-    // Get current season and era
-    const currentSeason = calendar.getCurrentSeason?.();
+    // Get season for the viewed year (use first month)
+    const viewedComponents = { month: 0, dayOfMonth: 0 };
+    const currentSeason = ViewUtils.enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
 
     return {
@@ -525,24 +507,33 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    * @returns {Array}
    */
   _getNotesForDay(notePages, year, month, day) {
+    const targetDate = { year, month, day };
     return notePages.filter((page) => {
       const start = page.system.startDate;
       const end = page.system.endDate;
 
-      // Only include events that start on this day
-      if (start.year !== year || start.month !== month || start.day !== day) return false;
-
       // Check if end date has valid values (not null/undefined)
       const hasValidEndDate = end && end.year != null && end.month != null && end.day != null;
 
-      // If no valid end date, treat as single-day event - include it
-      if (!hasValidEndDate) return true;
-
       // Exclude multi-day events (they're shown as event bars instead)
-      if (end.year !== start.year || end.month !== start.month || end.day !== start.day) return false;
+      if (hasValidEndDate && (end.year !== start.year || end.month !== start.month || end.day !== start.day)) return false;
 
-      // Include single-day events (start and end on same day)
-      return true;
+      // Build noteData for recurrence check
+      const noteData = {
+        startDate: start,
+        endDate: end,
+        repeat: page.system.repeat,
+        repeatInterval: page.system.repeatInterval,
+        repeatEndDate: page.system.repeatEndDate,
+        maxOccurrences: page.system.maxOccurrences,
+        moonConditions: page.system.moonConditions,
+        randomConfig: page.system.randomConfig,
+        cachedRandomOccurrences: page.flags?.[MODULE.ID]?.randomOccurrences,
+        linkedEvent: page.system.linkedEvent
+      };
+
+      // Check if this event occurs on this day (handles recurring events)
+      return isRecurringMatch(noteData, targetDate);
     });
   }
 
@@ -556,7 +547,23 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   _getNotesForMonth(notePages, year, month) {
     return notePages.filter((page) => {
       const start = page.system.startDate;
-      return start.year === year && start.month === month;
+      const repeat = page.system.repeat;
+
+      // Non-repeating notes: only include if they start in this month
+      if (!repeat || repeat === 'never') return start.year === year && start.month === month;
+
+      // Recurring notes: include if they could occur in this month
+      // (start date is before or during this month, and no end date or end date is after this month)
+      const startBeforeOrInMonth = start.year < year || (start.year === year && start.month <= month);
+      if (!startBeforeOrInMonth) return false;
+
+      const repeatEndDate = page.system.repeatEndDate;
+      if (repeatEndDate) {
+        const endAfterOrInMonth = repeatEndDate.year > year || (repeatEndDate.year === year && repeatEndDate.month >= month);
+        if (!endAfterOrInMonth) return false;
+      }
+
+      return true;
     });
   }
 
@@ -840,6 +847,12 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         if (page.type === 'calendaria.calendarnote') debouncedRender();
       })
     });
+
+    // Listen for weather changes
+    this._hooks.push({
+      name: HOOKS.WEATHER_CHANGE,
+      id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender())
+    });
   }
 
   /**
@@ -946,22 +959,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Create note using NoteManager (which creates it as a page in the calendar journal)
     const page = await NoteManager.createNote({
-      name: 'New Note',
+      name: game.i18n.localize('CALENDARIA.Note.NewNote'),
       noteData: {
-        startDate: {
-          year: parseInt(year),
-          month: parseInt(month),
-          day: parseInt(day),
-          hour: parseInt(hour),
-          minute: 0
-        },
-        endDate: {
-          year: parseInt(year),
-          month: parseInt(month),
-          day: endDay,
-          hour: endHour,
-          minute: 0
-        }
+        startDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: parseInt(hour), minute: 0 },
+        endDate: { year: parseInt(year), month: parseInt(month), day: endDay, hour: endHour, minute: 0 }
       }
     });
 
@@ -1003,22 +1004,10 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     // Create note using NoteManager (which creates it as a page in the calendar journal)
     const page = await NoteManager.createNote({
-      name: 'New Note',
+      name: game.i18n.localize('CALENDARIA.Note.NewNote'),
       noteData: {
-        startDate: {
-          year: parseInt(year),
-          month: parseInt(month),
-          day: parseInt(day),
-          hour: parseInt(hour),
-          minute: parseInt(minute)
-        },
-        endDate: {
-          year: parseInt(year),
-          month: parseInt(month),
-          day: endDay,
-          hour: endHour,
-          minute: parseInt(minute)
-        }
+        startDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day), hour: parseInt(hour), minute: parseInt(minute) },
+        endDate: { year: parseInt(year), month: parseInt(month), day: endDay, hour: endHour, minute: parseInt(minute) }
       }
     });
 
@@ -1046,8 +1035,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
 
     if (page) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: 'Delete Note' },
-        content: `<p>Delete note "${page.name}"?</p>`,
+        window: { title: game.i18n.localize('CALENDARIA.ContextMenu.DeleteNote') },
+        content: `<p>${game.i18n.format('CALENDARIA.ContextMenu.DeleteConfirm', { name: page.name })}</p>`,
         rejectClose: false,
         modal: true
       });
@@ -1105,40 +1094,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
   static async _onSetAsCurrentDate(event, target) {
     const calendar = this.calendar;
     const yearZero = calendar?.years?.yearZero ?? 0;
-
-    // Use selected date or viewed date
     const dateToSet = this._selectedDate || this.viewedDate;
-
-    // Use the calendar's jumpToDate method if available
-    if (calendar && typeof calendar.jumpToDate === 'function') {
-      // calendar.jumpToDate expects display year and 1-indexed day
-      await calendar.jumpToDate({
-        year: dateToSet.year, // Display year
-        month: dateToSet.month,
-        day: dateToSet.day // 1-indexed day (jumpToDate subtracts 1 internally)
-      });
-    } else {
-      // Fallback: construct time components and set world time
-      // For internal components, we need to subtract yearZero and convert day to 0-indexed dayOfMonth
-      const internalYear = dateToSet.year - yearZero;
-      const dayOfMonth = dateToSet.day - 1; // Convert 1-indexed day to 0-indexed dayOfMonth
-      const components = {
-        year: internalYear,
-        month: dateToSet.month,
-        dayOfMonth: dayOfMonth,
-        hour: game.time.components.hour ?? 12,
-        minute: game.time.components.minute ?? 0,
-        second: 0
-      };
-
-      // Convert to world time and update
-      if (calendar) {
-        const worldTime = calendar.componentsToTime(components);
-        await game.time.set(worldTime);
-      }
-    }
-
-    // Clear selection and refresh
+    await calendar.jumpToDate({ year: dateToSet.year, month: dateToSet.month, day: dateToSet.day });
     this._selectedDate = null;
     await this.render();
   }
@@ -1156,4 +1113,44 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     await this.render();
   }
 
+  /**
+   * Toggle between full and compact calendar views.
+   * Closes this window and opens the compact calendar.
+   */
+  static async _onToggleCompact(event, target) {
+    // Close this full calendar
+    await this.close();
+
+    // Open or focus the compact calendar
+    const { CompactCalendar } = await import('./compact-calendar.mjs');
+    const existing = foundry.applications.instances.get('compact-calendar');
+    if (existing) existing.render(true, { focus: true });
+    else new CompactCalendar().render(true);
+  }
+
+  /**
+   * Cycle through weather presets or generate new weather.
+   */
+  static async _onOpenWeatherPicker(event, target) {
+    if (!game.user.isGM) return;
+    await openWeatherPicker();
+  }
+
+  /**
+   * Get weather context for template.
+   * @returns {object|null} Weather context or null if no weather set
+   */
+  _getWeatherContext() {
+    const weather = WeatherManager.getCurrentWeather();
+    if (!weather) return null;
+
+    return {
+      id: weather.id,
+      label: game.i18n.localize(weather.label),
+      icon: weather.icon,
+      color: weather.color,
+      temperature: WeatherManager.formatTemperature(WeatherManager.getTemperature()),
+      tooltip: weather.description ? game.i18n.localize(weather.description) : game.i18n.localize(weather.label)
+    };
+  }
 }

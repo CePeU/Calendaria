@@ -32,6 +32,7 @@ import { log } from '../utils/logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { compareDates, getCurrentDate } from '../notes/utils/date-utils.mjs';
+import { generateRandomOccurrences, needsRandomRegeneration } from '../notes/utils/recurrence.mjs';
 
 /**
  * Event Scheduler class that monitors time changes and triggers event notifications.
@@ -101,6 +102,9 @@ export default class EventScheduler {
 
       // Update multi-day event progress
       this.#updateMultiDayEventProgress(currentDate);
+
+      // Check if random events need regeneration (approaching year end)
+      this.#checkRandomEventRegeneration(currentDate);
     }
 
     // Throttle trigger checks to every 30 game minutes
@@ -244,9 +248,7 @@ export default class EventScheduler {
     const categories = note.flagData.categories || [];
 
     // Use warning for important categories
-    if (categories.includes('deadline') || categories.includes('combat')) {
-      return 'warn';
-    }
+    if (categories.includes('deadline') || categories.includes('combat')) return 'warn';
 
     return 'info';
   }
@@ -284,9 +286,10 @@ export default class EventScheduler {
    * Execute the macro attached to a note.
    *
    * @param {Object} note - The note stub
+   * @param {Object} [context={}] - Additional context to pass to the macro
    * @private
    */
-  static #executeMacro(note) {
+  static #executeMacro(note, context = {}) {
     const macroId = note.flagData.macro;
     if (!macroId) return;
 
@@ -294,7 +297,11 @@ export default class EventScheduler {
     if (!macro) return;
 
     log(3, `Executing macro for event ${note.name}: ${macro.name}`);
-    macro.execute();
+
+    // Build scope object with event data and context
+    const scope = { event: { id: note.id, name: note.name, flagData: note.flagData }, ...context };
+
+    macro.execute(scope);
   }
 
   /* -------------------------------------------- */
@@ -405,6 +412,53 @@ export default class EventScheduler {
   }
 
   /* -------------------------------------------- */
+  /*  Random Event Regeneration                   */
+  /* -------------------------------------------- */
+
+  /**
+   * Check and regenerate random event occurrences when approaching year end.
+   * Regenerates occurrences for next year during the last week of the last month.
+   *
+   * @param {Object} currentDate - Current date components
+   * @private
+   */
+  static async #checkRandomEventRegeneration(currentDate) {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar?.months?.values) return;
+
+    const allNotes = NoteManager.getAllNotes();
+
+    for (const note of allNotes) {
+      // Only process random repeat events
+      if (note.flagData.repeat !== 'random') continue;
+
+      // Get full note document to check/update flags
+      const fullNote = NoteManager.getFullNote(note.id);
+      if (!fullNote) continue;
+
+      // Check if regeneration is needed
+      const cachedData = fullNote.getFlag(MODULE.ID, 'randomOccurrences');
+      if (!needsRandomRegeneration(cachedData)) continue;
+
+      // Calculate target year (current or next)
+      const yearZero = calendar?.years?.yearZero ?? 0;
+      const currentYear = currentDate.year;
+      const targetYear = cachedData?.year >= currentYear ? currentYear + 1 : currentYear;
+
+      // Build note data for generation
+      const noteData = { startDate: fullNote.system.startDate, randomConfig: fullNote.system.randomConfig, repeatEndDate: fullNote.system.repeatEndDate };
+
+      // Generate occurrences
+      const occurrences = generateRandomOccurrences(noteData, targetYear);
+
+      // Store in flag
+      await fullNote.setFlag(MODULE.ID, 'randomOccurrences', { year: targetYear, generatedAt: Date.now(), occurrences });
+
+      log(2, `Auto-regenerated ${occurrences.length} random occurrences for ${fullNote.name} until year ${targetYear}`);
+    }
+  }
+
+  /* -------------------------------------------- */
   /*  Multi-Day Event Progress                    */
   /* -------------------------------------------- */
 
@@ -471,13 +525,7 @@ export default class EventScheduler {
 
     if (totalDays <= 1) return null; // Not multi-day
 
-    return {
-      currentDay,
-      totalDays,
-      percentage: Math.round((currentDay / totalDays) * 100),
-      isFirstDay: currentDay === 1,
-      isLastDay: currentDay === totalDays
-    };
+    return { currentDay, totalDays, percentage: Math.round((currentDay / totalDays) * 100), isFirstDay: currentDay === 1, isLastDay: currentDay === totalDays };
   }
 
   /**
@@ -493,24 +541,8 @@ export default class EventScheduler {
     if (!calendar) return 0;
 
     // Convert to total days from epoch for each date
-    const startSeconds = calendar.componentsToTime({
-      year: start.year,
-      month: start.month,
-      dayOfMonth: start.day - 1, // 0-indexed
-      hour: 0,
-      minute: 0,
-      second: 0
-    });
-
-    const endSeconds = calendar.componentsToTime({
-      year: end.year,
-      month: end.month,
-      dayOfMonth: end.day - 1, // 0-indexed
-      hour: 0,
-      minute: 0,
-      second: 0
-    });
-
+    const startSeconds = calendar.componentsToTime({ year: start.year, month: start.month, dayOfMonth: start.day - 1, hour: 0, minute: 0, second: 0 });
+    const endSeconds = calendar.componentsToTime({ year: end.year, month: end.month, dayOfMonth: end.day - 1, hour: 0, minute: 0, second: 0 });
     const secondsPerDay = 24 * 60 * 60;
     return Math.floor((endSeconds - startSeconds) / secondsPerDay);
   }
@@ -535,5 +567,8 @@ export default class EventScheduler {
 
     // Fire hook for multi-day progress
     Hooks.callAll(HOOKS.EVENT_DAY_CHANGED, { id: note.id, name: note.name, progress });
+
+    // Execute macro for multi-day events (fires daily)
+    this.#executeMacro(note, { trigger: 'multiDayProgress', progress });
   }
 }

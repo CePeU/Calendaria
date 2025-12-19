@@ -10,6 +10,8 @@ import { ResetPositionDialog } from './applications/settings/reset-position.mjs'
 import { ThemeEditor } from './applications/settings/theme-editor.mjs';
 import { CalendarEditor } from './applications/calendar-editor.mjs';
 import { TimeKeeperHUD } from './applications/time-keeper-hud.mjs';
+import { ImporterApp } from './applications/importer-app.mjs';
+import { MacroTriggerConfig } from './applications/settings/macro-trigger-config.mjs';
 
 /**
  * Register all module settings with Foundry VTT.
@@ -45,15 +47,6 @@ export function registerSettings() {
     config: false,
     type: Object,
     default: null
-  });
-
-  /** Whether the compact calendar is open */
-  game.settings.register(MODULE.ID, SETTINGS.COMPACT_CALENDAR_OPEN, {
-    name: 'Compact Calendar Open',
-    scope: 'client',
-    config: false,
-    type: Boolean,
-    default: false
   });
 
   /** Delay before auto-hiding compact calendar controls */
@@ -111,6 +104,16 @@ export function registerSettings() {
     }
   });
 
+  /** Show Compact Calendar on world load */
+  game.settings.register(MODULE.ID, SETTINGS.SHOW_COMPACT_CALENDAR, {
+    name: 'CALENDARIA.Settings.ShowCompactCalendar.Name',
+    hint: 'CALENDARIA.Settings.ShowCompactCalendar.Hint',
+    scope: 'client',
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
   /** User-customized theme color overrides */
   game.settings.register(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, {
     name: 'Custom Theme Colors',
@@ -132,6 +135,15 @@ export function registerSettings() {
   /** User-created custom calendar definitions */
   game.settings.register(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, {
     name: 'Custom Calendars',
+    scope: 'world',
+    config: false,
+    type: Object,
+    default: {}
+  });
+
+  /** User overrides for default/built-in calendars */
+  game.settings.register(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, {
+    name: 'Default Calendar Overrides',
     scope: 'world',
     config: false,
     type: Object,
@@ -178,8 +190,77 @@ export function registerSettings() {
   // Primary GM setting registered in registerReadySettings() when users are available
 
   // ========================================//
+  //  Weather System                         //
+  // ========================================//
+
+  /** Current weather state */
+  game.settings.register(MODULE.ID, SETTINGS.CURRENT_WEATHER, {
+    name: 'Current Weather',
+    scope: 'world',
+    config: false,
+    type: Object,
+    default: null
+  });
+
+  /** Temperature unit (Celsius or Fahrenheit) */
+  game.settings.register(MODULE.ID, SETTINGS.TEMPERATURE_UNIT, {
+    name: 'CALENDARIA.Settings.TemperatureUnit.Name',
+    hint: 'CALENDARIA.Settings.TemperatureUnit.Hint',
+    scope: 'world',
+    config: true,
+    type: new foundry.data.fields.StringField({
+      choices: {
+        celsius: 'CALENDARIA.Settings.TemperatureUnit.Celsius',
+        fahrenheit: 'CALENDARIA.Settings.TemperatureUnit.Fahrenheit'
+      },
+      initial: 'celsius'
+    })
+  });
+
+  /** Custom weather presets */
+  game.settings.register(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, {
+    name: 'Custom Weather Presets',
+    scope: 'world',
+    config: false,
+    type: Array,
+    default: []
+  });
+
+  // ========================================//
+  //  Macro Triggers                         //
+  // ========================================//
+
+  /** Macro trigger configuration - stores all trigger definitions */
+  game.settings.register(MODULE.ID, SETTINGS.MACRO_TRIGGERS, {
+    name: 'Macro Triggers',
+    scope: 'world',
+    config: false,
+    type: Object,
+    default: {
+      global: {
+        dawn: '',
+        dusk: '',
+        midday: '',
+        midnight: '',
+        newDay: ''
+      },
+      season: [],
+      moonPhase: []
+    }
+  });
+
+  // ========================================//
   //  Technical                              //
   // ========================================//
+
+  /** Dev mode - allows deletion of calendar note journals */
+  game.settings.register(MODULE.ID, SETTINGS.DEV_MODE, {
+    name: 'Dev Mode',
+    scope: 'world',
+    config: false,
+    type: Boolean,
+    default: false
+  });
 
   /** Logging level configuration for debug output */
   game.settings.register(MODULE.ID, SETTINGS.LOGGING_LEVEL, {
@@ -238,6 +319,26 @@ export function registerSettings() {
     label: 'CALENDARIA.Settings.TimeKeeper.Label',
     icon: 'fas fa-clock',
     type: TimeKeeperHUD,
+    restricted: true
+  });
+
+  /** Settings menu button to open calendar importer */
+  game.settings.registerMenu(MODULE.ID, 'importer', {
+    name: 'CALENDARIA.Settings.Importer.Name',
+    hint: 'CALENDARIA.Settings.Importer.Hint',
+    label: 'CALENDARIA.Settings.Importer.Label',
+    icon: 'fas fa-file-import',
+    type: ImporterApp,
+    restricted: true
+  });
+
+  /** Settings menu button to open macro trigger config */
+  game.settings.registerMenu(MODULE.ID, 'macroTriggers', {
+    name: 'CALENDARIA.Settings.MacroTriggers.Name',
+    hint: 'CALENDARIA.Settings.MacroTriggers.Hint',
+    label: 'CALENDARIA.Settings.MacroTriggers.Label',
+    icon: 'fas fa-bolt',
+    type: MacroTriggerConfig,
     restricted: true
   });
 

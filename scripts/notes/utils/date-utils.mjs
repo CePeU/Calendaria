@@ -42,6 +42,19 @@ export function isSameDay(date1, date2) {
 }
 
 /**
+ * Compare two dates by day only (ignoring time).
+ * @param {object} date1  First date
+ * @param {object} date2  Second date
+ * @returns {number}  -1 if date1 < date2, 0 if same day, 1 if date1 > date2
+ */
+export function compareDays(date1, date2) {
+  if (date1.year !== date2.year) return date1.year < date2.year ? -1 : 1;
+  if (date1.month !== date2.month) return date1.month < date2.month ? -1 : 1;
+  if (date1.day !== date2.day) return date1.day < date2.day ? -1 : 1;
+  return 0;
+}
+
+/**
  * Calculate days between two dates using calendar's time system.
  * @param {object} startDate  Start date
  * @param {object} endDate  End date
@@ -52,32 +65,26 @@ export function daysBetween(startDate, endDate) {
   if (!calendar) return 0;
 
   try {
-    // Convert dates to time components
-    const startComponents = {
-      year: startDate.year,
-      month: startDate.month,
-      day: startDate.day,
-      hour: startDate.hour ?? 0,
-      minute: startDate.minute ?? 0,
-      second: 0
-    };
+    const monthDays = calendar.months?.values || [];
 
-    const endComponents = {
-      year: endDate.year,
-      month: endDate.month,
-      day: endDate.day,
-      hour: endDate.hour ?? 0,
-      minute: endDate.minute ?? 0,
-      second: 0
-    };
+    // Convert day-of-month to day-of-year (componentsToTime expects day-of-year)
+    let startDayOfYear = (startDate.day ?? 1) - 1;
+    for (let i = 0; i < startDate.month && i < monthDays.length; i++) startDayOfYear += monthDays[i]?.days || 30;
+    let endDayOfYear = (endDate.day ?? 1) - 1;
+    for (let i = 0; i < endDate.month && i < monthDays.length; i++) endDayOfYear += monthDays[i]?.days || 30;
+
+    const startComponents = { year: startDate.year, day: startDayOfYear, hour: 0, minute: 0, second: 0 };
+    const endComponents = { year: endDate.year, day: endDayOfYear, hour: 0, minute: 0, second: 0 };
 
     // Convert to seconds using calendar's time system
     const startTime = calendar.componentsToTime(startComponents);
     const endTime = calendar.componentsToTime(endComponents);
 
     // Convert seconds difference to days
-    const hoursPerDay = calendar.hours ?? 24;
-    const secondsPerDay = hoursPerDay * 60 * 60;
+    const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
+    const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+    const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+    const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
     return Math.floor((endTime - startTime) / secondsPerDay);
   } catch (error) {
     console.warn('Error calculating days between dates:', error);
@@ -94,15 +101,16 @@ export function daysBetween(startDate, endDate) {
 export function monthsBetween(startDate, endDate) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return 0;
-
   const yearDiff = endDate.year - startDate.year;
   const monthDiff = endDate.month - startDate.month;
-
-  return yearDiff * calendar.months.length + monthDiff;
+  const monthsPerYear = calendar.months?.values?.length || 12;
+  return yearDiff * monthsPerYear + monthDiff;
 }
 
 /**
  * Get day of week for a date (0 = first day of week).
+ * Respects month's startingWeekday if set.
+ * Accounts for intercalary days that don't count for weekday calculation.
  * @param {object} date  Date to check
  * @returns {number}  Day of week index
  */
@@ -111,8 +119,34 @@ export function dayOfWeek(date) {
   if (!calendar) return 0;
 
   try {
-    const components = { year: date.year, month: date.month, day: date.day, hour: 0, minute: 0, second: 0 };
+    // Check if the month has a fixed startingWeekday
+    const monthData = calendar.months?.values?.[date.month];
+    if (monthData?.startingWeekday != null) {
+      const daysInWeek = calendar.days?.values?.length || 7;
+      const dayIndex = (date.day ?? 1) - 1;
 
+      // Adjust for non-counting festivals even within fixed-weekday months
+      const nonCountingDays = calendar.countNonWeekdayFestivalsBefore?.({ year: date.year - (calendar.years?.yearZero ?? 0), month: date.month, dayOfMonth: (date.day ?? 1) - 1 }) ?? 0;
+      return (monthData.startingWeekday + dayIndex - nonCountingDays + daysInWeek * 100) % daysInWeek;
+    }
+
+    // Convert display year to internal year (subtract yearZero)
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const internalYear = date.year - yearZero;
+
+    // Convert day of month (1-indexed) to day of year (0-indexed)
+    // componentsToTime expects day as day-of-year, ignoring month
+    let dayOfYear = (date.day ?? 1) - 1; // Convert 1-indexed to 0-indexed
+    const monthDays = calendar.months?.values || [];
+    for (let i = 0; i < date.month && i < monthDays.length; i++) dayOfYear += monthDays[i]?.days || 30;
+
+    // Count non-counting festival days before this date to adjust weekday calculation
+    const nonCountingDays = calendar.countNonWeekdayFestivalsBefore?.({ year: internalYear, month: date.month, dayOfMonth: (date.day ?? 1) - 1 }) ?? 0;
+
+    // Adjust dayOfYear by subtracting non-counting days
+    const adjustedDayOfYear = dayOfYear - nonCountingDays;
+
+    const components = { year: internalYear, day: adjustedDayOfYear, hour: 0, minute: 0, second: 0 };
     const time = calendar.componentsToTime(components);
     const timeComponents = calendar.timeToComponents(time);
 
@@ -134,22 +168,19 @@ export function addDays(date, days) {
   if (!calendar) return date;
 
   try {
-    const components = {
-      year: date.year,
-      month: date.month,
-      day: date.day,
-      hour: date.hour ?? 0,
-      minute: date.minute ?? 0,
-      second: 0
-    };
-
+    // Convert day-of-month to day-of-year (componentsToTime expects day-of-year)
+    let dayOfYear = date.day - 1; // Convert 1-indexed to 0-indexed
+    const monthDays = calendar.months?.values || [];
+    for (let i = 0; i < date.month && i < monthDays.length; i++) dayOfYear += monthDays[i]?.days || 30;
+    const components = { year: date.year, day: dayOfYear, hour: date.hour ?? 0, minute: date.minute ?? 0, second: 0 };
     const time = calendar.componentsToTime(components);
-    const hoursPerDay = calendar.hours ?? 24;
-    const secondsPerDay = hoursPerDay * 60 * 60;
+    const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
+    const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+    const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+    const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
     const newTime = time + days * secondsPerDay;
     const newComponents = calendar.timeToComponents(newTime);
-
-    return { year: newComponents.year, month: newComponents.month, day: newComponents.dayOfMonth, hour: newComponents.hour, minute: newComponents.minute };
+    return { year: newComponents.year, month: newComponents.month, day: newComponents.dayOfMonth + 1, hour: newComponents.hour, minute: newComponents.minute };
   } catch (error) {
     console.warn('Error adding days to date:', error);
     return date;
@@ -169,7 +200,7 @@ export function addMonths(date, months) {
   let newYear = date.year;
   let newMonth = date.month + months;
 
-  const monthsPerYear = calendar.months.length;
+  const monthsPerYear = calendar.months?.values?.length || 12;
 
   // Handle month overflow/underflow
   while (newMonth >= monthsPerYear) {
@@ -183,7 +214,7 @@ export function addMonths(date, months) {
   }
 
   // Clamp day to valid range for new month
-  const monthData = calendar.months[newMonth];
+  const monthData = calendar.months?.values?.[newMonth];
   const maxDays = monthData?.days ?? 30;
   const newDay = Math.min(date.day, maxDays);
 
@@ -203,7 +234,7 @@ export function addYears(date, years) {
   const newYear = date.year + years;
 
   // Clamp day to valid range (handles Feb 29 in leap years)
-  const monthData = calendar.months[date.month];
+  const monthData = calendar.months?.values?.[date.month];
   const maxDays = monthData?.days ?? 30;
   const newDay = Math.min(date.day, maxDays);
 
@@ -216,8 +247,6 @@ export function addYears(date, years) {
  */
 export function getCurrentDate() {
   const components = game.time.components;
-
-  // dayOfMonth is 0-indexed in Foundry, convert to 1-indexed to match note data
   return { year: components.year, month: components.month, day: components.dayOfMonth + 1, hour: components.hour, minute: components.minute };
 }
 

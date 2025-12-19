@@ -13,6 +13,10 @@ import NoteManager from './notes/note-manager.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 import { log } from './utils/logger.mjs';
 import { HOOKS } from './constants.mjs';
+import { CalendarApplication } from './applications/calendar-application.mjs';
+import { CalendarEditor } from './applications/calendar-editor.mjs';
+import { CompactCalendar } from './applications/compact-calendar.mjs';
+import WeatherManager from './weather/weather-manager.mjs';
 
 /**
  * Public API for Calendaria module.
@@ -35,10 +39,7 @@ export const CalendariaAPI = {
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
 
-    return {
-      ...components,
-      year: components.year + yearZero
-    };
+    return { ...components, year: components.year + yearZero };
   },
 
   /**
@@ -51,7 +52,6 @@ export const CalendariaAPI = {
    */
   async advanceTime(delta) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can advance time');
       ui.notifications.error('Only GMs can advance time');
       return game.time.worldTime;
     }
@@ -68,7 +68,6 @@ export const CalendariaAPI = {
    */
   async setDateTime(components) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can set date/time');
       ui.notifications.error('Only GMs can set date/time');
       return game.time.worldTime;
     }
@@ -96,14 +95,12 @@ export const CalendariaAPI = {
    */
   async jumpToDate({ year, month, day }) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can jump to date');
       ui.notifications.error('Only GMs can jump to date');
       return;
     }
 
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) {
-      log(2, 'No active calendar available');
       ui.notifications.warn('No active calendar available');
       return;
     }
@@ -170,7 +167,6 @@ export const CalendariaAPI = {
    */
   async switchCalendar(id) {
     if (!game.user.isGM) {
-      log(1, 'Only GMs can switch calendars');
       ui.notifications.error('Only GMs can switch calendars');
       return false;
     }
@@ -219,10 +215,23 @@ export const CalendariaAPI = {
   getCurrentSeason() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || !calendar.seasons) return null;
-
     const components = game.time.components;
     const seasonIndex = components.season ?? 0;
     return calendar.seasons.values?.[seasonIndex] ?? null;
+  },
+
+  /**
+   * Get the current values for all cycles (zodiac signs, elemental weeks, etc).
+   * @returns {{text: string, values: Array<{cycleName: string, entryName: string, index: number}>}|null}
+   * @example
+   * const cycles = CALENDARIA.api.getCycleValues();
+   * console.log(cycles.text); // Formatted display text
+   * cycles.values.forEach(v => console.log(v.cycleName, v.entryName));
+   */
+  getCycleValues() {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar || typeof calendar.getCycleValues !== 'function') return null;
+    return calendar.getCycleValues();
   },
 
   /**
@@ -235,7 +244,6 @@ export const CalendariaAPI = {
   getSunrise() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.sunrise !== 'function') return null;
-
     return calendar.sunrise();
   },
 
@@ -249,7 +257,6 @@ export const CalendariaAPI = {
   getSunset() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.sunset !== 'function') return null;
-
     return calendar.sunset();
   },
 
@@ -263,7 +270,6 @@ export const CalendariaAPI = {
   getDaylightHours() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.daylightHours !== 'function') return null;
-
     return calendar.daylightHours();
   },
 
@@ -277,7 +283,6 @@ export const CalendariaAPI = {
   getProgressDay() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.progressDay !== 'function') return null;
-
     return calendar.progressDay();
   },
 
@@ -291,7 +296,6 @@ export const CalendariaAPI = {
   getProgressNight() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.progressNight !== 'function') return null;
-
     return calendar.progressNight();
   },
 
@@ -305,19 +309,15 @@ export const CalendariaAPI = {
   getTimeUntilSunrise() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.sunrise !== 'function') return null;
-
     const targetHour = calendar.sunrise();
     if (targetHour === null) return null;
-
     const components = game.time.components;
     const currentHour = components.hour + components.minute / 60 + components.second / 3600;
     const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-
     const hours = Math.floor(hoursUntil);
     const remainingMinutes = (hoursUntil - hours) * 60;
     const minutes = Math.floor(remainingMinutes);
     const seconds = Math.floor((remainingMinutes - minutes) * 60);
-
     return { hours, minutes, seconds };
   },
 
@@ -331,19 +331,15 @@ export const CalendariaAPI = {
   getTimeUntilSunset() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.sunset !== 'function') return null;
-
     const targetHour = calendar.sunset();
     if (targetHour === null) return null;
-
     const components = game.time.components;
     const currentHour = components.hour + components.minute / 60 + components.second / 3600;
     const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-
     const hours = Math.floor(hoursUntil);
     const remainingMinutes = (hoursUntil - hours) * 60;
     const minutes = Math.floor(remainingMinutes);
     const seconds = Math.floor((remainingMinutes - minutes) * 60);
-
     return { hours, minutes, seconds };
   },
 
@@ -357,17 +353,14 @@ export const CalendariaAPI = {
   getTimeUntilMidnight() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
-
     const targetHour = 0;
     const components = game.time.components;
     const currentHour = components.hour + components.minute / 60 + components.second / 3600;
     const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-
     const hours = Math.floor(hoursUntil);
     const remainingMinutes = (hoursUntil - hours) * 60;
     const minutes = Math.floor(remainingMinutes);
     const seconds = Math.floor((remainingMinutes - minutes) * 60);
-
     return { hours, minutes, seconds };
   },
 
@@ -381,17 +374,14 @@ export const CalendariaAPI = {
   getTimeUntilMidday() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
-
     const targetHour = 12;
     const components = game.time.components;
     const currentHour = components.hour + components.minute / 60 + components.second / 3600;
     const hoursUntil = currentHour < targetHour ? targetHour - currentHour : 24 - currentHour + targetHour;
-
     const hours = Math.floor(hoursUntil);
     const remainingMinutes = (hoursUntil - hours) * 60;
     const minutes = Math.floor(remainingMinutes);
     const seconds = Math.floor((remainingMinutes - minutes) * 60);
-
     return { hours, minutes, seconds };
   },
 
@@ -421,7 +411,6 @@ export const CalendariaAPI = {
   isFestivalDay() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar || typeof calendar.isFestivalDay !== 'function') return false;
-
     return calendar.isFestivalDay();
   },
 
@@ -447,9 +436,7 @@ export const CalendariaAPI = {
     components = components || game.time.components;
 
     // Use calendar's format method if available
-    if (typeof calendar.format === 'function') {
-      return calendar.format(components, formatter);
-    }
+    if (typeof calendar.format === 'function') return calendar.format(components, formatter);
 
     // Fallback to basic formatting
     // Only add yearZero if components are internal (from game.time.components)
@@ -542,24 +529,9 @@ export const CalendariaAPI = {
     // Convert display year to internal year
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
-
     const noteData = {
-      startDate: {
-        year: startDate.year - yearZero,
-        month: startDate.month,
-        day: startDate.day,
-        hour: startDate.hour ?? 0,
-        minute: startDate.minute ?? 0
-      },
-      endDate: endDate
-        ? {
-            year: endDate.year - yearZero,
-            month: endDate.month,
-            day: endDate.day,
-            hour: endDate.hour ?? 23,
-            minute: endDate.minute ?? 59
-          }
-        : null,
+      startDate: { year: startDate.year - yearZero, month: startDate.month, day: startDate.day, hour: startDate.hour ?? 0, minute: startDate.minute ?? 0 },
+      endDate: endDate ? { year: endDate.year - yearZero, month: endDate.month, day: endDate.day, hour: endDate.hour ?? 23, minute: endDate.minute ?? 59 } : null,
       allDay,
       repeat,
       categories,
@@ -597,29 +569,15 @@ export const CalendariaAPI = {
     const yearZero = calendar?.years?.yearZero ?? 0;
 
     const noteData = {};
-    if (updates.startDate) {
-      noteData.startDate = {
-        ...updates.startDate,
-        year: updates.startDate.year - yearZero
-      };
-    }
-    if (updates.endDate) {
-      noteData.endDate = {
-        ...updates.endDate,
-        year: updates.endDate.year - yearZero
-      };
-    }
+    if (updates.startDate) noteData.startDate = { ...updates.startDate, year: updates.startDate.year - yearZero };
+    if (updates.endDate) noteData.endDate = { ...updates.endDate, year: updates.endDate.year - yearZero };
     if (updates.allDay !== undefined) noteData.allDay = updates.allDay;
     if (updates.repeat !== undefined) noteData.repeat = updates.repeat;
     if (updates.categories !== undefined) noteData.categories = updates.categories;
     if (updates.icon !== undefined) noteData.icon = updates.icon;
     if (updates.color !== undefined) noteData.color = updates.color;
     if (updates.gmOnly !== undefined) noteData.gmOnly = updates.gmOnly;
-
-    return await NoteManager.updateNote(pageId, {
-      name: updates.name,
-      noteData: Object.keys(noteData).length > 0 ? noteData : undefined
-    });
+    return await NoteManager.updateNote(pageId, { name: updates.name, noteData: Object.keys(noteData).length > 0 ? noteData : undefined });
   },
 
   /**
@@ -771,7 +729,6 @@ export const CalendariaAPI = {
    * await CALENDARIA.api.openCalendar({ date: { year: 1492, month: 5, day: 1 } });
    */
   async openCalendar(options = {}) {
-    const { CalendarApplication } = await import('./applications/calendar-application.mjs');
     const app = new CalendarApplication();
     return app.render(true, options);
   },
@@ -791,7 +748,6 @@ export const CalendariaAPI = {
       return null;
     }
 
-    const { CalendarEditor } = await import('./applications/calendar-editor.mjs');
     const app = new CalendarEditor({ calendarId });
     return app.render(true);
   },
@@ -803,7 +759,6 @@ export const CalendariaAPI = {
    * CALENDARIA.api.showCompactCalendar();
    */
   async showCompactCalendar() {
-    const { CompactCalendar } = await import('./applications/compact-calendar.mjs');
     return CompactCalendar.show();
   },
 
@@ -813,7 +768,6 @@ export const CalendariaAPI = {
    * CALENDARIA.api.hideCompactCalendar();
    */
   async hideCompactCalendar() {
-    const { CompactCalendar } = await import('./applications/compact-calendar.mjs');
     CompactCalendar.hide();
   },
 
@@ -823,7 +777,6 @@ export const CalendariaAPI = {
    * CALENDARIA.api.toggleCompactCalendar();
    */
   async toggleCompactCalendar() {
-    const { CompactCalendar } = await import('./applications/compact-calendar.mjs');
     CompactCalendar.toggle();
   },
 
@@ -845,10 +798,7 @@ export const CalendariaAPI = {
     const components = calendar.timeToComponents(timestamp);
     const yearZero = calendar.years?.yearZero ?? 0;
 
-    return {
-      ...components,
-      year: components.year + yearZero
-    };
+    return { ...components, year: components.year + yearZero };
   },
 
   /**
@@ -1013,6 +963,171 @@ export const CalendariaAPI = {
    */
   canManageNotes() {
     return game.user.isGM;
+  },
+
+  /* -------------------------------------------- */
+  /*  Weather System                              */
+  /* -------------------------------------------- */
+
+  /**
+   * Get the current weather.
+   * @returns {object|null} Current weather state with id, label, icon, color, temperature
+   * @example
+   * const weather = CALENDARIA.api.getCurrentWeather();
+   * if (weather) console.log(`Current weather: ${weather.label}`);
+   */
+  getCurrentWeather() {
+    return WeatherManager.getCurrentWeather();
+  },
+
+  /**
+   * Set the current weather by preset ID.
+   * @param {string} presetId - Weather preset ID (e.g., 'clear', 'rain', 'thunderstorm')
+   * @param {object} [options={}] - Additional options
+   * @param {number} [options.temperature] - Optional temperature value
+   * @returns {Promise<object>} The set weather
+   * @example
+   * await CALENDARIA.api.setWeather('rain');
+   * await CALENDARIA.api.setWeather('snow', { temperature: -5 });
+   */
+  async setWeather(presetId, options = {}) {
+    return WeatherManager.setWeather(presetId, options);
+  },
+
+  /**
+   * Set custom weather with arbitrary values.
+   * @param {object} weatherData - Weather data
+   * @param {string} weatherData.label - Display label
+   * @param {string} [weatherData.icon='fa-question'] - Font Awesome icon class
+   * @param {string} [weatherData.color='#888888'] - Display color
+   * @param {string} [weatherData.description] - Description text
+   * @param {number} [weatherData.temperature] - Temperature value
+   * @returns {Promise<object>} The set weather
+   * @example
+   * await CALENDARIA.api.setCustomWeather({
+   *   label: 'Magical Aurora',
+   *   icon: 'fa-star',
+   *   color: '#E0BBFF',
+   *   description: 'Shimmering lights dance across the sky'
+   * });
+   */
+  async setCustomWeather(weatherData) {
+    return WeatherManager.setCustomWeather(weatherData);
+  },
+
+  /**
+   * Clear the current weather.
+   * @returns {Promise<void>}
+   * @example
+   * await CALENDARIA.api.clearWeather();
+   */
+  async clearWeather() {
+    return WeatherManager.clearWeather();
+  },
+
+  /**
+   * Generate and set weather based on current climate and season.
+   * @param {object} [options={}] - Generation options
+   * @param {string} [options.climate] - Climate override (uses setting if not provided)
+   * @param {string} [options.season] - Season override (uses current if not provided)
+   * @returns {Promise<object>} Generated weather
+   * @example
+   * await CALENDARIA.api.generateWeather();
+   * await CALENDARIA.api.generateWeather({ climate: 'polar' });
+   */
+  async generateWeather(options = {}) {
+    return WeatherManager.generateAndSetWeather(options);
+  },
+
+  /**
+   * Get a weather forecast for upcoming days.
+   * @param {object} [options={}] - Forecast options
+   * @param {number} [options.days=7] - Number of days to forecast
+   * @param {string} [options.climate] - Climate override
+   * @returns {Promise<object[]>} Array of forecast entries
+   * @example
+   * const forecast = await CALENDARIA.api.getWeatherForecast({ days: 5 });
+   * forecast.forEach(day => console.log(day.preset.label, day.temperature));
+   */
+  async getWeatherForecast(options = {}) {
+    return WeatherManager.getForecast(options);
+  },
+
+  /**
+   * Get the current climate zone.
+   * @returns {Promise<string>} Climate zone ID
+   * @example
+   * const climate = await CALENDARIA.api.getCurrentClimate();
+   * console.log(climate); // 'temperate'
+   */
+  async getCurrentClimate() {
+    return WeatherManager.getCurrentClimate();
+  },
+
+  /**
+   * Set the current climate zone.
+   * @param {string} climateId - Climate zone ID ('tropical', 'subtropical', 'temperate', 'polar')
+   * @returns {Promise<void>}
+   * @example
+   * await CALENDARIA.api.setClimate('polar');
+   */
+  async setClimate(climateId) {
+    return WeatherManager.setClimate(climateId);
+  },
+
+  /**
+   * Get all available weather presets.
+   * @returns {Promise<object[]>} Array of weather presets
+   * @example
+   * const presets = await CALENDARIA.api.getWeatherPresets();
+   * presets.forEach(p => console.log(p.id, p.label));
+   */
+  async getWeatherPresets() {
+    return WeatherManager.getAllPresets();
+  },
+
+  /**
+   * Get all available climate zones.
+   * @returns {Promise<object[]>} Array of climate zones
+   * @example
+   * const climates = await CALENDARIA.api.getClimateZones();
+   * climates.forEach(c => console.log(c.id, c.label));
+   */
+  async getClimateZones() {
+    return WeatherManager.getClimateZones();
+  },
+
+  /**
+   * Add a custom weather preset.
+   * @param {object} preset - Preset definition
+   * @param {string} preset.id - Unique ID
+   * @param {string} preset.label - Display label
+   * @param {string} [preset.icon='fa-question'] - Icon class
+   * @param {string} [preset.color='#888888'] - Display color
+   * @param {string} [preset.description] - Description
+   * @returns {Promise<object>} The added preset
+   * @example
+   * await CALENDARIA.api.addWeatherPreset({
+   *   id: 'acid-rain',
+   *   label: 'Acid Rain',
+   *   icon: 'fa-skull',
+   *   color: '#00FF00',
+   *   description: 'Corrosive rainfall'
+   * });
+   */
+  async addWeatherPreset(preset) {
+    return WeatherManager.addCustomPreset(preset);
+  },
+
+  /**
+   * Remove a custom weather preset.
+   * @param {string} presetId - Preset ID to remove
+   * @returns {Promise<boolean>} True if removed
+   * @example
+   * await CALENDARIA.api.removeWeatherPreset('acid-rain');
+   */
+  async removeWeatherPreset(presetId) {
+    return WeatherManager.removeCustomPreset(presetId);
   },
 
   /* -------------------------------------------- */

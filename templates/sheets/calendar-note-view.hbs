@@ -37,8 +37,14 @@
     {{/unless}}
     {{#if repeatLabel}}
       <div class="repeat-info">
-        <i class="fas fa-redo"></i>
+        <i class="fas fa-arrows-rotate"></i>
         <span>{{repeatLabel}}</span>
+      </div>
+    {{/if}}
+    {{#if moonConditionsDisplay}}
+      <div class="moon-info">
+        <i class="fas fa-moon"></i>
+        <span>{{moonConditionsDisplay}}</span>
       </div>
     {{/if}}
   </div>

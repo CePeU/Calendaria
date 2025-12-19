@@ -46,6 +46,7 @@ import { MODULE, SETTINGS, SYSTEM, SOCKET_TYPES, HOOKS } from '../constants.mjs'
 import { log } from './logger.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import WeatherManager from '../weather/weather-manager.mjs';
 
 /**
  * Socket manager for handling multiplayer synchronization.
@@ -242,6 +243,10 @@ export class CalendariaSocket {
         this.#handleCalendarSwitch(data);
         break;
 
+      case SOCKET_TYPES.WEATHER_CHANGE:
+        this.#handleWeatherChange(data);
+        break;
+
       default:
         log(1, `Unknown socket message type: ${type}`);
     }
@@ -285,9 +290,7 @@ export class CalendariaSocket {
     log(3, 'Handling remote date change', data);
 
     // Re-render the calendar HUD if it exists (dnd5e only)
-    if (SYSTEM.isDnd5e && dnd5e.ui.calendar) {
-      dnd5e.ui.calendar.render();
-    }
+    if (SYSTEM.isDnd5e && dnd5e.ui.calendar) dnd5e.ui.calendar.render();
 
     // Emit hook for other systems to respond
     Hooks.callAll(HOOKS.REMOTE_DATE_CHANGE, data);
@@ -322,16 +325,10 @@ export class CalendariaSocket {
     // 2. Future use cases where we need to sync data not stored in documents
 
     // Re-render any open calendar applications
-    for (const app of Object.values(ui.windows)) {
-      if (app.constructor.name === 'CalendarApplication') {
-        app.render();
-      }
-    }
+    for (const app of foundry.applications.instances.values()) if (app.constructor.name === 'CalendarApplication') app.render();
 
     // Re-render dnd5e calendar HUD if present
-    if (SYSTEM.isDnd5e && dnd5e.ui.calendar) {
-      dnd5e.ui.calendar.render();
-    }
+    if (SYSTEM.isDnd5e && dnd5e.ui.calendar) dnd5e.ui.calendar.render();
 
     // Emit appropriate hook based on action
     switch (action) {
@@ -364,6 +361,21 @@ export class CalendariaSocket {
 
     // Emit hook for TimeKeeper or other modules to respond
     Hooks.callAll('calendaria.clockUpdate', { running, ratio });
+  }
+
+  /**
+   * Handle remote weather change messages.
+   * Syncs the weather state across all clients.
+   * @private
+   *
+   * @param {Object} data - The weather change data
+   * @param {Object} data.weather - The new weather state
+   * @returns {void}
+   */
+  static #handleWeatherChange(data) {
+    const { weather } = data;
+    log(3, `Handling remote weather change: ${weather?.id ?? 'cleared'}`);
+    WeatherManager.handleRemoteWeatherChange(data);
   }
 
   /* -------------------------------------------- */
@@ -403,11 +415,7 @@ export class CalendariaSocket {
     // Check for manual override setting
     const primaryGMOverride = game.settings.get(MODULE.ID, SETTINGS.PRIMARY_GM);
 
-    if (primaryGMOverride) {
-      const isPrimary = primaryGMOverride === game.user.id;
-      log(3, `Primary GM check (override): ${isPrimary} (override: ${primaryGMOverride}, current: ${game.user.id})`);
-      return isPrimary;
-    }
+    if (primaryGMOverride) return primaryGMOverride === game.user.id;
 
     // Fallback to automatic election: lowest user ID among active GMs
     const activeGMs = game.users.filter((u) => u.isGM && u.active);
@@ -439,9 +447,7 @@ export class CalendariaSocket {
   static getPrimaryGM() {
     // Check for manual override
     const primaryGMOverride = game.settings.get(MODULE.ID, SETTINGS.PRIMARY_GM);
-    if (primaryGMOverride) {
-      return game.users.get(primaryGMOverride) ?? null;
-    }
+    if (primaryGMOverride) return game.users.get(primaryGMOverride) ?? null;
 
     // Automatic election
     const activeGMs = game.users.filter((u) => u.isGM && u.active);
