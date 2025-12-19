@@ -6,7 +6,7 @@
  * @author Tyler
  */
 
-import { MODULE, HOOKS, TEMPLATES } from '../constants.mjs';
+import { MODULE, HOOKS, TEMPLATES, SETTINGS } from '../constants.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -22,7 +22,7 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: 'time-keeper-hud',
     classes: ['time-keeper-hud'],
-    position: { width: 'auto', height: 'auto', top: 80, left: 120, zIndex: 100 },
+    position: { width: 'auto', height: 'auto', zIndex: 100 },
     window: { frame: false, positioned: true }
   };
 
@@ -55,6 +55,12 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   _onRender(context, options) {
     super._onRender(context, options);
 
+    // Restore saved position
+    this.#restorePosition();
+
+    // Enable dragging
+    this.#enableDragging();
+
     // Set up event listeners
     this.#activateListeners();
 
@@ -65,8 +71,78 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
   }
 
+  /**
+   * Restore saved position from settings.
+   * @private
+   */
+  #restorePosition() {
+    const savedPos = game.settings.get(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION);
+    if (savedPos && typeof savedPos.top === 'number' && typeof savedPos.left === 'number') this.setPosition({ left: savedPos.left, top: savedPos.top });
+    else this.setPosition({ left: 120, top: 120 });
+  }
+
+  /**
+   * Enable dragging on the time display.
+   * @private
+   */
+  #enableDragging() {
+    const dragHandle = this.element.querySelector('.time-display');
+    if (!dragHandle) return;
+
+    const drag = new foundry.applications.ux.Draggable.implementation(this, this.element, dragHandle, false);
+
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let elementStartLeft = 0;
+    let elementStartTop = 0;
+
+    const originalMouseDown = drag._onDragMouseDown.bind(drag);
+    drag._onDragMouseDown = (event) => {
+      const rect = this.element.getBoundingClientRect();
+      elementStartLeft = rect.left;
+      elementStartTop = rect.top;
+      dragStartX = event.clientX;
+      dragStartY = event.clientY;
+      originalMouseDown(event);
+    };
+
+    drag._onDragMouseMove = (event) => {
+      event.preventDefault();
+      const now = Date.now();
+      if (!drag._moveTime) drag._moveTime = 0;
+      if (now - drag._moveTime < 1000 / 60) return;
+      drag._moveTime = now;
+
+      const deltaX = event.clientX - dragStartX;
+      const deltaY = event.clientY - dragStartY;
+      const rect = this.element.getBoundingClientRect();
+
+      let newLeft = elementStartLeft + deltaX;
+      let newTop = elementStartTop + deltaY;
+
+      // Clamp to viewport
+      newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - rect.width));
+      newTop = Math.max(0, Math.min(newTop, window.innerHeight - rect.height));
+
+      this.setPosition({ left: newLeft, top: newTop });
+    };
+
+    drag._onDragMouseUp = async (event) => {
+      event.preventDefault();
+      window.removeEventListener(...drag.handlers.dragMove);
+      window.removeEventListener(...drag.handlers.dragUp);
+
+      // Save position
+      await game.settings.set(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, { left: this.position.left, top: this.position.top });
+    };
+  }
+
   /** @override */
   _onClose(options) {
+    // Save position before closing
+    const pos = this.position;
+    if (pos.top != null && pos.left != null) game.settings.set(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, { top: pos.top, left: pos.left });
+
     super._onClose(options);
 
     // Clean up time hook

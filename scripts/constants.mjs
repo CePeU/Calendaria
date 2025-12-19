@@ -94,6 +94,9 @@ export const SETTINGS = {
   /** @type {string} Whether to show TimeKeeper HUD on world load */
   SHOW_TIME_KEEPER: 'showTimeKeeper',
 
+  /** @type {string} Saved position of the TimeKeeper HUD */
+  TIME_KEEPER_POSITION: 'timeKeeperPosition',
+
   /** @type {string} Whether to show Compact Calendar on world load */
   SHOW_COMPACT_CALENDAR: 'showCompactCalendar',
 

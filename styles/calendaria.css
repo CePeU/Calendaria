@@ -3004,6 +3004,7 @@
   padding-bottom: 6px;
   margin-bottom: 6px;
   border-bottom: 1px solid var(--tk-border);
+  cursor: move;
 }
 
 .time-keeper-hud .time-display-row {

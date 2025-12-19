@@ -49,6 +49,15 @@ export function registerSettings() {
     default: null
   });
 
+  /** Saved position for the TimeKeeper HUD */
+  game.settings.register(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, {
+    name: 'TimeKeeper Position',
+    scope: 'client',
+    config: false,
+    type: Object,
+    default: null
+  });
+
   /** Delay before auto-hiding compact calendar controls */
   game.settings.register(MODULE.ID, SETTINGS.COMPACT_CONTROLS_DELAY, {
     name: 'CALENDARIA.Settings.CompactControlsDelay.Name',
