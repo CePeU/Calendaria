@@ -341,8 +341,23 @@ export default class FantasyCalendarImporter extends BaseImporter {
       startYear: era.start ?? 0,
       endYear: era.end ?? null,
       format: 'suffix',
-      template: era.format || era.formatting || era.date_format || null
+      template: this.#transformEraTemplate(era.format || era.formatting || era.date_format)
     }));
+  }
+
+  /**
+   * Transform FC era template format to Calendaria format.
+   * FC uses: {{era_name}}, {{era_year}}, {{year}}
+   * Calendaria uses: {{era}}, {{yearInEra}}, {{year}}, {{abbreviation}}
+   * @param {string|null} template - FC template string
+   * @returns {string|null}
+   */
+  #transformEraTemplate(template) {
+    if (!template) return null;
+    return template
+      .replace(/\{\{era_name\}\}/g, '{{era}}')
+      .replace(/\{\{era_year\}\}/g, '{{yearInEra}}')
+      .replace(/\{\{short_era\}\}/g, '{{abbreviation}}');
   }
 
   /**
