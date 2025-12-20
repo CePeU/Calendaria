@@ -336,6 +336,7 @@
   "CALENDARIA.Editor.Hint.PhasePercentage": "Start/End are percentages of the moon cycle (0% = new moon, 50% = full moon, 100% = next new moon).",
   "CALENDARIA.Editor.Hint.ReferenceDate": "A date when this moon was new. Used to calculate current phase.",
   "CALENDARIA.Editor.Hint.Seasons": "Define seasons by day ranges. Optional.",
+  "CALENDARIA.Editor.Hint.SeasonsFields": "Each row: name, abbreviation, icon (FontAwesome class), color, and date range (start month/day to end month/day).",
   "CALENDARIA.Editor.Hint.ShortestDay": "Hours of daylight on the shortest day (winter solstice).",
   "CALENDARIA.Editor.Hint.SummerSolstice": "Date when daylight is longest (summer solstice).",
   "CALENDARIA.Editor.Hint.System": "The game world or setting this calendar is from.",

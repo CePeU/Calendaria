@@ -2182,6 +2182,10 @@
     padding: 0.25rem 0.5rem;
   }
 
+  .seasons-hint {
+    margin-bottom: 0.75rem;
+  }
+
   /* Season columns - two-row layout */
   .seasons-list {
     .season-item {
