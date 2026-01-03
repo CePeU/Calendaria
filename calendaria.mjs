@@ -67,7 +67,14 @@ Hooks.once('ready', async () => {
   initializeTheme();
   await WeatherManager.initialize();
   TimeKeeperHUD.updateIdleOpacity();
-  if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER)) TimeKeeperHUD.show();
+  if (game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER)) TimeKeeperHUD.show();
+  // Force display settings override user preferences for non-GMs
+  if (game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR)) {
+    await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, true);
+  }
+  if (game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) {
+    await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
+  }
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR)) MiniCalendar.show();
   if (game.system.id === 'dnd5e') {
     const calendarConfig = game.settings.get('dnd5e', 'calendarConfig');

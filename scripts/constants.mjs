@@ -50,7 +50,9 @@ export const SETTINGS = {
   DISPLAY_FORMATS: 'displayFormats',
   SHOW_TOOLBAR_BUTTON: 'showToolbarButton',
   TIMEKEEPER_IDLE_OPACITY: 'timeKeeperIdleOpacity',
-  TIMEKEEPER_AUTO_FADE: 'timeKeeperAutoFade'
+  TIMEKEEPER_AUTO_FADE: 'timeKeeperAutoFade',
+  FORCE_HUD: 'forceHUD',
+  FORCE_MINI_CALENDAR: 'forceMiniCalendar'
 };
 
 /**
@@ -61,6 +63,8 @@ export const SETTINGS = {
 export const DISPLAY_LOCATIONS = {
   HUD_DATE: 'hudDate',
   HUD_TIME: 'hudTime',
+  TIMEKEEPER_DATE: 'timekeeperDate',
+  TIMEKEEPER_TIME: 'timekeeperTime',
   MINI_CALENDAR_HEADER: 'miniCalendarHeader',
   MINI_CALENDAR_TIME: 'miniCalendarTime',
   FULL_CALENDAR_HEADER: 'fullCalendarHeader',

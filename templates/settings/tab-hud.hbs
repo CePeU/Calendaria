@@ -5,6 +5,10 @@
       <i class="fas fa-external-link-alt"></i>
       {{localize "CALENDARIA.Common.Open"}}
     </button>
+    <button type="button" data-action="closeHUD">
+      <i class="fas fa-times"></i>
+      {{localize "CALENDARIA.Common.Close"}}
+    </button>
   </div>
 
   <fieldset>
@@ -17,6 +21,16 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.ShowCalendarHUD.Hint"}}</p>
     </div>
+
+    {{#if isGM}}
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.ForceHUD.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="forceHUD" {{#if forceHUD}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.ForceHUD.Hint"}}</p>
+    </div>
+    {{/if}}
 
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.CalendarHUDMode.Name"}}</label>

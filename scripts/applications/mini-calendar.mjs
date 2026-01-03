@@ -679,10 +679,24 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
     this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
     this.#hooks.push({ name: 'calendaria.displayFormatsChanged', id: Hooks.on('calendaria.displayFormatsChanged', () => this.render()) });
+
+    // Right-click context menu for close
+    new foundry.applications.ux.ContextMenu.implementation(this.element, '.mini-calendar-container', [
+      {
+        name: 'CALENDARIA.Common.Close',
+        icon: '<i class="fas fa-times"></i>',
+        callback: () => MiniCalendar.hide()
+      }
+    ], { fixed: true, jQuery: false });
   }
 
   /** @override - Disable animation to avoid 1000ms _awaitTransition timeout */
   async close(options = {}) {
+    // Prevent non-GMs from closing if force display is enabled
+    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR)) {
+      ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
+      return;
+    }
     return super.close({ animate: false, ...options });
   }
 
@@ -1423,7 +1437,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
    * Hide the MiniCalendar.
    */
   static hide() {
-    this._instance?.close();
+    if (this._instance) this._instance.close();
   }
 
   /**

@@ -7,6 +7,7 @@
 import { CalendarEditor } from './applications/calendar-editor.mjs';
 import { CalendariaHUD } from './applications/calendaria-hud.mjs';
 import { ImporterApp } from './applications/importer-app.mjs';
+import { MiniCalendar } from './applications/mini-calendar.mjs';
 import { SettingsPanel } from './applications/settings/settings-panel.mjs';
 import { TimeKeeperHUD } from './applications/time-keeper-hud.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
@@ -108,7 +109,7 @@ export function registerSettings() {
     type: new BooleanField({ initial: true })
   });
 
-  /** Show TimeKeeper HUD on world load */
+  /** Show TimeKeeper HUD on world load (GM only) */
   game.settings.register(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, {
     name: 'CALENDARIA.Settings.ShowTimeKeeper.Name',
     hint: 'CALENDARIA.Settings.ShowTimeKeeper.Hint',
@@ -117,6 +118,7 @@ export function registerSettings() {
     type: new BooleanField({ initial: false }),
     requiresReload: false,
     onChange: (value) => {
+      if (!game.user.isGM) return;
       if (value) TimeKeeperHUD.show();
       else TimeKeeperHUD.hide();
     }
@@ -171,11 +173,7 @@ export function registerSettings() {
     hint: 'CALENDARIA.Settings.ShowCalendarHUD.Hint',
     scope: 'user',
     config: false,
-    type: new BooleanField({ initial: false }),
-    onChange: (value) => {
-      if (value) CalendariaHUD.show();
-      else CalendariaHUD.hide();
-    }
+    type: new BooleanField({ initial: false })
   });
 
   /** Calendar HUD display mode (fullsize or compact) */
@@ -210,6 +208,36 @@ export function registerSettings() {
     scope: 'user',
     config: false,
     type: new ObjectField({ nullable: true, initial: null })
+  });
+
+  /** Force HUD display for all clients */
+  game.settings.register(MODULE.ID, SETTINGS.FORCE_HUD, {
+    name: 'CALENDARIA.Settings.ForceHUD.Name',
+    hint: 'CALENDARIA.Settings.ForceHUD.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false }),
+    onChange: async (value) => {
+      if (value) {
+        await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
+        CalendariaHUD.show();
+      }
+    }
+  });
+
+  /** Force MiniCalendar display for all clients */
+  game.settings.register(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR, {
+    name: 'CALENDARIA.Settings.ForceMiniCalendar.Name',
+    hint: 'CALENDARIA.Settings.ForceMiniCalendar.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false }),
+    onChange: async (value) => {
+      if (value) {
+        await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, true);
+        MiniCalendar.show();
+      }
+    }
   });
 
   /** User-customized theme color overrides */

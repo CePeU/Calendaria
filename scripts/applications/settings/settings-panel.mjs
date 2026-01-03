@@ -50,8 +50,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       exportTheme: SettingsPanel.#onExportTheme,
       importTheme: SettingsPanel.#onImportTheme,
       openHUD: SettingsPanel.#onOpenHUD,
+      closeHUD: SettingsPanel.#onCloseHUD,
       openMiniCalendar: SettingsPanel.#onOpenMiniCalendar,
+      closeMiniCalendar: SettingsPanel.#onCloseMiniCalendar,
       openTimeKeeper: SettingsPanel.#onOpenTimeKeeper,
+      closeTimeKeeper: SettingsPanel.#onCloseTimeKeeper,
       openFullCal: SettingsPanel.#onOpenFullCal,
       addMoonTrigger: SettingsPanel.#onAddMoonTrigger,
       removeMoonTrigger: SettingsPanel.#onRemoveMoonTrigger,
@@ -94,7 +97,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'advanced', icon: 'fas fa-tools', label: 'CALENDARIA.SettingsPanel.Tab.Advanced' },
         { id: 'hud', icon: 'fas fa-sun', label: 'CALENDARIA.SettingsPanel.Tab.HUD', cssClass: 'app-tab' },
         { id: 'miniCalendar', icon: 'fas fa-compress', label: 'CALENDARIA.SettingsPanel.Tab.MiniCalendar', cssClass: 'app-tab' },
-        { id: 'timekeeper', icon: 'fas fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', cssClass: 'app-tab' }
+        { id: 'timekeeper', icon: 'fas fa-stopwatch', label: 'CALENDARIA.SettingsPanel.Tab.TimeKeeper', cssClass: 'app-tab', gmOnly: true }
       ],
       initial: 'calendar'
     }
@@ -276,6 +279,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showMiniCalendar = game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR);
     context.showToolbarButton = game.settings.get(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON);
     context.miniCalendarControlsDelay = game.settings.get(MODULE.ID, SETTINGS.MINI_CALENDAR_CONTROLS_DELAY);
+    context.forceMiniCalendar = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR);
   }
 
   /**
@@ -288,6 +292,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.hudStickyPosition = hudSticky?.position ?? false;
     context.calendarHUDLocked = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED);
     context.showCalendarHUD = game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD);
+    context.forceHUD = game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD);
     const hudMode = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE);
     context.hudModeOptions = [
       { value: 'fullsize', label: localize('CALENDARIA.Settings.CalendarHUDMode.Fullsize'), selected: hudMode === 'fullsize' },
@@ -319,6 +324,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const locations = [
       { id: 'hudDate', label: localize('CALENDARIA.Format.Location.HudDate'), category: 'hud' },
       { id: 'hudTime', label: localize('CALENDARIA.Format.Location.HudTime'), category: 'hud' },
+      { id: 'timekeeperDate', label: localize('CALENDARIA.Format.Location.TimekeeperDate'), category: 'timekeeper' },
+      { id: 'timekeeperTime', label: localize('CALENDARIA.Format.Location.TimekeeperTime'), category: 'timekeeper' },
       { id: 'miniCalendarHeader', label: localize('CALENDARIA.Format.Location.MiniCalendarHeader'), category: 'miniCalendar' },
       { id: 'miniCalendarTime', label: localize('CALENDARIA.Format.Location.MiniCalendarTime'), category: 'miniCalendar' },
       { id: 'fullCalendarHeader', label: localize('CALENDARIA.Format.Location.FullCalendarHeader'), category: 'fullcal' },
@@ -350,6 +357,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     // Group by category for organized display
     context.formatCategories = [
       { id: 'hud', label: localize('CALENDARIA.Format.Category.CalendariaHUD'), locations: context.formatLocations.filter((l) => l.category === 'hud') },
+      { id: 'timekeeper', label: localize('CALENDARIA.Format.Category.Timekeeper'), locations: context.formatLocations.filter((l) => l.category === 'timekeeper') },
       { id: 'miniCalendar', label: localize('CALENDARIA.Format.Category.MiniCalendar'), locations: context.formatLocations.filter((l) => l.category === 'miniCalendar') },
       { id: 'fullcal', label: localize('CALENDARIA.Format.Category.FullCalendar'), locations: context.formatLocations.filter((l) => l.category === 'fullcal') },
       { id: 'chat', label: localize('CALENDARIA.Format.Category.Chat'), locations: context.formatLocations.filter((l) => l.category === 'chat') }
@@ -532,6 +540,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('showToolbarButton' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON, data.showToolbarButton);
     if ('showMiniCalendar' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, data.showMiniCalendar);
     if ('showCalendarHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, data.showCalendarHUD);
+    if ('forceHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_HUD, data.forceHUD);
+    if ('forceMiniCalendar' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR, data.forceMiniCalendar);
     if ('showMoonPhases' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MOON_PHASES, data.showMoonPhases);
     if ('calendarHUDMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, data.calendarHUDMode);
     if ('miniCalendarControlsDelay' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CALENDAR_CONTROLS_DELAY, Number(data.miniCalendarControlsDelay));
@@ -811,6 +821,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Close the Calendar HUD.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onCloseHUD(_event, _target) {
+    CalendariaHUD.hide();
+  }
+
+  /**
    * Open the MiniCalendar.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
@@ -820,12 +839,30 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Close the MiniCalendar.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onCloseMiniCalendar(_event, _target) {
+    MiniCalendar.hide();
+  }
+
+  /**
    * Open the TimeKeeper HUD.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
   static async #onOpenTimeKeeper(_event, _target) {
     TimeKeeperHUD.show();
+  }
+
+  /**
+   * Close the TimeKeeper HUD.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
+   */
+  static async #onCloseTimeKeeper(_event, _target) {
+    TimeKeeperHUD.hide();
   }
 
   /**

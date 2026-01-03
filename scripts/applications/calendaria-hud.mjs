@@ -252,6 +252,16 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /** @override */
+  async close(options = {}) {
+    // Prevent non-GMs from closing if force display is enabled
+    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) {
+      ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
+      return;
+    }
+    return super.close(options);
+  }
+
+  /** @override */
   async _onClose(options) {
     if (this.#timeHookId) {
       Hooks.off('updateWorldTime', this.#timeHookId);
@@ -317,6 +327,15 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     this._resizeHandler = this.#onWindowResize.bind(this);
     window.addEventListener('resize', this._resizeHandler);
+
+    // Right-click context menu for close (on bar area)
+    new foundry.applications.ux.ContextMenu.implementation(this.element, '.calendaria-hud-bar', [
+      {
+        name: 'CALENDARIA.Common.Close',
+        icon: '<i class="fas fa-times"></i>',
+        callback: () => CalendariaHUD.hide()
+      }
+    ], { fixed: true, jQuery: false });
   }
 
   /**
@@ -1548,7 +1567,8 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Hide the HUD.
    */
   static hide() {
-    foundry.applications.instances.get('calendaria-hud')?.close();
+    const instance = foundry.applications.instances.get('calendaria-hud');
+    if (instance) instance.close();
   }
 
   /**

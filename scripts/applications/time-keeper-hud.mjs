@@ -5,8 +5,10 @@
  * @author Tyler
  */
 
+import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
+import { formatForLocation } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
 
@@ -51,8 +53,8 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === TimeKeeper.incrementKey }));
     context.running = TimeKeeper.running;
     context.isGM = game.user.isGM;
-    context.currentTime = TimeKeeper.getFormattedTime();
-    context.currentDate = TimeKeeper.getFormattedDate();
+    context.currentTime = this.#formatTime();
+    context.currentDate = this.#formatDate();
     return context;
   }
 
@@ -67,6 +69,15 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     if (!this.#clockHookId) this.#clockHookId = Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
+
+    // Right-click context menu for close
+    new foundry.applications.ux.ContextMenu.implementation(this.element, '.time-keeper-content', [
+      {
+        name: 'CALENDARIA.Common.Close',
+        icon: '<i class="fas fa-times"></i>',
+        callback: () => TimeKeeperHUD.hide()
+      }
+    ], { fixed: true, jQuery: false });
   }
 
   /**
@@ -195,8 +206,34 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.rendered) return;
     const timeEl = this.element.querySelector('.time-display-time');
     const dateEl = this.element.querySelector('.time-display-date');
-    if (timeEl) timeEl.textContent = TimeKeeper.getFormattedTime();
-    if (dateEl) dateEl.textContent = TimeKeeper.getFormattedDate();
+    if (timeEl) timeEl.textContent = this.#formatTime();
+    if (dateEl) dateEl.textContent = this.#formatDate();
+  }
+
+  /**
+   * Format time using the timekeeperTime format location.
+   * @returns {string} Formatted time
+   * @private
+   */
+  #formatTime() {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar) return TimeKeeper.getFormattedTime();
+    const components = game.time.components;
+    const yearZero = calendar.years?.yearZero ?? 0;
+    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'timekeeperTime');
+  }
+
+  /**
+   * Format date using the timekeeperDate format location.
+   * @returns {string} Formatted date
+   * @private
+   */
+  #formatDate() {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar) return TimeKeeper.getFormattedDate();
+    const components = game.time.components;
+    const yearZero = calendar.years?.yearZero ?? 0;
+    return formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'timekeeperDate');
   }
 
   /* -------------------------------------------- */
