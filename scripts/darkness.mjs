@@ -84,7 +84,7 @@ export async function onRenderSceneConfig(app, html, _data) {
   let value = 'default';
   if (flagValue === true || flagValue === 'enabled') value = 'enabled';
   else if (flagValue === false || flagValue === 'disabled') value = 'disabled';
-  const formGroup = await renderTemplate(TEMPLATES.PARTIALS.SCENE_DARKNESS_SYNC, { moduleId: MODULE.ID, flagName: SCENE_FLAGS.DARKNESS_SYNC, value });
+  const formGroup = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.SCENE_DARKNESS_SYNC, { moduleId: MODULE.ID, flagName: SCENE_FLAGS.DARKNESS_SYNC, value });
   const ambientLightField = html.querySelector('[name="environment.globalLight.enabled"]')?.closest('.form-group');
   if (ambientLightField) ambientLightField.insertAdjacentHTML('afterend', formGroup);
   else log(2, 'Could not find ambiance section to inject darkness sync setting');

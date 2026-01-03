@@ -17,6 +17,23 @@
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.ShowTimeKeeper.Hint"}}</p>
     </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.TimeKeeperAutoFade.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" name="timeKeeperAutoFade" {{#if timeKeeperAutoFade}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.TimeKeeperAutoFade.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.TimeKeeperIdleOpacity.Name"}}</label>
+      <div class="form-fields">
+        <input type="range" name="timeKeeperIdleOpacity" min="0" max="100" value="{{timeKeeperIdleOpacity}}" {{#unless timeKeeperAutoFade}}disabled{{/unless}}>
+        <span class="range-value">{{timeKeeperIdleOpacity}}%</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.TimeKeeperIdleOpacity.Hint"}}</p>
+    </div>
   </fieldset>
 
   <fieldset>

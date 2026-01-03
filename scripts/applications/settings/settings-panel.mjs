@@ -274,6 +274,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.miniCalendarStickySidebar = miniCalendarSticky?.sidebar ?? false;
     context.miniCalendarStickyPosition = miniCalendarSticky?.position ?? false;
     context.showMiniCalendar = game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR);
+    context.showToolbarButton = game.settings.get(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON);
     context.miniCalendarControlsDelay = game.settings.get(MODULE.ID, SETTINGS.MINI_CALENDAR_CONTROLS_DELAY);
   }
 
@@ -361,6 +362,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareTimeKeeperContext(context) {
     context.showTimeKeeper = game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER);
+    context.timeKeeperAutoFade = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE);
+    context.timeKeeperIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_IDLE_OPACITY);
   }
 
   /**
@@ -524,6 +527,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const data = foundry.utils.expandObject(formData.object);
     log(3, 'Settings panel form data:', data);
     if ('showTimeKeeper' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, data.showTimeKeeper);
+    if ('timeKeeperAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE, data.timeKeeperAutoFade);
+    if ('timeKeeperIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_IDLE_OPACITY, Number(data.timeKeeperIdleOpacity));
+    if ('showToolbarButton' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON, data.showToolbarButton);
     if ('showMiniCalendar' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, data.showMiniCalendar);
     if ('showCalendarHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, data.showCalendarHUD);
     if ('showMoonPhases' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MOON_PHASES, data.showMoonPhases);
@@ -931,6 +937,17 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
             else opt.hidden = opt.dataset.moon !== '-1' && opt.dataset.moon !== selectedMoon;
           });
           if (phaseSelect.selectedOptions[0]?.hidden) phaseSelect.value = '';
+        });
+      }
+    }
+
+    // Range slider value display update
+    if (partId === 'timekeeper') {
+      const rangeInput = htmlElement.querySelector('input[name="timeKeeperIdleOpacity"]');
+      const rangeValue = htmlElement.querySelector('.range-value');
+      if (rangeInput && rangeValue) {
+        rangeInput.addEventListener('input', (e) => {
+          rangeValue.textContent = `${e.target.value}%`;
         });
       }
     }

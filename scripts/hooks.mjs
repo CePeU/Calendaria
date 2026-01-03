@@ -5,7 +5,9 @@
  * @author Tyler
  */
 
+import { MiniCalendar } from './applications/mini-calendar.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
+import { MODULE, SETTINGS } from './constants.mjs';
 import { onPreCreateChatMessage, onRenderAnnouncementMessage, onRenderChatMessageHTML } from './chat/chat-timestamp.mjs';
 import { onRenderSceneConfig, onUpdateWorldTime } from './darkness.mjs';
 import { onUpdateCombat } from './integrations/combat-time.mjs';
@@ -15,6 +17,7 @@ import EventScheduler from './time/event-scheduler.mjs';
 import ReminderScheduler from './time/reminder-scheduler.mjs';
 import TimeTracker from './time/time-tracker.mjs';
 import { onRenderJournalDirectory } from './utils/journal-button.mjs';
+import { localize } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
 
 /**
@@ -42,5 +45,23 @@ export function registerHooks() {
   Hooks.on('updateWorldTime', onUpdateWorldTime);
   Hooks.on('updateWorldTime', ReminderScheduler.onUpdateWorldTime.bind(ReminderScheduler));
   Hooks.on('updateWorldTime', TimeTracker.onUpdateWorldTime.bind(TimeTracker));
+  Hooks.on('getSceneControlButtons', onGetSceneControlButtons);
   log(3, 'Hooks registered');
+}
+
+/**
+ * Add Calendaria button to scene controls.
+ * @param {Object} controls - Scene controls object (V13 style)
+ */
+function onGetSceneControlButtons(controls) {
+  if (!controls.notes?.tools) return;
+  if (!game.settings.get(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON)) return;
+  controls.notes.tools.calendaria = {
+    name: 'calendaria',
+    title: localize('CALENDARIA.SceneControl.OpenCalendar'),
+    icon: 'fas fa-calendar-days',
+    visible: true,
+    onChange: () => MiniCalendar.toggle(),
+    button: true
+  };
 }

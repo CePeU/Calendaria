@@ -47,7 +47,10 @@ export const SETTINGS = {
   CALENDAR_HUD_POSITION: 'calendarHUDPosition',
   CHAT_TIMESTAMP_MODE: 'chatTimestampMode',
   CHAT_TIMESTAMP_SHOW_TIME: 'chatTimestampShowTime',
-  DISPLAY_FORMATS: 'displayFormats'
+  DISPLAY_FORMATS: 'displayFormats',
+  SHOW_TOOLBAR_BUTTON: 'showToolbarButton',
+  TIMEKEEPER_IDLE_OPACITY: 'timeKeeperIdleOpacity',
+  TIMEKEEPER_AUTO_FADE: 'timeKeeperAutoFade'
 };
 
 /**

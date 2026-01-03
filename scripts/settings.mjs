@@ -139,6 +139,36 @@ export function registerSettings() {
     }
   });
 
+  /** TimeKeeper auto-fade on idle */
+  game.settings.register(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE, {
+    name: 'CALENDARIA.Settings.TimeKeeperAutoFade.Name',
+    hint: 'CALENDARIA.Settings.TimeKeeperAutoFade.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    onChange: () => TimeKeeperHUD.updateIdleOpacity()
+  });
+
+  /** TimeKeeper idle opacity (0-100) */
+  game.settings.register(MODULE.ID, SETTINGS.TIMEKEEPER_IDLE_OPACITY, {
+    name: 'CALENDARIA.Settings.TimeKeeperIdleOpacity.Name',
+    hint: 'CALENDARIA.Settings.TimeKeeperIdleOpacity.Hint',
+    scope: 'user',
+    config: false,
+    type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
+    onChange: () => TimeKeeperHUD.updateIdleOpacity()
+  });
+
+  /** Show toolbar button in scene controls */
+  game.settings.register(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON, {
+    name: 'CALENDARIA.Settings.ShowToolbarButton.Name',
+    hint: 'CALENDARIA.Settings.ShowToolbarButton.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: true }),
+    requiresReload: true
+  });
+
   /** Show MiniCalendar on world load */
   game.settings.register(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, {
     name: 'CALENDARIA.Settings.ShowMiniCalendar.Name',

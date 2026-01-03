@@ -235,7 +235,7 @@ export default class EventScheduler {
       iconHtml = '<i class="fas fa-calendar"></i>';
     }
 
-    const content = await renderTemplate(TEMPLATES.PARTIALS.CHAT_ANNOUNCEMENT, {
+    const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.CHAT_ANNOUNCEMENT, {
       dateRange,
       content: plainContent,
       noteId: note.id,

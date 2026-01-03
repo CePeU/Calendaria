@@ -66,6 +66,7 @@ Hooks.once('ready', async () => {
   ReminderScheduler.initialize();
   initializeTheme();
   await WeatherManager.initialize();
+  TimeKeeperHUD.updateIdleOpacity();
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER)) TimeKeeperHUD.show();
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR)) MiniCalendar.show();
   if (game.system.id === 'dnd5e') {

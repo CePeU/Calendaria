@@ -696,7 +696,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    */
   static async _showDatePickerDialog(calendar, currentYear, currentMonth, currentDay) {
     const daysInMonth = calendar.getDaysInMonth(currentMonth, currentYear);
-    const content = await renderTemplate(TEMPLATES.PARTIALS.DATE_PICKER, {
+    const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.DATE_PICKER, {
       formClass: '',
       year: currentYear,
       months: calendar.months.values.map((m, i) => ({ index: i, name: localize(m.name), selected: i === currentMonth })),

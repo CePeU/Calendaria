@@ -253,6 +253,15 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     else this.show();
   }
 
+  /**
+   * Update the idle opacity CSS variable from settings.
+   */
+  static updateIdleOpacity() {
+    const autoFade = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE);
+    const opacity = autoFade ? game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_IDLE_OPACITY) / 100 : 1;
+    document.documentElement.style.setProperty('--calendaria-timekeeper-idle-opacity', opacity);
+  }
+
   /** @type {TimeKeeperHUD|null} Singleton instance */
   static _instance = null;
 }

@@ -165,7 +165,9 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const viewedDate = this.viewedDate;
     context.isGM = game.user.isGM;
     context.running = TimeKeeper.running;
-    context.currentTime = TimeKeeper.getFormattedTime();
+    const components = game.time.components;
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    context.currentTime = calendar ? formatForLocation(calendar, { ...components, year: components.year + yearZero, dayOfMonth: (components.dayOfMonth ?? 0) + 1 }, 'miniCalendarTime') : TimeKeeper.getFormattedTime();
     context.currentDate = TimeKeeper.getFormattedDate();
     context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === TimeKeeper.incrementKey }));
     if (calendar) context.calendarData = this._generateMiniCalendarData(calendar, viewedDate);
