@@ -27,7 +27,7 @@
         <input type="number" name="eras.{{this.index}}.endYear" value="{{this.endYear}}" class="col-end-year"
           placeholder="{{localize 'CALENDARIA.Editor.Placeholder.Ongoing'}}">
         <select name="eras.{{this.index}}.format" class="col-format">
-          {{#each ../formatOptions}}
+          {{#each this.formatOptions}}
           <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
           {{/each}}
         </select>

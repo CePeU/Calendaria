@@ -2922,7 +2922,6 @@
   .weather-category {
     border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
     border-radius: 4px;
-    overflow: hidden;
 
     .category-header {
       gap: 0.5rem;

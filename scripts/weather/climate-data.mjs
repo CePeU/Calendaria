@@ -6,7 +6,54 @@
  * @author Tyler
  */
 
+import { MODULE, SETTINGS } from '../constants.mjs';
 import { ALL_PRESETS } from './weather-presets.mjs';
+
+/**
+ * Convert Celsius to Fahrenheit.
+ * @param {number} celsius - Temperature in Celsius
+ * @returns {number} Temperature in Fahrenheit
+ */
+export function celsiusToFahrenheit(celsius) {
+  return Math.round((celsius * 9) / 5 + 32);
+}
+
+/**
+ * Convert Fahrenheit to Celsius.
+ * @param {number} fahrenheit - Temperature in Fahrenheit
+ * @returns {number} Temperature in Celsius
+ */
+export function fahrenheitToCelsius(fahrenheit) {
+  return Math.round(((fahrenheit - 32) * 5) / 9);
+}
+
+/**
+ * Get the current temperature unit setting.
+ * @returns {'celsius'|'fahrenheit'} Current unit
+ */
+export function getTemperatureUnit() {
+  return game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT) || 'celsius';
+}
+
+/**
+ * Convert a temperature value to the user's preferred unit.
+ * @param {number} celsius - Temperature in Celsius (internal storage format)
+ * @returns {number} Temperature in user's preferred unit
+ */
+export function toDisplayUnit(celsius) {
+  if (celsius == null) return null;
+  return getTemperatureUnit() === 'fahrenheit' ? celsiusToFahrenheit(celsius) : celsius;
+}
+
+/**
+ * Convert a temperature from user's display unit to Celsius for storage.
+ * @param {number} value - Temperature in user's display unit
+ * @returns {number} Temperature in Celsius
+ */
+export function fromDisplayUnit(value) {
+  if (value == null) return null;
+  return getTemperatureUnit() === 'fahrenheit' ? fahrenheitToCelsius(value) : value;
+}
 
 /**
  * Climate zone template definitions.

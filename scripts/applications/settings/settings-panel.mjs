@@ -952,6 +952,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
 
+    if (partId === 'miniCalendar') {
+      const rangeInput = htmlElement.querySelector('input[name="miniCalendarControlsDelay"]');
+      const rangeValue = htmlElement.querySelector('.range-value');
+      if (rangeInput && rangeValue) {
+        rangeInput.addEventListener('input', (e) => {
+          rangeValue.textContent = `${e.target.value}s`;
+        });
+      }
+    }
+
     // Format preset dropdowns toggle custom input visibility
     if (partId === 'formats') {
       const presetSelects = htmlElement.querySelectorAll('select[name*="Preset"]');

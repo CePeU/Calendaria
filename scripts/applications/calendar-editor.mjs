@@ -12,7 +12,7 @@ import { ASSETS, DEFAULT_MOON_PHASES, MODULE, SETTINGS, TEMPLATES } from '../con
 import { createImporter } from '../importers/index.mjs';
 import { format, localize, preLocalizeCalendar } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
-import { CLIMATE_ZONE_TEMPLATES, getClimateTemplateOptions, getDefaultZoneConfig } from '../weather/climate-data.mjs';
+import { CLIMATE_ZONE_TEMPLATES, fromDisplayUnit, getClimateTemplateOptions, getDefaultZoneConfig, toDisplayUnit } from '../weather/climate-data.mjs';
 import { ALL_PRESETS, WEATHER_CATEGORIES } from '../weather/weather-presets.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -206,7 +206,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       amPmNotation: { am: 'AM', pm: 'PM' },
       dateFormats: { short: '{{d}} {{b}}', long: '{{d}} {{B}}, {{y}}', full: '{{B}} {{d}}, {{y}}', time: '{{H}}:{{M}}', time12: '{{h}}:{{M}} {{p}}' },
       metadata: { id: '', description: '', author: game.user?.name ?? '', system: '' },
-      weather: { defaultClimate: 'temperate', autoGenerate: false, presets: [] }
+      weather: { activeZone: null, autoGenerate: false, zones: [] }
     };
   }
 
@@ -614,8 +614,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             index: presetIndex++,
             enabled,
             chance: chance.toFixed(2),
-            tempMin: saved.tempMin ?? '',
-            tempMax: saved.tempMax ?? '',
+            tempMin: saved.tempMin != null ? toDisplayUnit(saved.tempMin) : '',
+            tempMax: saved.tempMax != null ? toDisplayUnit(saved.tempMax) : '',
             customDescription: saved.description || ''
           };
           return presetData;
@@ -1034,8 +1034,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const preset = { id, enabled: !!data[`weather.presets.${idx}.enabled`], chance: parseFloat(data[`weather.presets.${idx}.chance`]) || 0 };
       const tempMin = data[`weather.presets.${idx}.tempMin`];
       const tempMax = data[`weather.presets.${idx}.tempMax`];
-      if (tempMin !== '' && tempMin != null) preset.tempMin = parseInt(tempMin);
-      if (tempMax !== '' && tempMax != null) preset.tempMax = parseInt(tempMax);
+      if (tempMin !== '' && tempMin != null) preset.tempMin = fromDisplayUnit(parseInt(tempMin));
+      if (tempMax !== '' && tempMax != null) preset.tempMax = fromDisplayUnit(parseInt(tempMax));
       const desc = data[`weather.presets.${idx}.description`]?.trim();
       if (desc) preset.description = desc;
       newPresets.push(preset);
@@ -1599,11 +1599,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const presetId = target.dataset.presetId;
     if (!presetId) return;
 
-    // Find and remove this preset from saved config
-    const presets = this.#calendarData.weather?.presets || [];
-    const idx = presets.findIndex((p) => p.id === presetId);
+    // Find and reset this preset in the active zone
+    const activeZoneId = this.#calendarData.weather?.activeZone;
+    const zones = this.#calendarData.weather?.zones || [];
+    const activeZone = zones.find((z) => z.id === activeZoneId);
+    if (!activeZone?.presets) return;
+
+    const idx = activeZone.presets.findIndex((p) => p.id === presetId);
     if (idx >= 0) {
-      presets.splice(idx, 1);
+      activeZone.presets.splice(idx, 1);
       this.render();
     }
   }
@@ -1694,12 +1698,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const tempRows = seasonNames
       .map((season) => {
         const temp = zone.temperatures?.[season] || zone.temperatures?._default || { min: 10, max: 22 };
+        const displayMin = toDisplayUnit(temp.min);
+        const displayMax = toDisplayUnit(temp.max);
         return `
         <div class="form-group temperature-row">
           <label>${localize(season)}</label>
-          <input type="number" name="temp_${season}_min" value="${temp.min}" placeholder="${localize('CALENDARIA.Common.Min')}">
+          <input type="number" name="temp_${season}_min" value="${displayMin}" placeholder="${localize('CALENDARIA.Common.Min')}">
           <span>–</span>
-          <input type="number" name="temp_${season}_max" value="${temp.max}" placeholder="${localize('CALENDARIA.Common.Max')}">
+          <input type="number" name="temp_${season}_max" value="${displayMax}" placeholder="${localize('CALENDARIA.Common.Max')}">
         </div>
       `;
       })
@@ -1730,7 +1736,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           const form = button.form;
           const data = { name: form.elements.name.value, description: form.elements.description.value, temperatures: {} };
           for (const season of seasonNames) {
-            data.temperatures[season] = { min: parseInt(form.elements[`temp_${season}_min`].value) || 0, max: parseInt(form.elements[`temp_${season}_max`].value) || 20 };
+            const minVal = parseInt(form.elements[`temp_${season}_min`].value) || 0;
+            const maxVal = parseInt(form.elements[`temp_${season}_max`].value) || 20;
+            data.temperatures[season] = { min: fromDisplayUnit(minVal), max: fromDisplayUnit(maxVal) };
           }
 
           return data;
