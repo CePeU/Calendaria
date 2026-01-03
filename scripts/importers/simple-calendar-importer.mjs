@@ -280,8 +280,15 @@ export default class SimpleCalendarImporter extends BaseImporter {
     let regularMonthIndex = 0;
     for (const month of months) {
       if (month.intercalary) {
+        // intercalaryInclude: false means days don't count for weekday positioning
+        const countsForWeekday = month.intercalaryInclude === true;
         for (let day = 1; day <= month.numberOfDays; day++) {
-          festivals.push({ name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day})`, startDate: { month: regularMonthIndex, day: day } });
+          festivals.push({
+            name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day})`,
+            month: regularMonthIndex + 1,
+            day,
+            countsForWeekday
+          });
         }
       } else {
         regularMonthIndex++;

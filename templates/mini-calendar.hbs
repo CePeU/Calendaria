@@ -181,6 +181,27 @@
     </div>
     <div class="mini-days">
       {{#each calendarData.weeks}}
+      {{#if this.isIntercalaryRow}}
+      {{!-- Intercalary row: full width, centered, no weekday alignment --}}
+      <div class="mini-intercalary-row">
+        {{#each this.days}}
+        <div
+          class="mini-day intercalary{{#if isToday}} today{{/if}}{{#if isSelected}} selected{{/if}}{{#if hasNotes}} has-notes{{/if}} festival"
+          data-action="selectDay" data-year="{{year}}" data-month="{{month}}" data-day="{{day}}"
+          data-tooltip="{{festivalName}}">
+          <span class="festival-name">{{festivalName}}</span>
+          {{#if hasNotes}}<span class="note-badge">{{noteCount}}</span>{{/if}}
+          {{#if moonIcon}}{{#if moonColor}}<span class="moon-tint" style="--moon-color: {{moonColor}}">
+            <img class="moon-tiny tinted" src="{{moonIcon}}" alt="{{moonPhase}}"
+              data-tooltip="{{moonPhase}}"></span>
+          {{else}}
+          <img class="moon-tiny" src="{{moonIcon}}" alt="{{moonPhase}}" data-tooltip="{{moonPhase}}">
+          {{/if}}{{/if}}
+        </div>
+        {{/each}}
+      </div>
+      {{else}}
+      {{!-- Regular week row --}}
       {{#each this}}
       {{#if empty}}
       <div class="mini-day empty"></div>
@@ -205,6 +226,7 @@
       </div>
       {{/if}}
       {{/each}}
+      {{/if}}
       {{/each}}
     </div>
   </div>

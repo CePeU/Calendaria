@@ -843,3 +843,71 @@ export async function migrateCustomCalendars() {
     console.warn('Calendaria: Could not migrate custom calendars', e);
   }
 }
+
+/**
+ * Migrate Harptos calendar festivals to add countsForWeekday: false.
+ * This fixes intercalary days not being excluded from weekday calculations.
+ * @returns {Promise<void>}
+ */
+export async function migrateIntercalaryFestivals() {
+  const MODULE_ID = 'calendaria';
+  const SETTINGS_KEY = 'customCalendars';
+  const MIGRATION_KEY = 'intercalaryMigrationComplete';
+
+  try {
+    const migrationDone = game.settings.get(MODULE_ID, MIGRATION_KEY);
+    if (migrationDone) return;
+  } catch {
+    // Setting not registered yet
+  }
+
+  if (!game.user.isGM) return;
+
+  // Known Harptos festival names that should not count for weekday
+  const HARPTOS_FESTIVALS = [
+    'CALENDARIA.Calendar.Harptos.Festival.Midwinter',
+    'CALENDARIA.Calendar.Harptos.Festival.Greengrass',
+    'CALENDARIA.Calendar.Harptos.Festival.Midsummer',
+    'CALENDARIA.Calendar.Harptos.Festival.Shieldmeet',
+    'CALENDARIA.Calendar.Harptos.Festival.Highharvestide',
+    'CALENDARIA.Calendar.Harptos.Festival.FeastOfTheMoon'
+  ];
+
+  try {
+    const customCalendars = game.settings.get(MODULE_ID, SETTINGS_KEY);
+    if (!customCalendars || typeof customCalendars !== 'object') {
+      await game.settings.set(MODULE_ID, MIGRATION_KEY, true);
+      return;
+    }
+
+    let migrated = false;
+    const updatedCalendars = {};
+
+    for (const [id, calendar] of Object.entries(customCalendars)) {
+      const updated = { ...calendar };
+
+      // Check if this is a Harptos-based calendar
+      if (id === 'harptos' || calendar.metadata?.id === 'harptos') {
+        if (updated.festivals && Array.isArray(updated.festivals)) {
+          for (const festival of updated.festivals) {
+            if (HARPTOS_FESTIVALS.includes(festival.name) && festival.countsForWeekday === undefined) {
+              festival.countsForWeekday = false;
+              migrated = true;
+            }
+          }
+        }
+      }
+
+      updatedCalendars[id] = updated;
+    }
+
+    if (migrated) {
+      await game.settings.set(MODULE_ID, SETTINGS_KEY, updatedCalendars);
+      console.log('Calendaria: Migrated Harptos festivals to set countsForWeekday: false');
+    }
+
+    await game.settings.set(MODULE_ID, MIGRATION_KEY, true);
+  } catch (e) {
+    console.warn('Calendaria: Could not migrate intercalary festivals', e);
+  }
+}

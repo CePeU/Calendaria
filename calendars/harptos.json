@@ -138,33 +138,39 @@
     {
       "name": "CALENDARIA.Calendar.Harptos.Festival.Midwinter",
       "month": 1,
-      "day": 31
+      "day": 31,
+      "countsForWeekday": false
     },
     {
       "name": "CALENDARIA.Calendar.Harptos.Festival.Greengrass",
       "month": 4,
-      "day": 31
+      "day": 31,
+      "countsForWeekday": false
     },
     {
       "name": "CALENDARIA.Calendar.Harptos.Festival.Midsummer",
       "month": 7,
-      "day": 31
+      "day": 31,
+      "countsForWeekday": false
     },
     {
       "name": "CALENDARIA.Calendar.Harptos.Festival.Shieldmeet",
       "month": 7,
       "day": 32,
-      "leapYearOnly": true
+      "leapYearOnly": true,
+      "countsForWeekday": false
     },
     {
       "name": "CALENDARIA.Calendar.Harptos.Festival.Highharvestide",
       "month": 9,
-      "day": 31
+      "day": 31,
+      "countsForWeekday": false
     },
     {
       "name": "CALENDARIA.Calendar.Harptos.Festival.FeastOfTheMoon",
       "month": 11,
-      "day": 31
+      "day": 31,
+      "countsForWeekday": false
     }
   ],
   "seasons": {

@@ -194,6 +194,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     if (!monthData) return null;
     const daysInMonth = calendar.getDaysInMonth(month, year);
     const daysInWeek = calendar.days?.values?.length || 7;
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const internalYear = year - yearZero;
     const weeks = [];
     let currentWeek = [];
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES) && calendar.moons?.length;
@@ -201,34 +203,46 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, day: 1 });
     if (startDayOfWeek > 0) {
       const totalMonths = calendar.months?.values?.length ?? 12;
-      const prevDays = [];
+      let prevDays = [];
       let remainingSlots = startDayOfWeek;
-      let checkMonth = month;
-      let checkYear = year;
-      while (remainingSlots > 0) {
-        checkMonth = checkMonth === 0 ? totalMonths - 1 : checkMonth - 1;
-        if (checkMonth === totalMonths - 1) checkYear--;
-        const checkMonthData = calendar.months?.values?.[checkMonth];
-        const checkMonthDays = checkMonthData ? calendar.getDaysInMonth(checkMonth, checkYear) : 30;
-        const daysToTake = Math.min(remainingSlots, checkMonthDays);
-        for (let d = checkMonthDays - daysToTake + 1; d <= checkMonthDays; d++) prevDays.unshift({ day: d, year: checkYear, month: checkMonth });
-        remainingSlots -= daysToTake;
+      let checkMonth = month === 0 ? totalMonths - 1 : month - 1;
+      let checkYear = month === 0 ? year - 1 : year;
+      let checkDay = calendar.getDaysInMonth(checkMonth, checkYear);
+
+      // Collect previous month days, skipping intercalary days
+      while (remainingSlots > 0 && checkDay > 0) {
+        const checkInternalYear = checkYear - yearZero;
+        const festivalDay = calendar.findFestivalDay({ year: checkInternalYear, month: checkMonth, dayOfMonth: checkDay - 1 });
+        const isIntercalary = festivalDay?.countsForWeekday === false;
+
+        if (!isIntercalary) {
+          prevDays.unshift({ day: checkDay, year: checkYear, month: checkMonth });
+          remainingSlots--;
+        }
+
+        checkDay--;
+        if (checkDay < 1 && remainingSlots > 0) {
+          checkMonth = checkMonth === 0 ? totalMonths - 1 : checkMonth - 1;
+          if (checkMonth === totalMonths - 1) checkYear--;
+          checkDay = calendar.getDaysInMonth(checkMonth, checkYear);
+        }
       }
+
       for (const pd of prevDays) currentWeek.push({ day: pd.day, year: pd.year, month: pd.month, isFromOtherMonth: true, isToday: this._isToday(pd.year, pd.month, pd.day) });
     }
 
+    // Collect intercalary days to insert after regular days
+    const intercalaryDays = [];
     let dayIndex = startDayOfWeek;
+
     for (let day = 1; day <= daysInMonth; day++) {
       const dayNotes = this._getNotesForDay(notes, year, month, day);
-      const festivalDay = calendar.findFestivalDay({ year, month, dayOfMonth: day - 1 });
+      const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth: day - 1 });
       let moonPhases = null;
       if (showMoons) {
         let dayOfYear = day - 1;
-        for (let idx = 0; idx < month; idx++) {
-          const m = calendar.months.values[idx];
-          dayOfYear += m.days;
-        }
-        const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
+        for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, year);
+        const dayComponents = { year: internalYear, month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
         const dayWorldTime = calendar.componentsToTime(dayComponents);
         moonPhases = calendar.moons
           .map((moon, index) => {
@@ -238,40 +252,74 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
           })
           .filter(Boolean);
       }
-      const weekdayData = calendar.days?.values?.[currentWeek.length];
-      currentWeek.push({
-        day,
-        year,
-        month,
-        isToday: this._isToday(year, month, day),
-        isSelected: this._isSelected(year, month, day),
-        notes: dayNotes,
-        isOddDay: dayIndex % 2 === 1,
-        isFestival: !!festivalDay,
-        festivalName: festivalDay ? localize(festivalDay.name) : null,
-        isRestDay: weekdayData?.isRestDay || false,
-        moonPhases
-      });
-      dayIndex++;
-      if (currentWeek.length === daysInWeek) {
-        weeks.push(currentWeek);
-        currentWeek = [];
+
+      // Check if this is a non-counting festival (intercalary day)
+      const isIntercalary = festivalDay?.countsForWeekday === false;
+
+      if (isIntercalary) {
+        // Don't add to weekday grid - collect separately
+        intercalaryDays.push({
+          day,
+          year,
+          month,
+          isToday: this._isToday(year, month, day),
+          isSelected: this._isSelected(year, month, day),
+          notes: dayNotes,
+          isFestival: true,
+          festivalName: festivalDay ? localize(festivalDay.name) : null,
+          moonPhases,
+          isIntercalary: true
+        });
+      } else {
+        const weekdayData = calendar.days?.values?.[currentWeek.length];
+        currentWeek.push({
+          day,
+          year,
+          month,
+          isToday: this._isToday(year, month, day),
+          isSelected: this._isSelected(year, month, day),
+          notes: dayNotes,
+          isOddDay: dayIndex % 2 === 1,
+          isFestival: !!festivalDay,
+          festivalName: festivalDay ? localize(festivalDay.name) : null,
+          isRestDay: weekdayData?.isRestDay || false,
+          moonPhases
+        });
+        dayIndex++;
+        if (currentWeek.length === daysInWeek) {
+          weeks.push(currentWeek);
+          currentWeek = [];
+        }
       }
     }
 
-    if (currentWeek.length > 0 && currentWeek.length < daysInWeek) {
+    // Push any remaining days from current month before intercalary
+    if (currentWeek.length > 0) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+
+    // Insert intercalary row if there are intercalary days
+    if (intercalaryDays.length > 0) {
+      weeks.push({ isIntercalaryRow: true, days: intercalaryDays });
+      currentWeek = [];
+    }
+
+    // Fill remaining slots with next month days
+    const lastRegularWeek = weeks.filter(w => !w.isIntercalaryRow).pop();
+    const needsNextMonth = intercalaryDays.length > 0 || (lastRegularWeek && lastRegularWeek.length < daysInWeek);
+
+    if (needsNextMonth) {
       const totalMonths = calendar.months?.values?.length ?? 12;
-      let remainingSlots = daysInWeek - currentWeek.length;
+      let remainingSlots = intercalaryDays.length > 0 ? daysInWeek : (daysInWeek - (lastRegularWeek?.length || 0));
       let checkMonth = month;
       let checkYear = year;
       let dayInMonth = 1;
-      while (remainingSlots > 0) {
-        if (dayInMonth > (calendar.months?.values?.[checkMonth]?.days ?? 30) || checkMonth === month) {
-          checkMonth = checkMonth === totalMonths - 1 ? 0 : checkMonth + 1;
-          if (checkMonth === 0) checkYear++;
-          dayInMonth = 1;
-        }
 
+      checkMonth = checkMonth === totalMonths - 1 ? 0 : checkMonth + 1;
+      if (checkMonth === 0) checkYear++;
+
+      while (remainingSlots > 0) {
         const checkMonthDays = calendar.months?.values?.[checkMonth]?.days ?? 30;
         const daysToTake = Math.min(remainingSlots, checkMonthDays - dayInMonth + 1);
         for (let d = dayInMonth; d < dayInMonth + daysToTake; d++) {
@@ -279,10 +327,20 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         }
         dayInMonth += daysToTake;
         remainingSlots -= daysToTake;
+
+        if (remainingSlots > 0 && dayInMonth > checkMonthDays) {
+          checkMonth = checkMonth === totalMonths - 1 ? 0 : checkMonth + 1;
+          if (checkMonth === 0) checkYear++;
+          dayInMonth = 1;
+        }
+      }
+
+      if (intercalaryDays.length > 0) {
+        weeks.push(currentWeek);
+      } else if (lastRegularWeek) {
+        lastRegularWeek.push(...currentWeek);
       }
     }
-
-    if (currentWeek.length > 0) weeks.push(currentWeek);
     const allMultiDayEvents = this._findMultiDayEvents(notes, year, month, startDayOfWeek, daysInWeek, daysInMonth);
     weeks.forEach((week, weekIndex) => {
       week.multiDayEvents = allMultiDayEvents.filter((e) => e.weekIndex === weekIndex);
@@ -317,6 +375,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    */
   _generateWeekData(calendar, date, notes) {
     const { year, month, day } = date;
+    const yearZero = calendar.years?.yearZero ?? 0;
     const currentDayOfWeek = dayOfWeek({ year, month, day });
     let weekStartDay = day - currentDayOfWeek;
     let weekStartMonth = month;
@@ -328,8 +387,26 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         weekStartMonth = monthsInYear - 1;
         weekStartYear--;
       }
-      const prevMonthData = calendar.months?.values?.[weekStartMonth];
-      weekStartDay = prevMonthData ? prevMonthData.days + weekStartDay : 1;
+      const prevMonthDays = calendar.getDaysInMonth(weekStartMonth, weekStartYear);
+      weekStartDay = prevMonthDays + weekStartDay;
+    }
+
+    // Skip any intercalary days at the start position
+    while (true) {
+      const festivalDay = calendar.findFestivalDay({ year: weekStartYear - yearZero, month: weekStartMonth, dayOfMonth: weekStartDay - 1 });
+      if (festivalDay?.countsForWeekday === false) {
+        weekStartDay++;
+        if (weekStartDay > calendar.getDaysInMonth(weekStartMonth, weekStartYear)) {
+          weekStartDay = 1;
+          weekStartMonth++;
+          if (weekStartMonth >= monthsInYear) {
+            weekStartMonth = 0;
+            weekStartYear++;
+          }
+        }
+      } else {
+        break;
+      }
     }
 
     const currentTime = game.time.components || {};
@@ -339,12 +416,34 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     let currentDay = weekStartDay;
     let currentMonth = weekStartMonth;
     let currentYear = weekStartYear;
-    for (let i = 0; i < daysInWeek; i++) {
+    let weekdayIndex = 0;
+
+    // Loop until we've filled all weekday slots, skipping intercalary days
+    while (weekdayIndex < daysInWeek) {
       const monthData = calendar.months?.values?.[currentMonth];
       if (!monthData) break;
+
+      // Check if current day is intercalary (non-counting festival)
+      const festivalDay = calendar.findFestivalDay({ year: currentYear - yearZero, month: currentMonth, dayOfMonth: currentDay - 1 });
+      const isIntercalary = festivalDay?.countsForWeekday === false;
+
+      if (isIntercalary) {
+        // Skip intercalary days - they don't occupy weekday slots
+        currentDay++;
+        if (currentDay > calendar.getDaysInMonth(currentMonth, currentYear)) {
+          currentDay = 1;
+          currentMonth++;
+          if (currentMonth >= calendar.months.values.length) {
+            currentMonth = 0;
+            currentYear++;
+          }
+        }
+        continue;
+      }
+
       const dayNotes = this._getNotesForDay(notes, currentYear, currentMonth, currentDay);
       const monthWeekdays = calendar.getWeekdaysForMonth?.(currentMonth) ?? calendar.days?.values ?? [];
-      const weekdayData = monthWeekdays[i];
+      const weekdayData = monthWeekdays[weekdayIndex];
       const dayName = weekdayData?.name ? localize(weekdayData.name) : '';
       const monthName = calendar.months?.values?.[currentMonth]?.name ? localize(calendar.months.values[currentMonth].name) : '';
       const isToday = this._isToday(currentYear, currentMonth, currentDay);
@@ -363,8 +462,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         notes: dayNotes
       });
 
+      weekdayIndex++;
       currentDay++;
-      if (currentDay > monthData.days) {
+      if (currentDay > calendar.getDaysInMonth(currentMonth, currentYear)) {
         currentDay = 1;
         currentMonth++;
         if (currentMonth >= calendar.months.values.length) {
@@ -380,7 +480,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       day.eventBlocks = eventBlocks.filter((block) => block.year === day.year && block.month === day.month && block.day === day.day);
     });
     let dayOfYear = day;
-    for (let m = 0; m < month; m++) dayOfYear += calendar.months?.values?.[m]?.days || 0;
+    for (let m = 0; m < month; m++) dayOfYear += calendar.getDaysInMonth(m, year);
     const weekNumber = Math.ceil(dayOfYear / daysInWeek);
     const midWeekDay = days[Math.floor(days.length / 2)];
     const viewedComponents = { month: midWeekDay?.month ?? month, dayOfMonth: (midWeekDay?.day ?? day) - 1 };
@@ -881,9 +981,9 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         let newDay = current.day + direction * daysInWeek;
         let newMonth = current.month;
         let newYear = current.year;
-        const monthData = calendar.months?.values?.[newMonth];
-        if (newDay > monthData?.days) {
-          newDay -= monthData.days;
+        const daysInCurrentMonth = calendar.getDaysInMonth(newMonth, newYear);
+        if (newDay > daysInCurrentMonth) {
+          newDay -= daysInCurrentMonth;
           newMonth++;
           if (newMonth >= calendar.months.values.length) {
             newMonth = 0;
@@ -895,8 +995,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
             newMonth = calendar.months.values.length - 1;
             newYear--;
           }
-          const prevMonthData = calendar.months?.values?.[newMonth];
-          newDay += prevMonthData?.days || 30;
+          newDay += calendar.getDaysInMonth(newMonth, newYear);
         }
 
         this.viewedDate = { year: newYear, month: newMonth, day: newDay };

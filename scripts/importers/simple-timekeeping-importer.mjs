@@ -352,14 +352,24 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       if (month.intercalary) {
         const monthName = this.#localizeString(month.name);
         for (let day = 1; day <= month.days; day++) {
-          const festival = { name: month.days === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex + 1, day };
+          const festival = {
+            name: month.days === 1 ? monthName : `${monthName} (Day ${day})`,
+            month: regularMonthIndex + 1,
+            day,
+            countsForWeekday: false
+          };
           if (month.leapYearOnly || (month.days === 0 && month.leapDays > 0)) festival.leapYearOnly = true;
           festivals.push(festival);
         }
         if (month.days === 0 && month.leapDays > 0) {
-          const monthName = this.#localizeString(month.name);
           for (let day = 1; day <= month.leapDays; day++) {
-            festivals.push({ name: month.leapDays === 1 ? monthName : `${monthName} (Day ${day})`, month: regularMonthIndex + 1, day, leapYearOnly: true });
+            festivals.push({
+              name: month.leapDays === 1 ? monthName : `${monthName} (Day ${day})`,
+              month: regularMonthIndex + 1,
+              day,
+              leapYearOnly: true,
+              countsForWeekday: false
+            });
           }
         }
       } else {

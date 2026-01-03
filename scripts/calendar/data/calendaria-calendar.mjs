@@ -491,6 +491,64 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
+   * Count total festival days that don't count for weekday calculation in a full year.
+   * Only counts non-leap-year festivals (those that occur every year).
+   * @returns {number} Number of non-counting festival days per year.
+   */
+  countNonWeekdayFestivalsInYear() {
+    if (!this.festivals?.length) return 0;
+    let count = 0;
+    for (const festival of this.festivals) {
+      if (festival.countsForWeekday !== false) continue;
+      if (festival.leapYearOnly) continue;
+      count++;
+    }
+    return count;
+  }
+
+  /**
+   * Count all non-counting festival days between the epoch (year 0) and the given year.
+   * For positive years: counts festivals in years 0 through year-1 (positive return).
+   * For negative years: counts festivals in years -1 through year (negative return).
+   * Accounts for leap year festivals.
+   * @param {number} year - Internal year (0-based from calendar epoch)
+   * @returns {number} Total non-counting festival days (negative for years before epoch).
+   */
+  countNonWeekdayFestivalsBeforeYear(year) {
+    if (!this.festivals?.length || year === 0) return 0;
+    const yearZero = this.years?.yearZero ?? 0;
+
+    // Count regular (non-leap-only) non-counting festivals
+    let regularCount = 0;
+    let leapOnlyCount = 0;
+    for (const festival of this.festivals) {
+      if (festival.countsForWeekday !== false) continue;
+      if (festival.leapYearOnly) leapOnlyCount++;
+      else regularCount++;
+    }
+
+    if (year > 0) {
+      // Positive year: count festivals from year 0 to year-1
+      let leapYears = 0;
+      for (let y = 0; y < year; y++) {
+        if (this.isLeapYear(y + yearZero)) leapYears++;
+      }
+      const regularYears = year - leapYears;
+      return (regularYears * regularCount) + (leapYears * (regularCount + leapOnlyCount));
+    } else {
+      // Negative year: count festivals from year -1 down to year (going backward)
+      // Return negative since these festivals are "subtracted" from the day offset
+      let leapYears = 0;
+      for (let y = -1; y >= year; y--) {
+        if (this.isLeapYear(y + yearZero)) leapYears++;
+      }
+      const totalYears = -year;
+      const regularYears = totalYears - leapYears;
+      return -((regularYears * regularCount) + (leapYears * (regularCount + leapOnlyCount)));
+    }
+  }
+
+  /**
    * Get the current phase of a moon using FC-style distribution.
    * Primary phases (new/full moon) get floor(cycleLength/8) days each,
    * remaining phases split the leftover days evenly.

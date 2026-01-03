@@ -561,6 +561,24 @@
   gap: var(--calendaria-day-gap);
   display: grid;
   position: relative;
+
+  &.intercalary-row {
+    display: flex;
+    justify-content: center;
+
+    .calendar-day.intercalary {
+      width: 100%;
+      justify-content: center;
+
+      .day-number {
+        justify-content: center;
+      }
+
+      .festival-name {
+        font-weight: 500;
+      }
+    }
+  }
 }
 
 .calendar-day {
@@ -3806,6 +3824,25 @@
     display: grid;
     width: fit-content;
     margin: 0 auto;
+  }
+
+  .mini-intercalary-row {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    gap: var(--mini-gap);
+
+    .mini-day.intercalary {
+      width: 100%;
+      background: var(--calendaria-festival-bg);
+
+      .festival-name {
+        color: var(--calendaria-festival-text);
+        font-weight: 500;
+        font-size: 0.85rem;
+        white-space: nowrap;
+      }
+    }
   }
 
   .mini-day {

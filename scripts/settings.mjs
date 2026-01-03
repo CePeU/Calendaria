@@ -11,7 +11,7 @@ import { SettingsPanel } from './applications/settings/settings-panel.mjs';
 import { TimeKeeperHUD } from './applications/time-keeper-hud.mjs';
 import { BUNDLED_CALENDARS } from './calendar/calendar-loader.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
-import { migrateCustomCalendars } from './utils/format-utils.mjs';
+import { migrateCustomCalendars, migrateIntercalaryFestivals } from './utils/format-utils.mjs';
 import { localize } from './utils/localization.mjs';
 import { log } from './utils/logger.mjs';
 
@@ -106,6 +106,13 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
+  /** Track if intercalary weekday migration has been run */
+  game.settings.register(MODULE.ID, 'intercalaryMigrationComplete', {
+    name: 'Intercalary Migration Complete',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
 
   /** Default setting for syncing scene darkness with sun position */
   game.settings.register(MODULE.ID, SETTINGS.DARKNESS_SYNC, {
@@ -511,6 +518,7 @@ export function registerReadySettings() {
     })
   });
 
-  // Run format migration for custom calendars
+  // Run migrations for custom calendars
   migrateCustomCalendars();
+  migrateIntercalaryFestivals();
 }

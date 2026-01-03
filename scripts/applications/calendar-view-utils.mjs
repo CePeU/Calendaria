@@ -182,7 +182,7 @@ export function getFirstMoonPhase(calendar, year, month, day) {
   if (!game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES)) return null;
   if (!calendar?.moons?.[0]) return null;
   let dayOfYear = day - 1;
-  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.months.values[idx].days;
+  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, year);
   const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
   const phase = calendar.getMoonPhase(0, dayWorldTime);
@@ -203,7 +203,7 @@ export function getAllMoonPhases(calendar, year, month, day) {
   if (!game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES)) return null;
   if (!calendar?.moons?.length) return null;
   let dayOfYear = day - 1;
-  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.months.values[idx].days;
+  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, year);
   const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
   return calendar.moons
@@ -263,7 +263,7 @@ export async function setDateTo(year, month, day, calendar = null) {
   calendar = calendar || CalendarManager.getActiveCalendar();
   const yearZero = calendar?.years?.yearZero ?? 0;
   let dayOfYear = day - 1;
-  for (let i = 0; i < month; i++) dayOfYear += calendar.months.values[i].days;
+  for (let i = 0; i < month; i++) dayOfYear += calendar.getDaysInMonth(i, year);
   const currentComponents = game.time.components;
   const newComponents = { year: year - yearZero, month, day: dayOfYear, hour: currentComponents.hour, minute: currentComponents.minute, second: currentComponents.second };
   const newWorldTime = calendar.componentsToTime(newComponents);
