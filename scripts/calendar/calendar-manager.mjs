@@ -40,9 +40,11 @@ export default class CalendarManager {
 
     const activeCalendar = CalendarRegistry.getActive();
     if (activeCalendar) {
+      CalendariaCalendar.initializeEpochOffset();
       CONFIG.time.worldCalendarConfig = activeCalendar.toObject();
       CONFIG.time.worldCalendarClass = CalendariaCalendar;
       CONFIG.time.roundTime = activeCalendar.secondsPerRound ?? 6;
+      if (CalendariaCalendar.correctFirstWeekday !== null && CONFIG.time.worldCalendarConfig.years) CONFIG.time.worldCalendarConfig.years.firstWeekday = CalendariaCalendar.correctFirstWeekday;
       game.time.initializeCalendar();
       log(3, `Synced game.time.calendar to: ${activeCalendar.name} (roundTime: ${CONFIG.time.roundTime}s)`);
     }
@@ -207,6 +209,7 @@ export default class CalendarManager {
 
     const calendar = CalendarRegistry.get(id);
     CalendarRegistry.setActive(id);
+    CalendariaCalendar.initializeEpochOffset();
     CONFIG.time.worldCalendarConfig = calendar.toObject();
     CONFIG.time.worldCalendarClass = CalendariaCalendar;
     CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
@@ -256,6 +259,7 @@ export default class CalendarManager {
     log(3, `Handling remote calendar switch to: ${id}`);
     CalendarRegistry.setActive(id);
     const calendar = CalendarRegistry.get(id);
+    CalendariaCalendar.initializeEpochOffset();
     CONFIG.time.worldCalendarConfig = calendar.toObject();
     CONFIG.time.worldCalendarClass = CalendariaCalendar;
     CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
@@ -375,6 +379,7 @@ export default class CalendarManager {
       if (newCalendarId && CalendarRegistry.has(newCalendarId)) {
         CalendarRegistry.setActive(newCalendarId);
         const calendar = CalendarRegistry.get(newCalendarId);
+        CalendariaCalendar.initializeEpochOffset();
         CONFIG.time.worldCalendarConfig = calendar.toObject();
         CONFIG.time.worldCalendarClass = CalendariaCalendar;
         CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
@@ -508,6 +513,7 @@ export default class CalendarManager {
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
       CalendarRegistry.register(id, updatedCalendar);
       if (CalendarRegistry.getActiveId() === id) {
+        CalendariaCalendar.initializeEpochOffset();
         CONFIG.time.worldCalendarConfig = updatedCalendar.toObject();
         CONFIG.time.roundTime = updatedCalendar.secondsPerRound ?? 6;
         game.time.initializeCalendar();
@@ -645,6 +651,7 @@ export default class CalendarManager {
       await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
       CalendarRegistry.register(id, calendar);
       if (CalendarRegistry.getActiveId() === id) {
+        CalendariaCalendar.initializeEpochOffset();
         CONFIG.time.worldCalendarConfig = calendar.toObject();
         CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
         game.time.initializeCalendar();
@@ -680,6 +687,7 @@ export default class CalendarManager {
         const calendar = new CalendariaCalendar(calendarData);
         CalendarRegistry.register(id, calendar);
         if (CalendarRegistry.getActiveId() === id) {
+          CalendariaCalendar.initializeEpochOffset();
           CONFIG.time.worldCalendarConfig = calendar.toObject();
           CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
           game.time.initializeCalendar();

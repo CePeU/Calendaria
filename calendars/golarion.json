@@ -2,8 +2,8 @@
   "id": "golarion",
   "name": "CALENDARIA.Calendar.Golarion.Name",
   "years": {
-    "yearZero": 4724,
-    "firstWeekday": 0,
+    "yearZero": 2700,
+    "firstWeekday": 6,
     "leapYear": {
       "leapStart": 0,
       "leapInterval": 4

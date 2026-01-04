@@ -33,28 +33,24 @@ export function ordinal(n) {
  */
 export function dateFormattingParts(calendar, components) {
   const { year, month, dayOfMonth, hour = 0, minute = 0, second = 0 } = components;
-  // Note: year is expected to already include yearZero offset (display year)
   const displayYear = year;
-
-  // Month info
   const monthData = calendar?.months?.values?.[month];
   const monthName = monthData ? localize(monthData.name) : `Month ${month + 1}`;
   const monthAbbr = monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
-
-  // Weekday info
   const weekdays = calendar?.days?.values || [];
   const daysInMonthsBefore = (calendar?.months?.values || []).slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
   const dayOfYear = daysInMonthsBefore + dayOfMonth;
-  const weekday = weekdays.length > 0 ? (dayOfYear - 1) % weekdays.length : 0;
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const internalYear = displayYear - yearZero;
+  const daysPerYear = calendar?.days?.daysPerYear ?? 365;
+  const firstWeekday = calendar?.years?.firstWeekday ?? 0;
+  const totalDays = internalYear * daysPerYear + dayOfYear - 1;
+  const weekday = weekdays.length > 0 ? (((totalDays + firstWeekday) % weekdays.length) + weekdays.length) % weekdays.length : 0;
   const weekdayData = weekdays[weekday];
   const weekdayName = weekdayData ? localize(weekdayData.name) : '';
   const weekdayAbbr = weekdayData?.abbreviation ? localize(weekdayData.abbreviation) : weekdayName.slice(0, 3);
-
-  // Time info
   const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
   const ampm = hour < 12 ? 'AM' : 'PM';
-
-  // Era info - handle both array and {values: [...]} formats
   let eraName = '';
   let eraAbbr = '';
   let eraYear = '';
@@ -70,7 +66,6 @@ export function dateFormattingParts(calendar, components) {
     }
   }
 
-  // Season info - use calendar's method if available
   let seasonName = '';
   let seasonIndex = -1;
   const currentSeason = calendar?.getCurrentSeason?.({ year, month, dayOfMonth, hour, minute, second });

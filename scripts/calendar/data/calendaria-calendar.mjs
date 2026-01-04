@@ -7,6 +7,7 @@
  */
 
 import { format, localize } from '../../utils/localization.mjs';
+import CalendarRegistry from '../calendar-registry.mjs';
 import { formatEraTemplate } from '../calendar-utils.mjs';
 import * as LeapYearUtils from '../leap-year-utils.mjs';
 
@@ -16,6 +17,81 @@ const { ArrayField, BooleanField, NumberField, SchemaField, StringField } = foun
  * Calendar data model with extended features for fantasy calendars.
  */
 export default class CalendariaCalendar extends foundry.data.CalendarData {
+  /** @type {number} Epoch offset in seconds */
+  static #epochOffset = 0;
+
+  /**
+   * Whether PF2e sync is currently active.
+   * @returns {boolean}
+   */
+  static get usePF2eSync() {
+    if (!game.pf2e?.worldClock) return false;
+    const dateTheme = game.pf2e.worldClock.dateTheme;
+    if (dateTheme !== 'AR' && dateTheme !== 'IC') return false;
+    const activeCalendarId = game.settings.get('calendaria', 'activeCalendar');
+    return activeCalendarId === 'golarion';
+  }
+
+  /**
+   * Initialize epoch offset for PF2e sync.
+   * Calculates offset by matching PF2e's Luxon date to our internal time.
+   * Also adjusts firstWeekday to align weekdays with Luxon.
+   * Only applies when using PF2e with AR/IC theme AND Golarion calendar.
+   */
+  static initializeEpochOffset() {
+    this.#epochOffset = 0;
+    if (!this.usePF2eSync) return;
+    const calendar = CalendarRegistry.getActive();
+    if (!calendar) return;
+    const wc = game.pf2e.worldClock;
+    const dt = wc.worldCreatedOn.plus({ seconds: game.time.worldTime });
+    const secondsPerMinute = calendar.time?.secondsPerMinute ?? 60;
+    const minutesPerHour = calendar.time?.minutesPerHour ?? 60;
+    const hoursPerDay = calendar.time?.hoursPerDay ?? 24;
+    const secondsPerHour = minutesPerHour * secondsPerMinute;
+    const secondsPerDay = hoursPerDay * secondsPerHour;
+    const year = dt.year;
+    const dayOfYear = dt.ordinal - 1;
+    const daysPerYear = calendar.days?.daysPerYear ?? 365;
+    const totalDays = year * daysPerYear + dayOfYear;
+    const internalTime = totalDays * secondsPerDay + dt.hour * secondsPerHour + dt.minute * secondsPerMinute + dt.second;
+    this.#epochOffset = internalTime - game.time.worldTime;
+    const expectedWeekday = dt.weekday - 1;
+    const numWeekdays = calendar.days?.values?.length ?? 7;
+    const correctFirstWeekday = (expectedWeekday - (totalDays % numWeekdays) + numWeekdays) % numWeekdays;
+    if (calendar.years && calendar.years.firstWeekday !== correctFirstWeekday) calendar.years.firstWeekday = correctFirstWeekday;
+    this.#correctFirstWeekday = correctFirstWeekday;
+  }
+
+  /** @type {number|null} Correct firstWeekday for PF2e sync */
+  static #correctFirstWeekday = null;
+
+  /**
+   * Get the correct firstWeekday calculated during epoch initialization.
+   * @returns {number|null}
+   */
+  static get correctFirstWeekday() {
+    return this.#correctFirstWeekday;
+  }
+
+  /**
+   * Get the current epoch offset.
+   * @returns {number}
+   */
+  static get epochOffset() {
+    return this.#epochOffset;
+  }
+
+  /** @override */
+  timeToComponents(time) {
+    return super.timeToComponents(time + CalendariaCalendar.epochOffset);
+  }
+
+  /** @override */
+  componentsToTime(components) {
+    return super.componentsToTime(components) - CalendariaCalendar.epochOffset;
+  }
+
   /** @override */
   static defineSchema() {
     const schema = super.defineSchema();
@@ -517,8 +593,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   countNonWeekdayFestivalsBeforeYear(year) {
     if (!this.festivals?.length || year === 0) return 0;
     const yearZero = this.years?.yearZero ?? 0;
-
-    // Count regular (non-leap-only) non-counting festivals
     let regularCount = 0;
     let leapOnlyCount = 0;
     for (const festival of this.festivals) {
@@ -528,23 +602,16 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     }
 
     if (year > 0) {
-      // Positive year: count festivals from year 0 to year-1
       let leapYears = 0;
-      for (let y = 0; y < year; y++) {
-        if (this.isLeapYear(y + yearZero)) leapYears++;
-      }
+      for (let y = 0; y < year; y++) if (this.isLeapYear(y + yearZero)) leapYears++;
       const regularYears = year - leapYears;
-      return (regularYears * regularCount) + (leapYears * (regularCount + leapOnlyCount));
+      return regularYears * regularCount + leapYears * (regularCount + leapOnlyCount);
     } else {
-      // Negative year: count festivals from year -1 down to year (going backward)
-      // Return negative since these festivals are "subtracted" from the day offset
       let leapYears = 0;
-      for (let y = -1; y >= year; y--) {
-        if (this.isLeapYear(y + yearZero)) leapYears++;
-      }
+      for (let y = -1; y >= year; y--) if (this.isLeapYear(y + yearZero)) leapYears++;
       const totalYears = -year;
       const regularYears = totalYears - leapYears;
-      return -((regularYears * regularCount) + (leapYears * (regularCount + leapOnlyCount)));
+      return -(regularYears * regularCount + leapYears * (regularCount + leapOnlyCount));
     }
   }
 
