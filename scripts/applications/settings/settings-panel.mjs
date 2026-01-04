@@ -249,8 +249,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareTimeContext(context) {
     context.darknessSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC);
     context.advanceTimeOnRest = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
-    context.advanceTimeOnCombat = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_COMBAT);
     context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
+    context.roundTimeDisabled = CONFIG.time.roundTime === 0;
   }
 
   /**
@@ -547,7 +547,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('miniCalendarControlsDelay' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CALENDAR_CONTROLS_DELAY, Number(data.miniCalendarControlsDelay));
     if ('darknessSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC, data.darknessSync);
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
-    if ('advanceTimeOnCombat' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_COMBAT, data.advanceTimeOnCombat);
     if ('syncClockPause' in data) await game.settings.set(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);
     if ('chatTimestampMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE, data.chatTimestampMode);
     if ('chatTimestampShowTime' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME, data.chatTimestampShowTime);

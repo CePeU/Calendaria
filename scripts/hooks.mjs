@@ -10,7 +10,6 @@ import CalendarManager from './calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
 import { onPreCreateChatMessage, onRenderAnnouncementMessage, onRenderChatMessageHTML } from './chat/chat-timestamp.mjs';
 import { onRenderSceneConfig, onUpdateWorldTime } from './darkness.mjs';
-import { onUpdateCombat } from './integrations/combat-time.mjs';
 import { onLongRest, onPreRest } from './integrations/rest-time.mjs';
 import NoteManager from './notes/note-manager.mjs';
 import EventScheduler from './time/event-scheduler.mjs';
@@ -38,7 +37,6 @@ export function registerHooks() {
   Hooks.on('renderChatMessageHTML', onRenderChatMessageHTML);
   Hooks.on('renderJournalDirectory', onRenderJournalDirectory);
   Hooks.on('renderSceneConfig', onRenderSceneConfig);
-  Hooks.on('updateCombat', onUpdateCombat);
   Hooks.on('updateJournalEntryPage', NoteManager.onUpdateJournalEntryPage.bind(NoteManager));
   Hooks.on('updateSetting', CalendarManager.onUpdateSetting.bind(CalendarManager));
   Hooks.on('updateWorldTime', EventScheduler.onUpdateWorldTime.bind(EventScheduler));

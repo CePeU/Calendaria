@@ -30,7 +30,6 @@ export const SETTINGS = {
   SHOW_TIME_KEEPER: 'showTimeKeeper',
   TIME_KEEPER_POSITION: 'timeKeeperPosition',
   SHOW_MINI_CALENDAR: 'showMiniCalendar',
-  ADVANCE_TIME_ON_COMBAT: 'advanceTimeOnCombat',
   SYNC_CLOCK_PAUSE: 'syncClockPause',
   MINI_CALENDAR_POSITION: 'miniCalendarPosition',
   MINI_CALENDAR_CONTROLS_DELAY: 'miniCalendarControlsDelay',

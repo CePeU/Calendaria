@@ -365,15 +365,6 @@ export function registerSettings() {
     type: new BooleanField({ initial: false })
   });
 
-  /** Whether to advance world time when combat rounds change */
-  game.settings.register(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_COMBAT, {
-    name: 'CALENDARIA.Settings.AdvanceTimeOnCombat.Name',
-    hint: 'CALENDARIA.Settings.AdvanceTimeOnCombat.Hint',
-    scope: 'world',
-    config: false,
-    type: new BooleanField({ initial: false })
-  });
-
   /** Whether to sync clock pause with game pause */
   game.settings.register(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, {
     name: 'CALENDARIA.Settings.SyncClockPause.Name',

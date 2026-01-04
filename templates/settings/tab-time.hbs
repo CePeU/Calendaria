@@ -21,14 +21,6 @@
     </div>
 
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.AdvanceTimeOnCombat.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="advanceTimeOnCombat" {{#if advanceTimeOnCombat}}checked{{/if}}>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.AdvanceTimeOnCombat.Hint"}}</p>
-    </div>
-
-    <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.SyncClockPause.Name"}}</label>
       <div class="form-fields">
         <input type="checkbox" name="syncClockPause" {{#if syncClockPause}}checked{{/if}}>
@@ -36,6 +28,13 @@
       <p class="hint">{{localize "CALENDARIA.Settings.SyncClockPause.Hint"}}</p>
     </div>
   </fieldset>
+
+  {{#if roundTimeDisabled}}
+  <div class="notification warning">
+    <i class="fas fa-exclamation-triangle"></i>
+    <p>{{localize "CALENDARIA.SettingsPanel.TimeTab.RoundTimeDisabledWarning"}}</p>
+  </div>
+  {{/if}}
   {{/if}}
 
   {{#unless isGM}}
