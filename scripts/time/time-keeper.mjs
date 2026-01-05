@@ -92,9 +92,6 @@ export default class TimeKeeper {
   /*  Initialization                              */
   /* -------------------------------------------- */
 
-  /** @type {boolean} Whether the clock was running before game pause */
-  static #wasRunningBeforePause = false;
-
   /**
    * Initialize the TimeKeeper and register socket listeners.
    */
@@ -102,25 +99,56 @@ export default class TimeKeeper {
     this.setIncrement('minute');
     Hooks.on(HOOKS.CLOCK_UPDATE, this.#onRemoteClockUpdate.bind(this));
     Hooks.on('pauseGame', this.#onPauseGame.bind(this));
+    Hooks.on('combatStart', this.#onCombatStart.bind(this));
+    Hooks.on('deleteCombat', this.#onCombatEnd.bind(this));
     log(3, 'TimeKeeper initialized');
   }
 
   /**
    * Handle game pause/unpause to sync clock state.
+   * When sync is enabled, clock always starts at 1:1 on unpause.
    * @param {boolean} paused - Whether the game is paused
    */
   static #onPauseGame(paused) {
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
     if (!game.user.isGM) return;
 
-    if (paused && this.#running) {
-      this.#wasRunningBeforePause = true;
+    if (paused) {
+      if (this.#running) this.stop();
+      log(3, 'Clock stopped (game paused)');
+    } else if (!game.combat?.started) {
+      this.setIncrement('second');
+      if (!this.#running) this.start();
+      log(3, 'Clock started at 1:1 (game unpaused)');
+    }
+  }
+
+  /**
+   * Handle combat start to pause clock.
+   * @param {Combat} combat - The combat that started
+   */
+  static #onCombatStart(combat) {
+    if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
+    if (!game.user.isGM) return;
+
+    if (this.#running) {
       this.stop();
-      log(3, 'Clock paused (synced with game pause)');
-    } else if (!paused && this.#wasRunningBeforePause) {
-      this.#wasRunningBeforePause = false;
-      this.start();
-      log(3, 'Clock resumed (synced with game unpause)');
+      log(3, 'Clock stopped (combat started)');
+    }
+  }
+
+  /**
+   * Handle combat end to resume clock.
+   * @param {Combat} combat - The combat that ended
+   */
+  static #onCombatEnd(combat) {
+    if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
+    if (!game.user.isGM) return;
+
+    if (!game.paused) {
+      this.setIncrement('second');
+      if (!this.#running) this.start();
+      log(3, 'Clock started at 1:1 (combat ended)');
     }
   }
 
@@ -138,6 +166,14 @@ export default class TimeKeeper {
     if (!game.user.isGM) {
       ui.notifications.warn('CALENDARIA.TimeKeeper.GMOnly', { localize: true });
       return;
+    }
+
+    // When sync is enabled, prevent start if game is paused or combat is active
+    if (game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) {
+      if (game.paused || game.combat?.started) {
+        log(3, 'Clock start blocked (sync active, game paused or in combat)');
+        return;
+      }
     }
 
     this.#running = true;
