@@ -56,6 +56,26 @@
     </div>
 
     <div class="calendaria-hud-center">
+      {{#if useSliceMode}}
+      <div class="calendaria-hud-slice" {{#if isGM}}role="button" tabindex="0" data-action="openTimeDial"
+        data-tooltip="{{localize 'CALENDARIA.HUD.ClickToSetTime'}}"{{/if}}>
+        <div class="calendaria-slice-sky"></div>
+        <div class="calendaria-slice-track">
+          <div class="calendaria-slice-body calendaria-slice-sun"></div>
+          <div class="calendaria-slice-body calendaria-slice-moon"></div>
+        </div>
+        <div class="calendaria-slice-time-overlay">
+          <span class="calendaria-hud-time">{{time}}</span>
+          {{#if isGM}}
+          <button type="button" class="calendaria-hud-play-btn" data-action="toggleTimeFlow"
+            aria-pressed="{{isPlaying}}"
+            data-tooltip="{{#if isPlaying}}{{localize 'CALENDARIA.HUD.PauseTime'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
+            <i class="fa-solid {{#if isPlaying}}fa-pause{{else}}fa-play{{/if}}"></i>
+          </button>
+          {{/if}}
+        </div>
+      </div>
+      {{else}}
       <div class="calendaria-hud-time-wrapper">
         <span class="calendaria-hud-time">{{time}}</span>
         {{#if isGM}}
@@ -66,6 +86,7 @@
         </button>
         {{/if}}
       </div>
+      {{/if}}
     </div>
 
     <div class="calendaria-hud-section right">

@@ -5841,6 +5841,161 @@
 }
 
 /* ======================================== */
+/* Slice Mode                               */
+/* ======================================== */
+.calendaria-hud-wrapper.slice-mode .calendaria-hud-dome {
+  display: none;
+}
+
+.calendaria-hud-slice {
+  position: relative;
+  width: 120px;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid rgb(0 0 0 / 30%);
+}
+
+.calendaria-hud-slice:focus {
+  outline: 2px solid rgb(100 180 255 / 60%);
+  outline-offset: 1px;
+}
+
+.calendaria-slice-sky {
+  position: absolute;
+  inset: 0;
+  transition: background 0.5s ease;
+}
+
+.calendaria-slice-track {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.calendaria-slice-body {
+  position: absolute;
+  top: 50%;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  transition: opacity 0.8s ease;
+}
+
+.calendaria-slice-sun {
+  opacity: 0;
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 35% 35%, rgb(255 245 170) 0%, rgb(255 229 92) 30%, rgb(255 217 61) 60%, rgb(255 165 0) 100%);
+  box-shadow:
+    0 0 8px rgb(255 217 61),
+    0 0 16px rgb(255 217 61 / 50%);
+}
+
+.calendaria-slice-moon {
+  opacity: 0;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle at 35% 35%, rgb(255 255 248) 0%, rgb(232 232 224) 40%, rgb(200 200 184) 100%);
+  box-shadow:
+    0 0 6px rgb(255 255 255 / 50%),
+    0 0 12px rgb(255 255 255 / 20%);
+}
+
+.calendaria-slice-time-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.calendaria-slice-time-overlay .calendaria-hud-time {
+  padding: 0 4px;
+  font-size: var(--font-size-12, 0.75rem);
+  color: rgb(255 255 255);
+  font-weight: 600;
+  text-shadow:
+    0 0 2px rgb(0 0 0),
+    0 0 4px rgb(0 0 0),
+    1px 1px 2px rgb(0 0 0),
+    -1px -1px 2px rgb(0 0 0),
+    1px -1px 2px rgb(0 0 0),
+    -1px 1px 2px rgb(0 0 0);
+}
+
+.calendaria-slice-time-overlay .calendaria-hud-play-btn {
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  max-height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 40%);
+  color: rgb(255 255 255);
+  font-size: var(--font-size-10, 0.625rem);
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.calendaria-hud-slice:hover .calendaria-slice-time-overlay .calendaria-hud-play-btn {
+  opacity: 1;
+}
+
+.calendaria-slice-time-overlay .calendaria-hud-play-btn:hover {
+  background: rgb(0 0 0 / 60%);
+}
+
+.calendaria-slice-time-overlay .calendaria-hud-play-btn i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Compact slice adjustments */
+.calendaria-hud-wrapper.compact .calendaria-hud-slice {
+  width: 100px;
+  height: 20px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-slice-sun {
+  width: 12px;
+  height: 12px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-slice-moon {
+  width: 10px;
+  height: 10px;
+}
+
+.calendaria-hud-wrapper.compact .calendaria-slice-time-overlay .calendaria-hud-time {
+  font-size: var(--font-size-10, 0.625rem);
+}
+
+.calendaria-hud-wrapper.compact .calendaria-slice-time-overlay .calendaria-hud-play-btn {
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  min-height: 14px;
+  max-height: 14px;
+  font-size: 8px;
+}
+
+/* ======================================== */
 /* Chat Message Timestamps                  */
 /* ======================================== */
 .chat-message:has(.calendaria-timestamp-wrapper) .message-header .message-metadata {

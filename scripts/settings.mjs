@@ -206,6 +206,25 @@ export function registerSettings() {
     onChange: () => foundry.applications.instances.get('calendaria-hud')?.render()
   });
 
+  /** Calendar HUD dial style (dome vs slice) */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_DIAL_STYLE, {
+    name: 'CALENDARIA.Settings.HUDDialStyle.Name',
+    hint: 'CALENDARIA.Settings.HUDDialStyle.Hint',
+    scope: 'user',
+    config: false,
+    type: new StringField({ choices: { dome: 'CALENDARIA.Settings.HUDDialStyle.Dome', slice: 'CALENDARIA.Settings.HUDDialStyle.Slice' }, initial: 'dome' }),
+    onChange: () => foundry.applications.instances.get('calendaria-hud')?.render()
+  });
+
+  /** Calendar HUD combat compact mode */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT, {
+    name: 'CALENDARIA.Settings.HUDCombatCompact.Name',
+    hint: 'CALENDARIA.Settings.HUDCombatCompact.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: true })
+  });
+
   /** Calendar HUD position lock */
   game.settings.register(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED, {
     name: 'Calendar HUD Locked',

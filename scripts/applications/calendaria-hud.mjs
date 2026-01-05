@@ -87,6 +87,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {Function|null} Click-outside handler for search panel */
   #clickOutsideHandler = null;
 
+  /** @type {boolean} Whether combat is currently active */
+  #inCombat = false;
+
   /** @override */
   static DEFAULT_OPTIONS = {
     id: 'calendaria-hud',
@@ -153,6 +156,19 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     return game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE) === 'compact';
   }
 
+  /**
+   * Whether to use slice mode instead of dome.
+   * Slice mode is used when: manual 'slice' setting, compact mode, or combat (if enabled).
+   * @returns {boolean} True if slice mode should be used
+   */
+  get useSliceMode() {
+    const dialStyle = game.settings.get(MODULE.ID, SETTINGS.HUD_DIAL_STYLE);
+    if (dialStyle === 'slice') return true;
+    if (this.isCompact) return true;
+    if (this.#inCombat && game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT)) return true;
+    return false;
+  }
+
   /* -------------------------------------------- */
   /*  Rendering                                   */
   /* -------------------------------------------- */
@@ -182,10 +198,13 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const showWeatherBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER);
     const showSeasonBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_SEASON);
     const showEraBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ERA);
-    const weatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.HUD_WEATHER_DISPLAY_MODE);
+    const isCompact = this.isCompact;
+
+    // Compact mode forces icon-only display
+    const weatherDisplayMode = isCompact ? 'icon' : game.settings.get(MODULE.ID, SETTINGS.HUD_WEATHER_DISPLAY_MODE);
+    const seasonDisplayMode = isCompact ? 'icon' : game.settings.get(MODULE.ID, SETTINGS.HUD_SEASON_DISPLAY_MODE);
 
     const season = calendar?.getCurrentSeason?.();
-    const seasonDisplayMode = game.settings.get(MODULE.ID, SETTINGS.HUD_SEASON_DISPLAY_MODE);
     context.currentSeason = showSeasonBlock && season ? { name: localize(season.name), color: season.color || '#888', icon: season.icon || 'fas fa-sun' } : null;
     context.showSeasonIcon = seasonDisplayMode === 'full' || seasonDisplayMode === 'icon';
     context.showSeasonLabel = seasonDisplayMode === 'full' || seasonDisplayMode === 'text';
@@ -222,6 +241,10 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.searchOpen = this.#searchOpen;
     context.searchTerm = this.#searchTerm;
     context.searchResults = this.#searchResults || [];
+
+    // Dial mode - dome vs slice
+    context.useSliceMode = this.useSliceMode;
+    context.inCombat = this.#inCombat;
     return context;
   }
 
@@ -229,6 +252,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   _onRender(context, options) {
     super._onRender(context, options);
     this.element.classList.toggle('compact', this.isCompact);
+    this.element.classList.toggle('slice-mode', this.useSliceMode);
     this.#restorePosition();
     this.#enableDragging();
     this.#updateCelestialDisplay();
@@ -260,6 +284,29 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       name: 'calendaria.displayFormatsChanged',
       id: Hooks.on('calendaria.displayFormatsChanged', () => this.render({ parts: ['bar'] }))
     });
+    // Combat hooks for auto-compact
+    this.#hooks.push({
+      name: 'combatStart',
+      id: Hooks.on('combatStart', () => this.#onCombatChange(true))
+    });
+    this.#hooks.push({
+      name: 'deleteCombat',
+      id: Hooks.on('deleteCombat', () => this.#onCombatChange(false))
+    });
+    // Check initial combat state
+    this.#inCombat = !!game.combat?.started;
+  }
+
+  /**
+   * Handle combat state changes for auto-compact.
+   * @param {boolean} inCombat - Whether combat is now active
+   */
+  #onCombatChange(inCombat) {
+    if (this.#inCombat === inCombat) return;
+    this.#inCombat = inCombat;
+    if (game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT)) {
+      this.render();
+    }
   }
 
   /** @override */
@@ -550,54 +597,122 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #updateCelestialDisplay() {
     const components = game.time.components;
     const hour = this.#getDecimalHour(components);
-    const sky = this.element.querySelector('.calendaria-hud-sky');
+    const useSlice = this.useSliceMode;
+
+    // Update dome elements if in dome mode
+    if (!useSlice) {
+      const sky = this.element.querySelector('.calendaria-hud-sky');
+      if (sky) {
+        const colors = this.#getSkyColors(hour);
+        sky.style.background = `linear-gradient(to bottom, ${colors.top} 0%, ${colors.mid} 50%, ${colors.bottom} 100%)`;
+      }
+
+      const stars = this.element.querySelector('.calendaria-hud-stars');
+      if (stars) {
+        const showStars = hour < 5.5 || hour > 19;
+        const partialStars = (hour >= 5.5 && hour < 7) || (hour > 17.5 && hour <= 19);
+        stars.classList.toggle('visible', showStars || partialStars);
+        if (partialStars) {
+          const starOpacity = hour < 12 ? 1 - (hour - 5.5) / 1.5 : (hour - 17.5) / 1.5;
+          stars.style.opacity = Math.max(0, Math.min(1, starOpacity));
+        } else {
+          stars.style.opacity = '';
+        }
+      }
+
+      const clouds = this.element.querySelector('.calendaria-hud-clouds');
+      if (clouds) {
+        const showClouds = hour >= 7 && hour < 18;
+        const partialClouds = (hour >= 6 && hour < 7) || (hour >= 18 && hour < 19);
+        clouds.classList.toggle('visible', showClouds || partialClouds);
+        if (partialClouds) {
+          const cloudOpacity = hour < 12 ? hour - 6 : 1 - (hour - 18);
+          clouds.style.opacity = Math.max(0, Math.min(1, cloudOpacity));
+        } else {
+          clouds.style.opacity = '';
+        }
+      }
+
+      const isCompact = this.isCompact;
+      const trackWidth = isCompact ? 100 : 140;
+      const trackHeight = isCompact ? 50 : 70;
+      const sunSize = isCompact ? 16 : 20;
+      const moonSize = isCompact ? 14 : 18;
+      const isSunVisible = hour >= 6 && hour < 18;
+      const sun = this.element.querySelector('.calendaria-hud-sun');
+      const moon = this.element.querySelector('.calendaria-hud-moon');
+      if (sun) {
+        sun.style.opacity = isSunVisible ? '1' : '0';
+        if (isSunVisible) this.#positionCelestialBody(sun, hour, trackWidth, trackHeight, sunSize, true);
+      }
+      if (moon) {
+        moon.style.opacity = isSunVisible ? '0' : '1';
+        if (!isSunVisible) this.#positionCelestialBody(moon, hour, trackWidth, trackHeight, moonSize, false);
+      }
+    } else {
+      // Update slice elements
+      this.#updateSliceDisplay(hour);
+    }
+  }
+
+  /**
+   * Update the slice display (horizontal sun/moon strip).
+   * @param {number} hour - Current hour (decimal 0-24)
+   */
+  #updateSliceDisplay(hour) {
+    const slice = this.element.querySelector('.calendaria-hud-slice');
+    if (!slice) return;
+
+    const sky = slice.querySelector('.calendaria-slice-sky');
     if (sky) {
       const colors = this.#getSkyColors(hour);
-      sky.style.background = `linear-gradient(to bottom, ${colors.top} 0%, ${colors.mid} 50%, ${colors.bottom} 100%)`;
-    }
-
-    const stars = this.element.querySelector('.calendaria-hud-stars');
-    if (stars) {
-      const showStars = hour < 5.5 || hour > 19;
-      const partialStars = (hour >= 5.5 && hour < 7) || (hour > 17.5 && hour <= 19);
-      stars.classList.toggle('visible', showStars || partialStars);
-      if (partialStars) {
-        const starOpacity = hour < 12 ? 1 - (hour - 5.5) / 1.5 : (hour - 17.5) / 1.5;
-        stars.style.opacity = Math.max(0, Math.min(1, starOpacity));
-      } else {
-        stars.style.opacity = '';
-      }
-    }
-
-    const clouds = this.element.querySelector('.calendaria-hud-clouds');
-    if (clouds) {
-      const showClouds = hour >= 7 && hour < 18;
-      const partialClouds = (hour >= 6 && hour < 7) || (hour >= 18 && hour < 19);
-      clouds.classList.toggle('visible', showClouds || partialClouds);
-      if (partialClouds) {
-        const cloudOpacity = hour < 12 ? hour - 6 : 1 - (hour - 18);
-        clouds.style.opacity = Math.max(0, Math.min(1, cloudOpacity));
-      } else {
-        clouds.style.opacity = '';
-      }
+      sky.style.background = `linear-gradient(to right, ${colors.top} 0%, ${colors.mid} 50%, ${colors.bottom} 100%)`;
     }
 
     const isCompact = this.isCompact;
-    const trackWidth = isCompact ? 100 : 140;
-    const trackHeight = isCompact ? 50 : 70;
-    const sunSize = isCompact ? 16 : 20;
-    const moonSize = isCompact ? 14 : 18;
+    const sliceWidth = isCompact ? 100 : 120;
+    const sunSize = isCompact ? 12 : 14;
+    const moonSize = isCompact ? 10 : 12;
     const isSunVisible = hour >= 6 && hour < 18;
-    const sun = this.element.querySelector('.calendaria-hud-sun');
-    const moon = this.element.querySelector('.calendaria-hud-moon');
+
+    const sun = slice.querySelector('.calendaria-slice-sun');
+    const moon = slice.querySelector('.calendaria-slice-moon');
+
     if (sun) {
       sun.style.opacity = isSunVisible ? '1' : '0';
-      if (isSunVisible) this.#positionCelestialBody(sun, hour, trackWidth, trackHeight, sunSize, true);
+      if (isSunVisible) this.#positionSliceBody(sun, hour, sliceWidth, sunSize, true);
     }
     if (moon) {
       moon.style.opacity = isSunVisible ? '0' : '1';
-      if (!isSunVisible) this.#positionCelestialBody(moon, hour, trackWidth, trackHeight, moonSize, false);
+      if (!isSunVisible) this.#positionSliceBody(moon, hour, sliceWidth, moonSize, false);
     }
+  }
+
+  /**
+   * Position a celestial body on the horizontal slice track.
+   * @param {HTMLElement} element - The body element
+   * @param {number} hour - Current hour (decimal)
+   * @param {number} sliceWidth - Slice width in pixels
+   * @param {number} bodySize - Body size in pixels
+   * @param {boolean} isSun - Whether this is the sun (vs moon)
+   */
+  #positionSliceBody(element, hour, sliceWidth, bodySize, isSun) {
+    let normalizedHour;
+    if (isSun) {
+      // Sun: 6AM = left edge (0), 6PM = right edge (12)
+      normalizedHour = hour - 6;
+    } else {
+      // Moon: 6PM = left edge, 6AM = right edge
+      if (hour >= 18) normalizedHour = hour - 18;
+      else normalizedHour = hour + 6;
+    }
+    normalizedHour = Math.max(0, Math.min(12, normalizedHour));
+
+    // Position from left to right
+    const padding = bodySize / 2 + 4;
+    const availableWidth = sliceWidth - padding * 2;
+    const x = padding + (normalizedHour / 12) * availableWidth - bodySize / 2;
+    element.style.left = `${x}px`;
   }
 
   /**

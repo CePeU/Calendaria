@@ -60,7 +60,9 @@ export const SETTINGS = {
   HUD_SHOW_SEASON: 'hudShowSeason',
   HUD_SHOW_ERA: 'hudShowEra',
   HUD_WEATHER_DISPLAY_MODE: 'hudWeatherDisplayMode',
-  HUD_SEASON_DISPLAY_MODE: 'hudSeasonDisplayMode'
+  HUD_SEASON_DISPLAY_MODE: 'hudSeasonDisplayMode',
+  HUD_DIAL_STYLE: 'hudDialStyle',
+  HUD_COMBAT_COMPACT: 'hudCombatCompact'
 };
 
 /**

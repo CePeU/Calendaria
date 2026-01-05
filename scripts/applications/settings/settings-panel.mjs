@@ -8,17 +8,17 @@
 import { BUNDLED_CALENDARS } from '../../calendar/calendar-loader.mjs';
 import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
+import TimeKeeper, { getTimeIncrements } from '../../time/time-keeper.mjs';
 import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
-import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, THEME_PRESETS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
+import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { CalendarApplication } from '../calendar-application.mjs';
 import { CalendarEditor } from '../calendar-editor.mjs';
 import { CalendariaHUD } from '../calendaria-hud.mjs';
-import { MiniCalendar } from '../mini-calendar.mjs';
 import { ImporterApp } from '../importer-app.mjs';
+import { MiniCalendar } from '../mini-calendar.mjs';
 import { TimeKeeperHUD } from '../time-keeper-hud.mjs';
-import TimeKeeper, { getTimeIncrements } from '../../time/time-keeper.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -230,7 +230,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     context.calendarOptions = [];
     for (const id of BUNDLED_CALENDARS) {
-      const key = id.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+      const key = id
+        .split('-')
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join('');
       context.calendarOptions.push({ value: id, label: localize(`CALENDARIA.Calendar.${key}.Name`), selected: id === activeCalendarId, isCustom: false });
     }
     for (const [id, data] of Object.entries(customCalendars)) context.calendarOptions.push({ value: id, label: data.name || id, selected: id === activeCalendarId, isCustom: true });
@@ -321,6 +324,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'fullsize', label: localize('CALENDARIA.Settings.CalendarHUDMode.Fullsize'), selected: hudMode === 'fullsize' },
       { value: 'compact', label: localize('CALENDARIA.Settings.CalendarHUDMode.Compact'), selected: hudMode === 'compact' }
     ];
+    context.isCompactMode = hudMode === 'compact';
+
+    // Dial style settings
+    const dialStyle = game.settings.get(MODULE.ID, SETTINGS.HUD_DIAL_STYLE);
+    context.dialStyleOptions = [
+      { value: 'dome', label: localize('CALENDARIA.Settings.HUDDialStyle.Dome'), selected: dialStyle === 'dome' },
+      { value: 'slice', label: localize('CALENDARIA.Settings.HUDDialStyle.Slice'), selected: dialStyle === 'slice' }
+    ];
+    context.hudCombatCompact = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT);
 
     // Block visibility settings
     context.hudShowWeather = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER);
@@ -638,6 +650,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('forceMiniCalendar' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR, data.forceMiniCalendar);
     if ('showMoonPhases' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MOON_PHASES, data.showMoonPhases);
     if ('calendarHUDMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, data.calendarHUDMode);
+    if ('hudDialStyle' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_DIAL_STYLE, data.hudDialStyle);
+    if ('hudCombatCompact' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT, data.hudCombatCompact);
     if ('miniCalendarControlsDelay' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CALENDAR_CONTROLS_DELAY, Number(data.miniCalendarControlsDelay));
     if ('darknessSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC, data.darknessSync);
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
@@ -1176,6 +1190,42 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         rangeInput.addEventListener('input', (e) => {
           rangeValue.textContent = `${e.target.value}s`;
         });
+      }
+    }
+
+    if (partId === 'hud') {
+      const hudModeSelect = htmlElement.querySelector('select[name="calendarHUDMode"]');
+      const dialStyleSelect = htmlElement.querySelector('select[name="hudDialStyle"]');
+      const dialStyleGroup = dialStyleSelect?.closest('.form-group');
+      const dialStyleHint = dialStyleGroup?.querySelector('.hint');
+      const weatherDisplaySelect = htmlElement.querySelector('select[name="hudWeatherDisplayMode"]');
+      const weatherDisplayGroup = weatherDisplaySelect?.closest('.form-group');
+      const seasonDisplaySelect = htmlElement.querySelector('select[name="hudSeasonDisplayMode"]');
+      const seasonDisplayGroup = seasonDisplaySelect?.closest('.form-group');
+      if (hudModeSelect) {
+        const updateCompactState = () => {
+          const isCompact = hudModeSelect.value === 'compact';
+          if (dialStyleSelect) {
+            dialStyleSelect.disabled = isCompact;
+            if (isCompact) dialStyleSelect.value = 'slice';
+            dialStyleGroup?.classList.toggle('disabled', isCompact);
+            if (dialStyleHint) {
+              dialStyleHint.textContent = isCompact ? game.i18n.localize('CALENDARIA.Settings.HUDDialStyle.DisabledHint') : game.i18n.localize('CALENDARIA.Settings.HUDDialStyle.Hint');
+            }
+          }
+          if (weatherDisplaySelect) {
+            weatherDisplaySelect.disabled = isCompact;
+            if (isCompact) weatherDisplaySelect.value = 'icon';
+            weatherDisplayGroup?.classList.toggle('disabled', isCompact);
+          }
+          if (seasonDisplaySelect) {
+            seasonDisplaySelect.disabled = isCompact;
+            if (isCompact) seasonDisplaySelect.value = 'icon';
+            seasonDisplayGroup?.classList.toggle('disabled', isCompact);
+          }
+        };
+        hudModeSelect.addEventListener('change', updateCompactState);
+        updateCompactState();
       }
     }
 
