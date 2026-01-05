@@ -632,6 +632,7 @@ export function migrateLegacyFormat(legacyFormat) {
  * Map of preset names to formatter functions.
  */
 export const PRESET_FORMATTERS = {
+  off: () => '',
   short: formatShort,
   long: formatLong,
   full: formatFull,

@@ -54,7 +54,8 @@ export const SETTINGS = {
   FORCE_MINI_CALENDAR: 'forceMiniCalendar',
   TIME_SPEED_MULTIPLIER: 'timeSpeedMultiplier',
   TIME_SPEED_INCREMENT: 'timeSpeedIncrement',
-  CUSTOM_TIME_JUMPS: 'customTimeJumps'
+  CUSTOM_TIME_JUMPS: 'customTimeJumps',
+  TIMEKEEPER_TIME_JUMPS: 'timeKeeperTimeJumps'
 };
 
 /**

@@ -363,6 +363,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'custom', label: localize('CALENDARIA.Format.Preset.Custom') }
     ];
 
+    // Locations that support "Off" option (hides the element entirely)
+    const supportsOff = ['timekeeperDate'];
+
     const locations = [
       { id: 'hudDate', label: localize('CALENDARIA.Format.Location.HudDate'), category: 'hud' },
       { id: 'hudTime', label: localize('CALENDARIA.Format.Location.HudTime'), category: 'hud' },
@@ -376,18 +379,25 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     context.formatLocations = locations.map((loc) => {
       const formats = displayFormats[loc.id] || { gm: 'long', player: 'long' };
-      const knownPresets = ['short', 'long', 'full', 'ordinal', 'fantasy', 'time', 'time12', 'approxTime', 'approxDate', 'datetime', 'datetime12'];
+      const knownPresets = ['off', 'short', 'long', 'full', 'ordinal', 'fantasy', 'time', 'time12', 'approxTime', 'approxDate', 'datetime', 'datetime12'];
       const isCustomGM = !knownPresets.includes(formats.gm);
       const isCustomPlayer = !knownPresets.includes(formats.player);
+
+      // Build preset options, adding "Off" for supported locations
+      let locationPresets = [...presetOptions];
+      if (supportsOff.includes(loc.id)) {
+        locationPresets = [{ value: 'off', label: localize('CALENDARIA.Format.Preset.Off') }, ...locationPresets];
+      }
+
       return {
         ...loc,
         gmFormat: formats.gm,
         playerFormat: formats.player,
-        gmPresetOptions: presetOptions.map((o) => ({
+        gmPresetOptions: locationPresets.map((o) => ({
           ...o,
           selected: isCustomGM ? o.value === 'custom' : o.value === formats.gm
         })),
-        playerPresetOptions: presetOptions.map((o) => ({
+        playerPresetOptions: locationPresets.map((o) => ({
           ...o,
           selected: isCustomPlayer ? o.value === 'custom' : o.value === formats.player
         })),
@@ -414,6 +424,25 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showTimeKeeper = game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER);
     context.timeKeeperAutoFade = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE);
     context.timeKeeperIdleOpacity = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_IDLE_OPACITY);
+
+    // TimeKeeper time jumps
+    const timeKeeperJumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
+    const incrementLabels = {
+      second: localize('CALENDARIA.Common.Second'),
+      round: localize('CALENDARIA.Common.Round'),
+      minute: localize('CALENDARIA.Common.Minute'),
+      hour: localize('CALENDARIA.Common.Hour'),
+      day: localize('CALENDARIA.Common.Day'),
+      week: localize('CALENDARIA.Common.Week'),
+      month: localize('CALENDARIA.Common.Month'),
+      season: localize('CALENDARIA.Common.Season'),
+      year: localize('CALENDARIA.Common.Year')
+    };
+    context.timeKeeperTimeJumps = Object.keys(getTimeIncrements()).map((key) => ({
+      key,
+      label: incrementLabels[key] || key,
+      jumps: timeKeeperJumps[key] || { dec2: null, dec1: null, inc1: null, inc2: null }
+    }));
   }
 
   /**
@@ -625,7 +654,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('hudStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, { tray: !!data.hudStickyTray, position: !!data.hudStickyPosition });
     if ('calendarHUDLocked' in data) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED, data.calendarHUDLocked);
 
-    // Custom time jumps
+    // Custom time jumps (HUD)
     if (data.customTimeJumps) {
       const jumps = {};
       for (const [key, values] of Object.entries(data.customTimeJumps)) {
@@ -637,6 +666,20 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         };
       }
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_TIME_JUMPS, jumps);
+    }
+
+    // TimeKeeper time jumps
+    if (data.timeKeeperTimeJumps) {
+      const jumps = {};
+      for (const [key, values] of Object.entries(data.timeKeeperTimeJumps)) {
+        jumps[key] = {
+          dec2: values.dec2 ? Number(values.dec2) : null,
+          dec1: values.dec1 ? Number(values.dec1) : null,
+          inc1: values.inc1 ? Number(values.inc1) : null,
+          inc2: values.inc2 ? Number(values.inc2) : null
+        };
+      }
+      await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS, jumps);
     }
     if ('primaryGM' in data) await game.settings.set(MODULE.ID, SETTINGS.PRIMARY_GM, data.primaryGM || '');
     if ('loggingLevel' in data) await game.settings.set(MODULE.ID, SETTINGS.LOGGING_LEVEL, data.loggingLevel);

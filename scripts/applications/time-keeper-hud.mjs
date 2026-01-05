@@ -8,7 +8,7 @@
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
-import { formatForLocation } from '../utils/format-utils.mjs';
+import { formatForLocation, getDisplayFormat } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
 
@@ -28,15 +28,14 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: 'time-keeper-hud',
     classes: ['calendaria', 'time-keeper-hud'],
-    position: { width: 'auto', height: 'auto', zIndex: 100 },
+    position: { width: 200, height: 'auto', zIndex: 100 },
     window: { frame: false, positioned: true },
     actions: {
-      reverse5x: TimeKeeperHUD.#onReverse5x,
-      reverse: TimeKeeperHUD.#onReverse,
-      forward: TimeKeeperHUD.#onForward,
-      forward5x: TimeKeeperHUD.#onForward5x,
-      toggle: TimeKeeperHUD.#onToggle,
-      openSettings: TimeKeeperHUD.#onOpenSettings
+      dec2: TimeKeeperHUD.#onDec2,
+      dec1: TimeKeeperHUD.#onDec1,
+      inc1: TimeKeeperHUD.#onInc1,
+      inc2: TimeKeeperHUD.#onInc2,
+      toggle: TimeKeeperHUD.#onToggle
     }
   };
 
@@ -55,6 +54,13 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.isGM = game.user.isGM;
     context.currentTime = this.#formatTime();
     context.currentDate = this.#formatDate();
+    const dateFormat = getDisplayFormat('timekeeperDate');
+    context.showDate = dateFormat !== 'off';
+    const tooltips = this.#getJumpTooltips();
+    context.dec2Tooltip = tooltips.dec2Tooltip;
+    context.dec1Tooltip = tooltips.dec1Tooltip;
+    context.inc1Tooltip = tooltips.inc1Tooltip;
+    context.inc2Tooltip = tooltips.inc2Tooltip;
     return context;
   }
 
@@ -65,19 +71,20 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#enableDragging();
     this.element.querySelector('[data-action="increment"]')?.addEventListener('change', (e) => {
       TimeKeeper.setIncrement(e.target.value);
+      this.#updateJumpTooltips();
     });
 
     if (!this.#clockHookId) this.#clockHookId = Hooks.on(HOOKS.CLOCK_START_STOP, this.#onClockStateChange.bind(this));
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
-
-    // Right-click context menu for close
-    new foundry.applications.ux.ContextMenu.implementation(this.element, '.time-keeper-content', [
-      {
-        name: 'CALENDARIA.Common.Close',
-        icon: '<i class="fas fa-times"></i>',
-        callback: () => TimeKeeperHUD.hide()
-      }
-    ], { fixed: true, jQuery: false });
+    new foundry.applications.ux.ContextMenu.implementation(
+      this.element,
+      '.time-keeper-content',
+      [
+        { name: 'CALENDARIA.Common.Settings', icon: '<i class="fas fa-cog"></i>', callback: () => new SettingsPanel().render(true) },
+        { name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => TimeKeeperHUD.hide() }
+      ],
+      { fixed: true, jQuery: false }
+    );
   }
 
   /**
@@ -155,35 +162,42 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /*  Action Handlers                             */
   /* -------------------------------------------- */
 
-  /** Reverse time by 5x increment. */
-  static #onReverse5x() {
-    TimeKeeper.reverse(5);
+  /** Decrement time by configured dec2 amount. */
+  static #onDec2() {
+    const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
+    const currentJumps = jumps[TimeKeeper.incrementKey] || { dec2: -5 };
+    const amount = currentJumps.dec2 || -5;
+    TimeKeeper.forward(amount);
   }
 
-  /** Reverse time by 1x increment. */
-  static #onReverse() {
-    TimeKeeper.reverse();
+  /** Decrement time by configured dec1 amount. */
+  static #onDec1() {
+    const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
+    const currentJumps = jumps[TimeKeeper.incrementKey] || { dec1: -1 };
+    const amount = currentJumps.dec1 || -1;
+    TimeKeeper.forward(amount);
   }
 
-  /** Advance time by 1x increment. */
-  static #onForward() {
-    TimeKeeper.forward();
+  /** Increment time by configured inc1 amount. */
+  static #onInc1() {
+    const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
+    const currentJumps = jumps[TimeKeeper.incrementKey] || { inc1: 1 };
+    const amount = currentJumps.inc1 || 1;
+    TimeKeeper.forward(amount);
   }
 
-  /** Advance time by 5x increment. */
-  static #onForward5x() {
-    TimeKeeper.forward(5);
+  /** Increment time by configured inc2 amount. */
+  static #onInc2() {
+    const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
+    const currentJumps = jumps[TimeKeeper.incrementKey] || { inc2: 5 };
+    const amount = currentJumps.inc2 || 5;
+    TimeKeeper.forward(amount);
   }
 
   /** Toggle clock running state. */
   static #onToggle() {
     TimeKeeper.toggle();
     this.render();
-  }
-
-  /** Open settings panel. */
-  static #onOpenSettings() {
-    new SettingsPanel().render(true);
   }
 
   /* -------------------------------------------- */
@@ -259,6 +273,39 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       year: localize('CALENDARIA.Common.Year')
     };
     return labels[key] || key;
+  }
+
+  /**
+   * Get tooltip strings for time jump buttons based on current increment and jump settings.
+   * @returns {{dec2Tooltip: string, dec1Tooltip: string, inc1Tooltip: string, inc2Tooltip: string}} Tooltip strings
+   * @private
+   */
+  #getJumpTooltips() {
+    const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
+    const currentJumps = jumps[TimeKeeper.incrementKey] || { dec2: -5, dec1: -1, inc1: 1, inc2: 5 };
+    const dec2 = currentJumps.dec2 || -5;
+    const dec1 = currentJumps.dec1 || -1;
+    const inc1 = currentJumps.inc1 || 1;
+    const inc2 = currentJumps.inc2 || 5;
+    const unitLabel = this.#formatIncrementLabel(TimeKeeper.incrementKey);
+    const formatTooltip = (val) => `${val > 0 ? '+' : ''}${val} ${unitLabel}`;
+    return { dec2Tooltip: formatTooltip(dec2), dec1Tooltip: formatTooltip(dec1), inc1Tooltip: formatTooltip(inc1), inc2Tooltip: formatTooltip(inc2) };
+  }
+
+  /**
+   * Update the time jump button tooltips after increment change.
+   * @private
+   */
+  #updateJumpTooltips() {
+    const tooltips = this.#getJumpTooltips();
+    const dec2Btn = this.element.querySelector('[data-action="dec2"]');
+    const dec1Btn = this.element.querySelector('[data-action="dec1"]');
+    const inc1Btn = this.element.querySelector('[data-action="inc1"]');
+    const inc2Btn = this.element.querySelector('[data-action="inc2"]');
+    if (dec2Btn) dec2Btn.dataset.tooltip = tooltips.dec2Tooltip;
+    if (dec1Btn) dec1Btn.dataset.tooltip = tooltips.dec1Tooltip;
+    if (inc1Btn) inc1Btn.dataset.tooltip = tooltips.inc1Tooltip;
+    if (inc2Btn) inc2Btn.dataset.tooltip = tooltips.inc2Tooltip;
   }
 
   /* -------------------------------------------- */

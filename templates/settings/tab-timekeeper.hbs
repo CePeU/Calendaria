@@ -51,4 +51,30 @@
     </div>
   </fieldset>
 
+  {{#if isGM}}
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}</legend>
+    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.CustomTimeJumps"}}</p>
+
+    <div class="time-jumps-grid timekeeper-jumps">
+      <div class="time-jumps-header">
+        <span></span>
+        <span>&lt;&lt;</span>
+        <span>&lt;</span>
+        <span>&gt;</span>
+        <span>&gt;&gt;</span>
+      </div>
+      {{#each timeKeeperTimeJumps}}
+      <div class="time-jumps-row">
+        <label>{{label}}</label>
+        <input type="number" name="timeKeeperTimeJumps.{{key}}.dec2" value="{{jumps.dec2}}" placeholder="-5">
+        <input type="number" name="timeKeeperTimeJumps.{{key}}.dec1" value="{{jumps.dec1}}" placeholder="-1">
+        <input type="number" name="timeKeeperTimeJumps.{{key}}.inc1" value="{{jumps.inc1}}" placeholder="1">
+        <input type="number" name="timeKeeperTimeJumps.{{key}}.inc2" value="{{jumps.inc2}}" placeholder="5">
+      </div>
+      {{/each}}
+    </div>
+  </fieldset>
+  {{/if}}
+
 </section>

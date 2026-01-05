@@ -182,6 +182,8 @@ export default class TimeKeeper {
     if (game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) {
       if (game.paused || game.combat?.started) {
         log(3, 'Clock start blocked (sync active, game paused or in combat)');
+        ui.notifications.clear();
+        ui.notifications.warn('CALENDARIA.TimeKeeper.ClockBlocked', { localize: true });
         return;
       }
     }

@@ -1,49 +1,43 @@
 <div class="time-keeper-content">
   <div class="time-display">
-    <div class="time-display-row">
+    <div class="time-display-time-wrapper">
       <span class="time-display-time">{{currentTime}}</span>
       {{#if isGM}}
-      <button type="button" class="time-btn toggle {{#if running}}active{{/if}}" data-action="toggle"
+      <button type="button" class="time-display-play-btn" data-action="toggle"
         data-tooltip="{{#if running}}{{localize 'CALENDARIA.TimeKeeper.Stop'}}{{else}}{{localize 'CALENDARIA.TimeKeeper.Start'}}{{/if}}">
         <i class="fas {{#if running}}fa-pause{{else}}fa-play{{/if}}"></i>
       </button>
       {{/if}}
-      <button type="button" class="time-btn settings" data-action="openSettings"
-        data-tooltip="{{localize 'CALENDARIA.Common.Settings'}}">
-        <i class="fas fa-cog"></i>
-      </button>
     </div>
-    <span class="time-display-date">{{currentDate}}</span>
+    {{#if showDate}}<span class="time-display-date">{{currentDate}}</span>{{/if}}
   </div>
 
+  {{#if isGM}}
   <div class="time-keeper-controls">
-    {{#if isGM}}
-    <button type="button" class="time-btn compact" data-action="reverse5x"
-      data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse5x'}}">
+    <button type="button" class="time-btn" data-action="dec2" data-tooltip="{{dec2Tooltip}}">
       <i class="fa-solid fa-backward-fast"></i>
     </button>
-    <button type="button" class="time-btn compact" data-action="reverse"
-      data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse'}}">
+    <button type="button" class="time-btn" data-action="dec1" data-tooltip="{{dec1Tooltip}}">
       <i class="fa-solid fa-backward"></i>
     </button>
-    <select class="increment-select compact" data-action="increment">
+    <select class="increment-select" data-action="increment">
       {{#each increments}}
       <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
       {{/each}}
     </select>
-    <button type="button" class="time-btn compact" data-action="forward"
-      data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward'}}">
+    <button type="button" class="time-btn" data-action="inc1" data-tooltip="{{inc1Tooltip}}">
       <i class="fa-solid fa-forward"></i>
     </button>
-    <button type="button" class="time-btn compact" data-action="forward5x"
-      data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward5x'}}">
+    <button type="button" class="time-btn" data-action="inc2" data-tooltip="{{inc2Tooltip}}">
       <i class="fa-solid fa-forward-fast"></i>
     </button>
-    {{else}}
+  </div>
+  {{else}}
+  <div class="time-keeper-controls">
     <span class="time-keeper-readonly">
       <i class="fas fa-clock"></i>
       {{localize "CALENDARIA.TimeKeeper.ReadOnly"}}
     </span>
-    {{/if}}
   </div>
+  {{/if}}
 </div>
