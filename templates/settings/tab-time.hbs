@@ -2,6 +2,24 @@
 
   {{#if isGM}}
   <fieldset>
+    <legend>{{localize "CALENDARIA.SettingsPanel.Section.RealTimeSpeed"}}</legend>
+
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Name"}}</label>
+      <div class="form-fields time-speed-fields">
+        <input type="number" name="timeSpeedMultiplier" value="{{timeSpeedMultiplier}}" min="1" step="1">
+        <select name="timeSpeedIncrement">
+          {{#each timeSpeedIncrements}}
+          <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+        <span class="time-speed-suffix">{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Suffix"}}</span>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  <fieldset>
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.TimeIntegration"}}</legend>
 
     <div class="form-group">

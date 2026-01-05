@@ -210,6 +210,26 @@ export function registerSettings() {
     type: new ObjectField({ nullable: true, initial: null })
   });
 
+  /** Custom time jump amounts per interval */
+  game.settings.register(MODULE.ID, SETTINGS.CUSTOM_TIME_JUMPS, {
+    name: 'Custom Time Jumps',
+    scope: 'world',
+    config: false,
+    type: new ObjectField({
+      initial: {
+        second: { dec2: -30, dec1: -5, inc1: 5, inc2: 30 },
+        round: { dec2: -10, dec1: -1, inc1: 1, inc2: 10 },
+        minute: { dec2: -30, dec1: -15, inc1: 15, inc2: 30 },
+        hour: { dec2: -6, dec1: -1, inc1: 1, inc2: 6 },
+        day: { dec2: -7, dec1: -1, inc1: 1, inc2: 7 },
+        week: { dec2: -4, dec1: -1, inc1: 1, inc2: 4 },
+        month: { dec2: -6, dec1: -1, inc1: 1, inc2: 6 },
+        season: { dec2: -2, dec1: -1, inc1: 1, inc2: 2 },
+        year: { dec2: -10, dec1: -1, inc1: 1, inc2: 10 }
+      }
+    })
+  });
+
   /** Force HUD display for all clients */
   game.settings.register(MODULE.ID, SETTINGS.FORCE_HUD, {
     name: 'CALENDARIA.Settings.ForceHUD.Name',
@@ -372,6 +392,24 @@ export function registerSettings() {
     scope: 'world',
     config: false,
     type: new BooleanField({ initial: false })
+  });
+
+  /** Real-time clock speed multiplier (game units per real second) */
+  game.settings.register(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER, {
+    name: 'CALENDARIA.Settings.TimeSpeedMultiplier.Name',
+    hint: 'CALENDARIA.Settings.TimeSpeedMultiplier.Hint',
+    scope: 'world',
+    config: false,
+    type: new NumberField({ initial: 1, min: 1, integer: true })
+  });
+
+  /** Real-time clock speed increment unit */
+  game.settings.register(MODULE.ID, SETTINGS.TIME_SPEED_INCREMENT, {
+    name: 'CALENDARIA.Settings.TimeSpeedIncrement.Name',
+    hint: 'CALENDARIA.Settings.TimeSpeedIncrement.Hint',
+    scope: 'world',
+    config: false,
+    type: new StringField({ initial: 'second' })
   });
 
   // ========================================//

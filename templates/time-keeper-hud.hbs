@@ -18,30 +18,26 @@
 
   <div class="time-keeper-controls">
     {{#if isGM}}
-    <button type="button" class="time-btn reverse-5x" data-action="reverse5x"
+    <button type="button" class="time-btn compact" data-action="reverse5x"
       data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse5x'}}">
-      <i class="fas fa-angle-double-left"></i>
+      <i class="fa-solid fa-backward-fast"></i>
     </button>
-
-    <button type="button" class="time-btn reverse" data-action="reverse"
+    <button type="button" class="time-btn compact" data-action="reverse"
       data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Reverse'}}">
-      <i class="fas fa-angle-left"></i>
+      <i class="fa-solid fa-backward"></i>
     </button>
-
-    <select class="increment-select" data-action="increment">
+    <select class="increment-select compact" data-action="increment">
       {{#each increments}}
       <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
       {{/each}}
     </select>
-
-    <button type="button" class="time-btn forward" data-action="forward"
+    <button type="button" class="time-btn compact" data-action="forward"
       data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward'}}">
-      <i class="fas fa-angle-right"></i>
+      <i class="fa-solid fa-forward"></i>
     </button>
-
-    <button type="button" class="time-btn forward-5x" data-action="forward5x"
+    <button type="button" class="time-btn compact" data-action="forward5x"
       data-tooltip="{{localize 'CALENDARIA.TimeKeeper.Forward5x'}}">
-      <i class="fas fa-angle-double-right"></i>
+      <i class="fa-solid fa-forward-fast"></i>
     </button>
     {{else}}
     <span class="time-keeper-readonly">

@@ -51,7 +51,10 @@ export const SETTINGS = {
   TIMEKEEPER_IDLE_OPACITY: 'timeKeeperIdleOpacity',
   TIMEKEEPER_AUTO_FADE: 'timeKeeperAutoFade',
   FORCE_HUD: 'forceHUD',
-  FORCE_MINI_CALENDAR: 'forceMiniCalendar'
+  FORCE_MINI_CALENDAR: 'forceMiniCalendar',
+  TIME_SPEED_MULTIPLIER: 'timeSpeedMultiplier',
+  TIME_SPEED_INCREMENT: 'timeSpeedIncrement',
+  CUSTOM_TIME_JUMPS: 'customTimeJumps'
 };
 
 /**

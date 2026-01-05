@@ -18,6 +18,7 @@ import { CalendariaHUD } from '../calendaria-hud.mjs';
 import { MiniCalendar } from '../mini-calendar.mjs';
 import { ImporterApp } from '../importer-app.mjs';
 import { TimeKeeperHUD } from '../time-keeper-hud.mjs';
+import TimeKeeper, { getTimeIncrements } from '../../time/time-keeper.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -253,6 +254,26 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.advanceTimeOnRest = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
     context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
     context.roundTimeDisabled = CONFIG.time.roundTime === 0;
+
+    // Real-time clock speed settings
+    context.timeSpeedMultiplier = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER);
+    const currentIncrement = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_INCREMENT);
+    const incrementLabels = {
+      second: localize('CALENDARIA.Common.Second'),
+      round: localize('CALENDARIA.Common.Round'),
+      minute: localize('CALENDARIA.Common.Minute'),
+      hour: localize('CALENDARIA.Common.Hour'),
+      day: localize('CALENDARIA.Common.Day'),
+      week: localize('CALENDARIA.Common.Week'),
+      month: localize('CALENDARIA.Common.Month'),
+      season: localize('CALENDARIA.Common.Season'),
+      year: localize('CALENDARIA.Common.Year')
+    };
+    context.timeSpeedIncrements = Object.keys(getTimeIncrements()).map((key) => ({
+      key,
+      label: incrementLabels[key] || key,
+      selected: key === currentIncrement
+    }));
   }
 
   /**
@@ -300,6 +321,25 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'fullsize', label: localize('CALENDARIA.Settings.CalendarHUDMode.Fullsize'), selected: hudMode === 'fullsize' },
       { value: 'compact', label: localize('CALENDARIA.Settings.CalendarHUDMode.Compact'), selected: hudMode === 'compact' }
     ];
+
+    // Custom time jumps per interval
+    const customJumps = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_TIME_JUMPS) || {};
+    const incrementLabels = {
+      second: localize('CALENDARIA.Common.Second'),
+      round: localize('CALENDARIA.Common.Round'),
+      minute: localize('CALENDARIA.Common.Minute'),
+      hour: localize('CALENDARIA.Common.Hour'),
+      day: localize('CALENDARIA.Common.Day'),
+      week: localize('CALENDARIA.Common.Week'),
+      month: localize('CALENDARIA.Common.Month'),
+      season: localize('CALENDARIA.Common.Season'),
+      year: localize('CALENDARIA.Common.Year')
+    };
+    context.customTimeJumps = Object.keys(getTimeIncrements()).map((key) => ({
+      key,
+      label: incrementLabels[key] || key,
+      jumps: customJumps[key] || { dec2: null, dec1: null, inc1: null, inc2: null }
+    }));
   }
 
   /**
@@ -539,6 +579,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('showTimeKeeper' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, data.showTimeKeeper);
     if ('timeKeeperAutoFade' in data) await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_AUTO_FADE, data.timeKeeperAutoFade);
     if ('timeKeeperIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_IDLE_OPACITY, Number(data.timeKeeperIdleOpacity));
+    if ('timeSpeedMultiplier' in data || 'timeSpeedIncrement' in data) {
+      if ('timeSpeedMultiplier' in data) await game.settings.set(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER, Math.max(1, Number(data.timeSpeedMultiplier) || 1));
+      if ('timeSpeedIncrement' in data) await game.settings.set(MODULE.ID, SETTINGS.TIME_SPEED_INCREMENT, data.timeSpeedIncrement);
+      TimeKeeper.loadSpeedFromSettings();
+    }
     if ('showToolbarButton' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON, data.showToolbarButton);
     if ('showMiniCalendar' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, data.showMiniCalendar);
     if ('showCalendarHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, data.showCalendarHUD);
@@ -579,6 +624,20 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     if ('hudStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, { tray: !!data.hudStickyTray, position: !!data.hudStickyPosition });
     if ('calendarHUDLocked' in data) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED, data.calendarHUDLocked);
+
+    // Custom time jumps
+    if (data.customTimeJumps) {
+      const jumps = {};
+      for (const [key, values] of Object.entries(data.customTimeJumps)) {
+        jumps[key] = {
+          dec2: values.dec2 ? Number(values.dec2) : null,
+          dec1: values.dec1 ? Number(values.dec1) : null,
+          inc1: values.inc1 ? Number(values.inc1) : null,
+          inc2: values.inc2 ? Number(values.inc2) : null
+        };
+      }
+      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_TIME_JUMPS, jumps);
+    }
     if ('primaryGM' in data) await game.settings.set(MODULE.ID, SETTINGS.PRIMARY_GM, data.primaryGM || '');
     if ('loggingLevel' in data) await game.settings.set(MODULE.ID, SETTINGS.LOGGING_LEVEL, data.loggingLevel);
     if ('devMode' in data) await game.settings.set(MODULE.ID, SETTINGS.DEV_MODE, data.devMode);

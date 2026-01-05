@@ -3518,6 +3518,30 @@
   }
 }
 
+.time-keeper-hud .time-btn.compact {
+  width: 28px;
+  height: 28px;
+
+  i {
+    font-size: 12px;
+  }
+}
+
+.time-keeper-hud .increment-select.compact {
+  box-sizing: border-box;
+  width: fit-content;
+  min-width: 55px;
+  height: 28px;
+  padding: 0 6px;
+  font-size: 11px;
+  line-height: 26px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  text-align: center;
+  background-image: none;
+}
+
 /* ======================================== */
 /* MiniCalendar                             */
 /* ======================================== */
@@ -5584,10 +5608,19 @@
   background: color-mix(in srgb, var(--calendaria-accent) 15%, transparent);
 }
 
+.calendaria-hud-time-btn.custom-jump {
+  width: auto;
+  min-width: 26px;
+  padding: 0 4px;
+  font-size: var(--font-size-10, 0.625rem);
+  font-weight: 600;
+}
+
 /* ======================================== */
 /* Tray Dropdown                            */
 /* ======================================== */
 .calendaria-hud-select {
+  box-sizing: border-box;
   -moz-appearance: none;
   -webkit-appearance: none;
   appearance: none;
@@ -5619,12 +5652,6 @@
 .calendaria-hud-select:focus {
   border-color: var(--calendaria-primary);
   outline: none;
-}
-
-.calendaria-hud-select[data-action='setMultiplier'] {
-  width: 45px;
-  min-width: 45px;
-  text-align: center;
 }
 
 .calendaria-hud-select[data-action='setIncrement'] {
@@ -6142,6 +6169,44 @@
         font-size: var(--font-size-14);
         text-align: center;
       }
+    }
+  }
+
+  .form-group .form-fields.time-speed-fields {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+
+    input[type='number'] {
+      width: 60px;
+      text-align: center;
+    }
+
+    select {
+      width: auto;
+    }
+
+    .time-speed-suffix {
+      color: var(--color-text-secondary, var(--calendaria-text-secondary));
+      font-size: var(--font-size-12);
+      white-space: nowrap;
+    }
+  }
+
+  .custom-time-jumps-row .form-fields.custom-jumps-inputs {
+    gap: 0.25rem;
+    display: flex;
+    align-items: center;
+
+    .jump-input {
+      width: 50px;
+      text-align: center;
+    }
+
+    .jump-separator {
+      color: var(--color-text-secondary, var(--calendaria-text-secondary));
+      font-weight: 600;
+      text-align: center;
     }
   }
 

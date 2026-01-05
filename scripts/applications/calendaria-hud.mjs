@@ -22,19 +22,6 @@ import { SettingsPanel } from './settings/settings-panel.mjs';
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 /**
- * Available time multipliers for the tray dropdown.
- */
-const TIME_MULTIPLIERS = [
-  { value: 0.25, label: '¼' },
-  { value: 0.5, label: '½' },
-  { value: 1, label: '1x' },
-  { value: 2, label: '2x' },
-  { value: 4, label: '4x' },
-  { value: 5, label: '5x' },
-  { value: 10, label: '10x' }
-];
-
-/**
  * Sky color keyframes for interpolation throughout the day.
  * Each entry defines top/mid/bottom gradient colors at a specific hour.
  */
@@ -75,9 +62,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {boolean} Sticky position (locks position) */
   #stickyPosition = false;
-
-  /** @type {number} Current time multiplier */
-  #multiplier = 1;
 
   /** @type {number|null} Last tracked day for re-render */
   #lastDay = null;
@@ -124,6 +108,10 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       toMidnight: CalendariaHUD.#onToMidnight,
       reverse: CalendariaHUD.#onReverse,
       forward: CalendariaHUD.#onForward,
+      customDec2: CalendariaHUD.#onCustomDec2,
+      customDec1: CalendariaHUD.#onCustomDec1,
+      customInc1: CalendariaHUD.#onCustomInc1,
+      customInc2: CalendariaHUD.#onCustomInc2,
       closeSearch: CalendariaHUD.#onCloseSearch,
       openSearchResult: CalendariaHUD.#onOpenSearchResult,
       setDate: CalendariaHUD.#onSetDate
@@ -180,16 +168,11 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_STATES) || {};
     this.#stickyTray = stickyStates.tray ?? false;
     this.#stickyPosition = stickyStates.position ?? false;
-    this.#multiplier = stickyStates.multiplier ?? 1;
     context.stickyTray = this.#stickyTray;
     const appSettings = TimeKeeper.getAppSettings('calendaria-hud');
     if (stickyStates.increment && stickyStates.increment !== appSettings.incrementKey) {
       TimeKeeper.setAppIncrement('calendaria-hud', stickyStates.increment);
       TimeKeeper.setIncrement(stickyStates.increment);
-    }
-    if (this.#multiplier !== appSettings.multiplier) {
-      TimeKeeper.setAppMultiplier('calendaria-hud', this.#multiplier);
-      TimeKeeper.setMultiplier(this.#multiplier);
     }
 
     context.time = this.#formatTime(components);
@@ -207,7 +190,17 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.firstEventColor = this.#liveEvents[0]?.color || null;
     context.currentEvent = this.#liveEvents.length > 0 ? this.#liveEvents[0] : null;
     context.increments = Object.entries(getTimeIncrements()).map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === appSettings.incrementKey }));
-    context.multipliers = TIME_MULTIPLIERS.map((m) => ({ value: m.value, label: m.label, selected: m.value === this.#multiplier }));
+
+    // Custom time jump buttons for current increment
+    const customJumps = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_TIME_JUMPS) || {};
+    const currentJumps = customJumps[appSettings.incrementKey] || {};
+    context.customJumps = {
+      dec2: currentJumps.dec2 || null,
+      dec1: currentJumps.dec1 || null,
+      inc1: currentJumps.inc1 || null,
+      inc2: currentJumps.inc2 || null
+    };
+
     context.searchOpen = this.#searchOpen;
     context.searchTerm = this.#searchTerm;
     context.searchResults = this.#searchResults || [];
@@ -289,16 +282,11 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Setup event listeners for the HUD.
    */
   #setupEventListeners() {
-    this.element.querySelector('.calendaria-hud-select[data-action="setIncrement"]')?.addEventListener('change', (event) => {
+    this.element.querySelector('.calendaria-hud-select[data-action="setIncrement"]')?.addEventListener('change', async (event) => {
       TimeKeeper.setAppIncrement('calendaria-hud', event.target.value);
       TimeKeeper.setIncrement(event.target.value);
-      this.#saveStickyStates();
-    });
-    this.element.querySelector('.calendaria-hud-select[data-action="setMultiplier"]')?.addEventListener('change', (event) => {
-      this.#multiplier = parseFloat(event.target.value);
-      TimeKeeper.setAppMultiplier('calendaria-hud', this.#multiplier);
-      TimeKeeper.setMultiplier(this.#multiplier);
-      this.#saveStickyStates();
+      await this.#saveStickyStates();
+      this.render({ parts: ['bar'] });
     });
     const searchInput = this.element.querySelector('.calendaria-hud-search-panel .search-input');
     if (searchInput) {
@@ -358,9 +346,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!states) return;
     this.#stickyTray = states.tray ?? false;
     this.#stickyPosition = states.position ?? false;
-    this.#multiplier = states.multiplier ?? 1;
-    TimeKeeper.setAppMultiplier('calendaria-hud', this.#multiplier);
-    TimeKeeper.setMultiplier(this.#multiplier);
     if (states.increment) {
       TimeKeeper.setAppIncrement('calendaria-hud', states.increment);
       TimeKeeper.setIncrement(states.increment);
@@ -379,7 +364,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     await game.settings.set(MODULE.ID, SETTINGS.HUD_STICKY_STATES, {
       tray: this.#stickyTray,
       position: this.#stickyPosition,
-      multiplier: this.#multiplier,
       increment: TimeKeeper.getAppSettings('calendaria-hud').incrementKey
     });
   }
@@ -1543,6 +1527,44 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static #onForward(_event, _target) {
     TimeKeeper.forwardFor('calendaria-hud');
+  }
+
+  /** Handle custom decrement 2 (larger). */
+  static #onCustomDec2() {
+    CalendariaHUD.#applyCustomJump('dec2');
+  }
+
+  /** Handle custom decrement 1 (smaller). */
+  static #onCustomDec1() {
+    CalendariaHUD.#applyCustomJump('dec1');
+  }
+
+  /** Handle custom increment 1 (smaller). */
+  static #onCustomInc1() {
+    CalendariaHUD.#applyCustomJump('inc1');
+  }
+
+  /** Handle custom increment 2 (larger). */
+  static #onCustomInc2() {
+    CalendariaHUD.#applyCustomJump('inc2');
+  }
+
+  /**
+   * Apply a custom time jump based on the current increment.
+   * @param {string} jumpKey - The jump key (dec2, dec1, inc1, inc2)
+   */
+  static #applyCustomJump(jumpKey) {
+    if (!game.user.isGM) return;
+    const appSettings = TimeKeeper.getAppSettings('calendaria-hud');
+    const incrementKey = appSettings.incrementKey || 'minute';
+    const customJumps = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_TIME_JUMPS) || {};
+    const jumps = customJumps[incrementKey] || {};
+    const amount = jumps[jumpKey];
+    if (!amount) return;
+    const increments = getTimeIncrements();
+    const secondsPerUnit = increments[incrementKey] || 60;
+    const totalSeconds = amount * secondsPerUnit;
+    game.time.advance(totalSeconds);
   }
 
   /* -------------------------------------------- */

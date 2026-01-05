@@ -44,17 +44,14 @@ export default class TimeKeeper {
   /** @type {boolean} Whether the clock is currently running */
   static #running = false;
 
-  /** @type {number} Time increment in seconds per tick (for real-time clock) */
+  /** @type {number} Time increment in seconds per tick (for manual advancement) */
   static #increment = 60;
 
-  /** @type {number} Game-time to real-time ratio (game seconds per real second) */
-  static #gameTimeRatio = 1;
-
-  /** @type {string} Current increment key (for real-time clock) */
+  /** @type {string} Current increment key (for manual advancement) */
   static #incrementKey = 'minute';
 
-  /** @type {number} Multiplier for time advancement (for real-time clock) */
-  static #multiplier = 1;
+  /** @type {number} Real-time clock speed (game seconds per real second, from settings) */
+  static #realTimeSpeed = 1;
 
   /** @type {Map<string, {incrementKey: string, multiplier: number}>} Per-app settings */
   static #appSettings = new Map();
@@ -68,24 +65,19 @@ export default class TimeKeeper {
     return this.#running;
   }
 
-  /** @returns {number} Current time increment in seconds */
+  /** @returns {number} Current time increment in seconds (for manual advancement) */
   static get increment() {
     return this.#increment;
   }
 
-  /** @returns {string} Current increment key */
+  /** @returns {string} Current increment key (for manual advancement) */
   static get incrementKey() {
     return this.#incrementKey;
   }
 
-  /** @returns {number} Game-time to real-time ratio */
-  static get gameTimeRatio() {
-    return this.#gameTimeRatio;
-  }
-
-  /** @returns {number} Current multiplier */
-  static get multiplier() {
-    return this.#multiplier;
+  /** @returns {number} Real-time clock speed (game seconds per real second) */
+  static get realTimeSpeed() {
+    return this.#realTimeSpeed;
   }
 
   /* -------------------------------------------- */
@@ -97,6 +89,7 @@ export default class TimeKeeper {
    */
   static initialize() {
     this.setIncrement('minute');
+    this.loadSpeedFromSettings();
     Hooks.on(HOOKS.CLOCK_UPDATE, this.#onRemoteClockUpdate.bind(this));
     Hooks.on('pauseGame', this.#onPauseGame.bind(this));
     Hooks.on('combatStart', this.#onCombatStart.bind(this));
@@ -105,8 +98,27 @@ export default class TimeKeeper {
   }
 
   /**
+   * Load real-time clock speed from settings.
+   * Called on init and when settings change.
+   */
+  static loadSpeedFromSettings() {
+    const multiplier = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER) || 1;
+    const incrementKey = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_INCREMENT) || 'second';
+    const increments = getTimeIncrements();
+    const incrementSeconds = increments[incrementKey] || 1;
+    this.#realTimeSpeed = multiplier * incrementSeconds;
+    log(3, `TimeKeeper real-time speed set to: ${this.#realTimeSpeed} game seconds per real second (${multiplier} ${incrementKey}s)`);
+
+    // Restart interval if running to apply new speed
+    if (this.#running) {
+      this.#stopInterval();
+      this.#startInterval();
+    }
+  }
+
+  /**
    * Handle game pause/unpause to sync clock state.
-   * When sync is enabled, clock always starts at 1:1 on unpause.
+   * When sync is enabled, clock resumes at settings-configured speed on unpause.
    * @param {boolean} paused - Whether the game is paused
    */
   static #onPauseGame(paused) {
@@ -117,9 +129,8 @@ export default class TimeKeeper {
       if (this.#running) this.stop();
       log(3, 'Clock stopped (game paused)');
     } else if (!game.combat?.started) {
-      this.setIncrement('second');
       if (!this.#running) this.start();
-      log(3, 'Clock started at 1:1 (game unpaused)');
+      log(3, 'Clock started at configured speed (game unpaused)');
     }
   }
 
@@ -146,9 +157,8 @@ export default class TimeKeeper {
     if (!game.user.isGM) return;
 
     if (!game.paused) {
-      this.setIncrement('second');
       if (!this.#running) this.start();
-      log(3, 'Clock started at 1:1 (combat ended)');
+      log(3, 'Clock started at configured speed (combat ended)');
     }
   }
 
@@ -209,7 +219,8 @@ export default class TimeKeeper {
   /* -------------------------------------------- */
 
   /**
-   * Set the time increment.
+   * Set the time increment for manual advancement.
+   * Does not affect real-time clock speed (controlled by settings).
    * @param {string} key - Increment key from getTimeIncrements()
    */
   static setIncrement(key) {
@@ -217,27 +228,7 @@ export default class TimeKeeper {
     if (!increments[key]) return;
     this.#incrementKey = key;
     this.#increment = increments[key];
-    this.#gameTimeRatio = increments[key];
-    log(3, `TimeKeeper increment set to: ${key} (ratio: ${this.#gameTimeRatio})`);
-
-    if (this.#running) {
-      this.#stopInterval();
-      this.#startInterval();
-    }
-  }
-
-  /**
-   * Set the time multiplier.
-   * @param {number} multiplier - Multiplier value (0.25 to 10)
-   */
-  static setMultiplier(multiplier) {
-    this.#multiplier = Math.max(0.25, Math.min(10, multiplier));
-    log(3, `TimeKeeper multiplier set to: ${this.#multiplier}x`);
-
-    if (this.#running) {
-      this.#stopInterval();
-      this.#startInterval();
-    }
+    log(3, `TimeKeeper manual increment set to: ${key} (${this.#increment}s)`);
   }
 
   /* -------------------------------------------- */
@@ -350,31 +341,21 @@ export default class TimeKeeper {
   /* -------------------------------------------- */
 
   /**
-   * Get the smooth animation unit based on current increment.
-   * Smaller increments use seconds, larger use hours/days/months.
+   * Get the smooth animation unit based on real-time speed.
+   * Smaller speeds use seconds, larger use hours/days/months.
    * @returns {number} Smooth unit in seconds
    * @private
    */
   static #getSmoothUnit() {
     const increments = getTimeIncrements();
-    switch (this.#incrementKey) {
-      case 'second':
-      case 'round':
-      case 'minute':
-        return 1;
-      case 'hour':
-        return increments.minute;
-      case 'day':
-        return increments.hour;
-      case 'week':
-      case 'month':
-        return increments.day;
-      case 'season':
-      case 'year':
-        return increments.month;
-      default:
-        return 1;
-    }
+    const speed = this.#realTimeSpeed;
+
+    // Choose smooth unit based on speed magnitude
+    if (speed <= increments.minute) return 1;
+    if (speed <= increments.hour) return increments.minute;
+    if (speed <= increments.day) return increments.hour;
+    if (speed <= increments.week) return increments.day;
+    return increments.day;
   }
 
   /**
@@ -387,13 +368,13 @@ export default class TimeKeeper {
     const MIN_INTERVAL = 50;
     const MAX_INTERVAL = 1000;
     const smoothUnit = this.#getSmoothUnit();
-    const targetRate = this.#gameTimeRatio * this.#multiplier;
+    const targetRate = this.#realTimeSpeed;
     const idealUpdatesPerSec = targetRate / smoothUnit;
     const idealInterval = 1000 / idealUpdatesPerSec;
     const intervalMs = Math.max(MIN_INTERVAL, Math.min(MAX_INTERVAL, idealInterval));
     const actualUpdatesPerSec = 1000 / intervalMs;
     const advanceAmount = targetRate / actualUpdatesPerSec;
-    log(3, `TimeKeeper interval: ${intervalMs.toFixed(0)}ms, advance: ${advanceAmount.toFixed(1)}s`);
+    log(3, `TimeKeeper interval: ${intervalMs.toFixed(0)}ms, advance: ${advanceAmount.toFixed(1)}s (speed: ${targetRate})`);
     this.#intervalId = setInterval(async () => {
       if (!this.#running) return;
       if (!game.user.isGM) return;
