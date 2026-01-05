@@ -33,6 +33,39 @@
     </div>
   </div>
 
+  {{#if seasonClimateList.length}}
+  <fieldset class="season-climate-section">
+    <legend>{{localize "CALENDARIA.Editor.Weather.SeasonClimate"}}</legend>
+    <p class="hint">{{localize "CALENDARIA.Editor.Weather.SeasonClimateHint"}}</p>
+    <div class="season-climate-list">
+      {{#each seasonClimateList}}
+      <div class="season-climate-item">
+        <span class="season-info">
+          <span class="season-icon" style="color: {{this.color}}">
+            {{#if this.icon}}<i class="{{this.icon}}"></i>{{/if}}
+          </span>
+          <span class="season-name">{{localize this.name}}</span>
+        </span>
+        <span class="season-climate-status">
+          {{#if this.hasClimate}}
+            <i class="fas fa-check-circle" style="color: var(--color-success)"></i>
+          {{else}}
+            <i class="fas fa-minus-circle" style="color: var(--color-text-tertiary)"></i>
+          {{/if}}
+        </span>
+        <button type="button" class="season-climate-btn" data-action="editSeasonClimate" data-index="{{this.index}}"
+          data-tooltip="{{localize 'CALENDARIA.Editor.Tooltip.EditSeasonClimate'}}">
+          <i class="fas fa-edit"></i>
+        </button>
+      </div>
+      {{/each}}
+    </div>
+  </fieldset>
+  {{/if}}
+
+  <fieldset class="zone-presets-section">
+    <legend>{{localize "CALENDARIA.Editor.Weather.ZonePresets"}}</legend>
+    <p class="hint">{{localize "CALENDARIA.Editor.Weather.ZonePresetsHint"}}</p>
   <div class="weather-presets-list">
     {{#each weatherCategories as |category|}}
     <div class="weather-category" data-category="{{category.id}}">
@@ -108,4 +141,5 @@
     <span class="total-value {{#if chancesValid}}valid{{else}}warning{{/if}}">{{totalChance}}%</span>
     <span class="total-hint">{{localize "CALENDARIA.Editor.Weather.TotalHint"}}</span>
   </div>
+  </fieldset>
 </section>

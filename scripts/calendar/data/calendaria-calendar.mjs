@@ -22,7 +22,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Whether PF2e sync is currently active.
-   * @returns {boolean}
+   * @returns {boolean} Is calendar golarian and pf2e system in play
    */
   static get usePF2eSync() {
     if (!game.pf2e?.worldClock) return false;
@@ -68,7 +68,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get the correct firstWeekday calculated during epoch initialization.
-   * @returns {number|null}
+   * @returns {number|null} Correct first weekday
    */
   static get correctFirstWeekday() {
     return this.#correctFirstWeekday;
@@ -76,7 +76,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get the current epoch offset.
-   * @returns {number}
+   * @returns {number} Valid epoch offset
    */
   static get epochOffset() {
     return this.#epochOffset;
@@ -115,6 +115,17 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       },
       { required: true, nullable: true, initial: null }
     );
+    const climatePresetSchema = new SchemaField({
+      id: new StringField({ required: true }),
+      chance: new NumberField({ required: false, initial: 0, min: 0 })
+    });
+    const climateSchema = new SchemaField(
+      {
+        temperatures: new SchemaField({ min: new NumberField({ required: false, nullable: true }), max: new NumberField({ required: false, nullable: true }) }, { required: false, nullable: true }),
+        presets: new ArrayField(climatePresetSchema, { required: false })
+      },
+      { required: false, nullable: true }
+    );
     const extendedSeasonSchema = new SchemaField(
       {
         type: new StringField({ required: false, initial: 'dated', choices: ['dated', 'periodic'] }),
@@ -129,7 +140,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
             dayEnd: new NumberField({ required: false, integer: true, min: 0, nullable: true }),
             monthStart: new NumberField({ required: false, integer: true, min: 1, nullable: true }),
             monthEnd: new NumberField({ required: false, integer: true, min: 1, nullable: true }),
-            duration: new NumberField({ required: false, integer: true, min: 1, nullable: true })
+            duration: new NumberField({ required: false, integer: true, min: 1, nullable: true }),
+            climate: climateSchema
           })
         )
       },
@@ -291,7 +303,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
                   tempMax: new NumberField({ required: false, nullable: true }),
                   description: new StringField({ required: false })
                 })
-              )
+              ),
+              seasonOverrides: new foundry.data.fields.ObjectField({ required: false, initial: {} })
             })
           )
         },

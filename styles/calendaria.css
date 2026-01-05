@@ -2931,6 +2931,98 @@
     }
   }
 
+  .season-climate-section {
+    margin-bottom: 1rem;
+    border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
+    border-radius: 4px;
+    padding: 0.75rem;
+
+    legend {
+      font-weight: 600;
+      padding: 0 0.5rem;
+    }
+
+    .hint {
+      margin: 0 0 0.5rem;
+      font-size: 0.85rem;
+    }
+  }
+
+  .season-climate-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .season-climate-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 3px;
+    background: var(--color-cool-5, var(--calendaria-cool-5));
+
+    .season-info {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .season-icon {
+      flex-shrink: 0;
+      width: 18px;
+      text-align: center;
+    }
+
+    .season-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .season-climate-status {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.8rem;
+      color: var(--color-text-secondary, var(--calendaria-text-secondary));
+      flex-shrink: 0;
+    }
+
+    .season-climate-btn {
+      flex-shrink: 0;
+      width: fit-content;
+      padding: 0.2rem 0.4rem;
+      background: transparent;
+      border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
+      border-radius: 3px;
+      cursor: pointer;
+
+      &:hover {
+        background: var(--color-cool-4, var(--calendaria-cool-4));
+      }
+    }
+  }
+
+  .zone-presets-section {
+    border: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
+    border-radius: 4px;
+    padding: 0.75rem;
+
+    legend {
+      font-weight: 600;
+      padding: 0 0.5rem;
+    }
+
+    > .hint {
+      margin: 0 0 0.5rem;
+      font-size: 0.85rem;
+    }
+  }
+
   .weather-presets-list {
     gap: 1rem;
     display: flex;
@@ -3003,51 +3095,36 @@
     grid-template-columns: 24px 28px 1fr 90px 130px 50px;
     display: grid;
     align-items: center;
-    padding: 0.25rem 0.5rem;
+    padding: 0.35rem 0.75rem;
   }
 
   .weather-preset-header {
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
     color: var(--color-text-secondary, var(--calendaria-text-secondary));
     font-weight: 600;
     font-size: var(--font-size-12);
-
-    > span {
-      text-align: center;
-    }
-
-    .col-name {
-      text-align: left;
-    }
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .weather-preset-item {
     position: relative;
-    border-bottom: 1px solid var(--color-cool-5, var(--calendaria-cool-5));
+    border-top: 1px solid var(--color-cool-4-50, var(--calendaria-cool-4-50));
 
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:nth-child(odd) {
+    &:hover {
       background: var(--color-cool-5-50, var(--calendaria-cool-5-50));
     }
 
-    .preset-enabled {
-      justify-self: center;
-    }
-
     .preset-icon {
-      font-size: 1.1em;
-      text-align: center;
+      justify-content: center;
+      display: flex;
+
+      i {
+        font-size: var(--font-size-16);
+      }
     }
 
     .preset-name {
-      overflow: hidden;
       font-weight: 500;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     .preset-chance {
@@ -3145,6 +3222,59 @@
       color: var(--color-text-secondary, var(--calendaria-text-secondary));
       font-size: var(--font-size-12);
     }
+  }
+}
+
+/* -------------------------------------------- */
+/*  Climate Settings Dialog                     */
+/* -------------------------------------------- */
+
+.calendaria.climate-settings-dialog {
+  .dialog-content {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+
+  .temp-fields {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    input {
+      width: 80px;
+    }
+  }
+
+  .preset-category {
+    margin-bottom: 1rem;
+
+    h4 {
+      margin: 0.5rem 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--color-cool-4, var(--calendaria-cool-4));
+    }
+  }
+
+  .preset-row {
+    display: grid;
+    grid-template-columns: 24px 1fr 60px 20px;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+
+    input {
+      text-align: right;
+    }
+  }
+
+  .preset-icon {
+    text-align: center;
+  }
+
+  .units {
+    color: var(--color-text-secondary, var(--calendaria-text-secondary));
+    font-size: 0.85rem;
   }
 }
 

@@ -361,28 +361,77 @@
         "icon": "fas fa-seedling",
         "color": "#90ee90",
         "dayStart": 0,
-        "dayEnd": 83
+        "dayEnd": 83,
+        "climate": {
+          "temperatures": { "min": 5, "max": 18 },
+          "presets": [
+            { "id": "clear", "chance": 20 },
+            { "id": "partly-cloudy", "chance": 25 },
+            { "id": "cloudy", "chance": 15 },
+            { "id": "rain", "chance": 20 },
+            { "id": "drizzle", "chance": 10 },
+            { "id": "fog", "chance": 5 },
+            { "id": "thunderstorm", "chance": 5 }
+          ]
+        }
       },
       {
         "name": "CALENDARIA.Calendar.Renescara.Season.Summer",
         "icon": "fas fa-sun",
         "color": "#ffd700",
         "dayStart": 84,
-        "dayEnd": 167
+        "dayEnd": 167,
+        "climate": {
+          "temperatures": { "min": 18, "max": 32 },
+          "presets": [
+            { "id": "clear", "chance": 35 },
+            { "id": "partly-cloudy", "chance": 25 },
+            { "id": "cloudy", "chance": 10 },
+            { "id": "rain", "chance": 10 },
+            { "id": "thunderstorm", "chance": 10 },
+            { "id": "windy", "chance": 5 },
+            { "id": "sunshower", "chance": 5 }
+          ]
+        }
       },
       {
         "name": "CALENDARIA.Calendar.Renescara.Season.Autumn",
         "icon": "fas fa-leaf",
         "color": "#d2691e",
         "dayStart": 168,
-        "dayEnd": 251
+        "dayEnd": 251,
+        "climate": {
+          "temperatures": { "min": 5, "max": 20 },
+          "presets": [
+            { "id": "clear", "chance": 15 },
+            { "id": "partly-cloudy", "chance": 20 },
+            { "id": "cloudy", "chance": 20 },
+            { "id": "overcast", "chance": 15 },
+            { "id": "rain", "chance": 15 },
+            { "id": "fog", "chance": 10 },
+            { "id": "windy", "chance": 5 }
+          ]
+        }
       },
       {
         "name": "CALENDARIA.Calendar.Renescara.Season.Winter",
         "icon": "fas fa-snowflake",
         "color": "#87ceeb",
         "dayStart": 252,
-        "dayEnd": 364
+        "dayEnd": 364,
+        "climate": {
+          "temperatures": { "min": -10, "max": 5 },
+          "presets": [
+            { "id": "clear", "chance": 15 },
+            { "id": "partly-cloudy", "chance": 15 },
+            { "id": "cloudy", "chance": 15 },
+            { "id": "overcast", "chance": 20 },
+            { "id": "snow", "chance": 20 },
+            { "id": "blizzard", "chance": 5 },
+            { "id": "fog", "chance": 5 },
+            { "id": "windy", "chance": 5 }
+          ]
+        }
       }
     ]
   },
@@ -522,396 +571,250 @@
         "name": "CALENDARIA.Calendar.Renescara.Weather.Zone.Valdris.Name",
         "description": "CALENDARIA.Calendar.Renescara.Weather.Zone.Valdris.Description",
         "temperatures": {
-          "Spring": {
-            "min": -18,
-            "max": 10
-          },
-          "Summer": {
-            "min": 10,
-            "max": 41
-          },
-          "Autumn": {
-            "min": -3,
-            "max": 19
-          },
-          "Winter": {
-            "min": -35,
-            "max": -4
-          },
-          "_default": {
-            "min": -10,
-            "max": 15
-          }
+          "_default": { "min": -10, "max": 15 }
         },
         "presets": [
-          {
-            "id": "clear",
-            "enabled": true,
-            "chance": 5
+          { "id": "clear", "enabled": true, "chance": 5 },
+          { "id": "partly-cloudy", "enabled": true, "chance": 4 },
+          { "id": "cloudy", "enabled": true, "chance": 3 },
+          { "id": "overcast", "enabled": true, "chance": 3 },
+          { "id": "snow", "enabled": true, "chance": 4 },
+          { "id": "blizzard", "enabled": true, "chance": 2 },
+          { "id": "fog", "enabled": true, "chance": 2 },
+          { "id": "windy", "enabled": true, "chance": 3 },
+          { "id": "aether-haze", "enabled": true, "chance": 2 },
+          { "id": "luminous-sky", "enabled": true, "chance": 3 },
+          { "id": "veilfall", "enabled": true, "chance": 1 },
+          { "id": "gravewind", "enabled": true, "chance": 2 },
+          { "id": "nullfront", "enabled": true, "chance": 2 },
+          { "id": "ley-surge", "enabled": true, "chance": 2 }
+        ],
+        "seasonOverrides": {
+          "Spring": {
+            "temperatures": { "min": -18, "max": 10 },
+            "presets": [
+              { "id": "rain", "chance": 0 },
+              { "id": "drizzle", "chance": 0 },
+              { "id": "thunderstorm", "chance": 0 },
+              { "id": "snow", "chance": 15 },
+              { "id": "blizzard", "chance": 5 }
+            ]
           },
-          {
-            "id": "partly-cloudy",
-            "enabled": true,
-            "chance": 4
+          "Summer": {
+            "temperatures": { "min": 10, "max": 41 },
+            "presets": [
+              { "id": "snow", "chance": 0 },
+              { "id": "blizzard", "chance": 0 },
+              { "id": "clear", "chance": 20 },
+              { "id": "windy", "chance": 10 }
+            ]
           },
-          {
-            "id": "cloudy",
-            "enabled": true,
-            "chance": 3
+          "Autumn": {
+            "temperatures": { "min": -3, "max": 19 },
+            "presets": [
+              { "id": "rain", "chance": 0 },
+              { "id": "snow", "chance": 10 },
+              { "id": "fog", "chance": 8 }
+            ]
           },
-          {
-            "id": "overcast",
-            "enabled": true,
-            "chance": 3
-          },
-          {
-            "id": "snow",
-            "enabled": true,
-            "chance": 4
-          },
-          {
-            "id": "blizzard",
-            "enabled": true,
-            "chance": 2
-          },
-          {
-            "id": "fog",
-            "enabled": true,
-            "chance": 2
-          },
-          {
-            "id": "windy",
-            "enabled": true,
-            "chance": 3
-          },
-          {
-            "id": "aether-haze",
-            "enabled": true,
-            "chance": 2
-          },
-          {
-            "id": "luminous-sky",
-            "enabled": true,
-            "chance": 3
-          },
-          {
-            "id": "veilfall",
-            "enabled": true,
-            "chance": 1
-          },
-          {
-            "id": "gravewind",
-            "enabled": true,
-            "chance": 2
-          },
-          {
-            "id": "nullfront",
-            "enabled": true,
-            "chance": 2
-          },
-          {
-            "id": "ley-surge",
-            "enabled": true,
-            "chance": 2
+          "Winter": {
+            "temperatures": { "min": -35, "max": -4 },
+            "presets": [
+              { "id": "rain", "chance": 0 },
+              { "id": "drizzle", "chance": 0 },
+              { "id": "snow", "chance": 25 },
+              { "id": "blizzard", "chance": 15 },
+              { "id": "permafrost-surge", "chance": 5 }
+            ]
           }
-        ]
+        }
       },
       {
         "id": "lys",
         "name": "CALENDARIA.Calendar.Renescara.Weather.Zone.Lys.Name",
         "description": "CALENDARIA.Calendar.Renescara.Weather.Zone.Lys.Description",
         "temperatures": {
-          "Spring": {
-            "min": 5,
-            "max": 25
-          },
-          "Summer": {
-            "min": 18,
-            "max": 38
-          },
-          "Autumn": {
-            "min": 8,
-            "max": 28
-          },
-          "Winter": {
-            "min": -5,
-            "max": 18
-          },
-          "_default": {
-            "min": 8,
-            "max": 25
-          }
+          "_default": { "min": 8, "max": 25 }
         },
         "presets": [
-          {
-            "id": "clear",
-            "enabled": true,
-            "chance": 6
+          { "id": "clear", "enabled": true, "chance": 6 },
+          { "id": "partly-cloudy", "enabled": true, "chance": 5 },
+          { "id": "cloudy", "enabled": true, "chance": 3 },
+          { "id": "rain", "enabled": true, "chance": 4 },
+          { "id": "drizzle", "enabled": true, "chance": 3 },
+          { "id": "thunderstorm", "enabled": true, "chance": 2 },
+          { "id": "fog", "enabled": true, "chance": 3 },
+          { "id": "windy", "enabled": true, "chance": 3 },
+          { "id": "aether-haze", "enabled": true, "chance": 2 },
+          { "id": "luminous-sky", "enabled": true, "chance": 1 },
+          { "id": "veilfall", "enabled": true, "chance": 1 },
+          { "id": "gravewind", "enabled": true, "chance": 1 },
+          { "id": "nullfront", "enabled": true, "chance": 1 },
+          { "id": "ley-surge", "enabled": true, "chance": 2 }
+        ],
+        "seasonOverrides": {
+          "Spring": {
+            "temperatures": { "min": 5, "max": 25 },
+            "presets": [
+              { "id": "fog", "chance": 0 },
+              { "id": "sunshower", "chance": 8 }
+            ]
           },
-          {
-            "id": "partly-cloudy",
-            "enabled": true,
-            "chance": 5
+          "Summer": {
+            "temperatures": { "min": 18, "max": 38 },
+            "presets": [
+              { "id": "rain", "chance": 5 },
+              { "id": "drizzle", "chance": 0 },
+              { "id": "fog", "chance": 0 },
+              { "id": "clear", "chance": 35 },
+              { "id": "thunderstorm", "chance": 8 }
+            ]
           },
-          {
-            "id": "cloudy",
-            "enabled": true,
-            "chance": 3
+          "Autumn": {
+            "temperatures": { "min": 8, "max": 28 },
+            "presets": [
+              { "id": "rain", "chance": 12 },
+              { "id": "fog", "chance": 5 }
+            ]
           },
-          {
-            "id": "rain",
-            "enabled": true,
-            "chance": 4
-          },
-          {
-            "id": "drizzle",
-            "enabled": true,
-            "chance": 3
-          },
-          {
-            "id": "thunderstorm",
-            "enabled": true,
-            "chance": 2
-          },
-          {
-            "id": "fog",
-            "enabled": true,
-            "chance": 3
-          },
-          {
-            "id": "windy",
-            "enabled": true,
-            "chance": 3
-          },
-          {
-            "id": "aether-haze",
-            "enabled": true,
-            "chance": 2
-          },
-          {
-            "id": "luminous-sky",
-            "enabled": true,
-            "chance": 1
-          },
-          {
-            "id": "veilfall",
-            "enabled": true,
-            "chance": 1
-          },
-          {
-            "id": "gravewind",
-            "enabled": true,
-            "chance": 1
-          },
-          {
-            "id": "nullfront",
-            "enabled": true,
-            "chance": 1
-          },
-          {
-            "id": "ley-surge",
-            "enabled": true,
-            "chance": 2
+          "Winter": {
+            "temperatures": { "min": -5, "max": 18 },
+            "presets": [
+              { "id": "snow", "chance": 0 },
+              { "id": "blizzard", "chance": 0 },
+              { "id": "rain", "chance": 15 },
+              { "id": "drizzle", "chance": 10 }
+            ]
           }
-        ]
+        }
       },
       {
         "id": "sanctus",
         "name": "CALENDARIA.Calendar.Renescara.Weather.Zone.Sanctus.Name",
         "description": "CALENDARIA.Calendar.Renescara.Weather.Zone.Sanctus.Description",
         "temperatures": {
-          "Spring": {
-            "min": -25,
-            "max": 5
-          },
-          "Summer": {
-            "min": -5,
-            "max": 22
-          },
-          "Autumn": {
-            "min": -20,
-            "max": 8
-          },
-          "Winter": {
-            "min": -50,
-            "max": -20
-          },
-          "_default": {
-            "min": -20,
-            "max": 5
-          }
+          "_default": { "min": -20, "max": 5 }
         },
         "presets": [
-          {
-            "id": "clear",
-            "enabled": true,
-            "chance": 4
+          { "id": "clear", "enabled": true, "chance": 4 },
+          { "id": "partly-cloudy", "enabled": true, "chance": 3 },
+          { "id": "cloudy", "enabled": true, "chance": 3 },
+          { "id": "overcast", "enabled": true, "chance": 4 },
+          { "id": "snow", "enabled": true, "chance": 5 },
+          { "id": "blizzard", "enabled": true, "chance": 4 },
+          { "id": "fog", "enabled": true, "chance": 2 },
+          { "id": "windy", "enabled": true, "chance": 4 },
+          { "id": "aether-haze", "enabled": true, "chance": 3 },
+          { "id": "luminous-sky", "enabled": true, "chance": 4 },
+          { "id": "veilfall", "enabled": true, "chance": 2 },
+          { "id": "gravewind", "enabled": true, "chance": 3 },
+          { "id": "nullfront", "enabled": true, "chance": 4 },
+          { "id": "ley-surge", "enabled": true, "chance": 2 }
+        ],
+        "seasonOverrides": {
+          "Spring": {
+            "temperatures": { "min": -25, "max": 5 },
+            "presets": [
+              { "id": "rain", "chance": 0 },
+              { "id": "drizzle", "chance": 0 },
+              { "id": "thunderstorm", "chance": 0 },
+              { "id": "snow", "chance": 20 },
+              { "id": "luminous-sky", "chance": 8 }
+            ]
           },
-          {
-            "id": "partly-cloudy",
-            "enabled": true,
-            "chance": 3
+          "Summer": {
+            "temperatures": { "min": -5, "max": 22 },
+            "presets": [
+              { "id": "snow", "chance": 5 },
+              { "id": "blizzard", "chance": 0 },
+              { "id": "clear", "chance": 20 },
+              { "id": "luminous-sky", "chance": 10 }
+            ]
           },
-          {
-            "id": "cloudy",
-            "enabled": true,
-            "chance": 3
+          "Autumn": {
+            "temperatures": { "min": -20, "max": 8 },
+            "presets": [
+              { "id": "rain", "chance": 0 },
+              { "id": "snow", "chance": 15 },
+              { "id": "nullfront", "chance": 8 }
+            ]
           },
-          {
-            "id": "overcast",
-            "enabled": true,
-            "chance": 4
-          },
-          {
-            "id": "snow",
-            "enabled": true,
-            "chance": 5
-          },
-          {
-            "id": "blizzard",
-            "enabled": true,
-            "chance": 4
-          },
-          {
-            "id": "fog",
-            "enabled": true,
-            "chance": 2
-          },
-          {
-            "id": "windy",
-            "enabled": true,
-            "chance": 4
-          },
-          {
-            "id": "aether-haze",
-            "enabled": true,
-            "chance": 3
-          },
-          {
-            "id": "luminous-sky",
-            "enabled": true,
-            "chance": 4
-          },
-          {
-            "id": "veilfall",
-            "enabled": true,
-            "chance": 2
-          },
-          {
-            "id": "gravewind",
-            "enabled": true,
-            "chance": 3
-          },
-          {
-            "id": "nullfront",
-            "enabled": true,
-            "chance": 4
-          },
-          {
-            "id": "ley-surge",
-            "enabled": true,
-            "chance": 2
+          "Winter": {
+            "temperatures": { "min": -50, "max": -20 },
+            "presets": [
+              { "id": "rain", "chance": 0 },
+              { "id": "drizzle", "chance": 0 },
+              { "id": "thunderstorm", "chance": 0 },
+              { "id": "snow", "chance": 25 },
+              { "id": "blizzard", "chance": 20 },
+              { "id": "permafrost-surge", "chance": 10 }
+            ]
           }
-        ]
+        }
       },
       {
         "id": "thornwood",
         "name": "CALENDARIA.Calendar.Renescara.Weather.Zone.Thornwood.Name",
         "description": "CALENDARIA.Calendar.Renescara.Weather.Zone.Thornwood.Description",
         "temperatures": {
-          "Spring": {
-            "min": -8,
-            "max": 22
-          },
-          "Summer": {
-            "min": 12,
-            "max": 35
-          },
-          "Autumn": {
-            "min": -2,
-            "max": 25
-          },
-          "Winter": {
-            "min": -25,
-            "max": 5
-          },
-          "_default": {
-            "min": 0,
-            "max": 20
-          }
+          "_default": { "min": 0, "max": 20 }
         },
         "presets": [
-          {
-            "id": "clear",
-            "enabled": true,
-            "chance": 4
+          { "id": "clear", "enabled": true, "chance": 4 },
+          { "id": "partly-cloudy", "enabled": true, "chance": 4 },
+          { "id": "cloudy", "enabled": true, "chance": 3 },
+          { "id": "overcast", "enabled": true, "chance": 3 },
+          { "id": "rain", "enabled": true, "chance": 3 },
+          { "id": "fog", "enabled": true, "chance": 4 },
+          { "id": "mist", "enabled": true, "chance": 4 },
+          { "id": "thunderstorm", "enabled": true, "chance": 2 },
+          { "id": "aether-haze", "enabled": true, "chance": 4 },
+          { "id": "luminous-sky", "enabled": true, "chance": 2 },
+          { "id": "veilfall", "enabled": true, "chance": 5 },
+          { "id": "gravewind", "enabled": true, "chance": 4 },
+          { "id": "nullfront", "enabled": true, "chance": 3 },
+          { "id": "ley-surge", "enabled": true, "chance": 5 }
+        ],
+        "seasonOverrides": {
+          "Spring": {
+            "temperatures": { "min": -8, "max": 22 },
+            "presets": [
+              { "id": "mist", "chance": 15 },
+              { "id": "fog", "chance": 10 },
+              { "id": "veilfall", "chance": 8 },
+              { "id": "ley-surge", "chance": 10 }
+            ]
           },
-          {
-            "id": "partly-cloudy",
-            "enabled": true,
-            "chance": 4
+          "Summer": {
+            "temperatures": { "min": 12, "max": 35 },
+            "presets": [
+              { "id": "fog", "chance": 5 },
+              { "id": "mist", "chance": 8 },
+              { "id": "thunderstorm", "chance": 8 },
+              { "id": "aether-haze", "chance": 10 }
+            ]
           },
-          {
-            "id": "cloudy",
-            "enabled": true,
-            "chance": 3
+          "Autumn": {
+            "temperatures": { "min": -2, "max": 25 },
+            "presets": [
+              { "id": "fog", "chance": 15 },
+              { "id": "mist", "chance": 12 },
+              { "id": "gravewind", "chance": 10 },
+              { "id": "veilfall", "chance": 10 }
+            ]
           },
-          {
-            "id": "overcast",
-            "enabled": true,
-            "chance": 3
-          },
-          {
-            "id": "rain",
-            "enabled": true,
-            "chance": 3
-          },
-          {
-            "id": "fog",
-            "enabled": true,
-            "chance": 4
-          },
-          {
-            "id": "mist",
-            "enabled": true,
-            "chance": 4
-          },
-          {
-            "id": "thunderstorm",
-            "enabled": true,
-            "chance": 2
-          },
-          {
-            "id": "aether-haze",
-            "enabled": true,
-            "chance": 4
-          },
-          {
-            "id": "luminous-sky",
-            "enabled": true,
-            "chance": 2
-          },
-          {
-            "id": "veilfall",
-            "enabled": true,
-            "chance": 5
-          },
-          {
-            "id": "gravewind",
-            "enabled": true,
-            "chance": 4
-          },
-          {
-            "id": "nullfront",
-            "enabled": true,
-            "chance": 3
-          },
-          {
-            "id": "ley-surge",
-            "enabled": true,
-            "chance": 5
+          "Winter": {
+            "temperatures": { "min": -25, "max": 5 },
+            "presets": [
+              { "id": "rain", "chance": 0 },
+              { "id": "drizzle", "chance": 0 },
+              { "id": "snow", "chance": 15 },
+              { "id": "fog", "chance": 10 },
+              { "id": "gravewind", "chance": 8 },
+              { "id": "nullfront", "chance": 8 }
+            ]
           }
-        ]
+        }
       }
     ]
   },

@@ -181,7 +181,7 @@ export default class WeatherManager {
    * Generate and set weather based on active calendar's climate zone.
    * @param {object} [options] - Generation options
    * @param {string} [options.zoneId] - Zone ID override (uses active if not provided)
-   * @param {string} [options.season] - Season override (uses current if not provided)
+   * @param {string} [options.season] - Season name override (uses current if not provided)
    * @param {boolean} [options.broadcast] - Whether to broadcast
    * @returns {Promise<object>} Generated weather
    */
@@ -192,12 +192,14 @@ export default class WeatherManager {
     }
 
     const zoneConfig = this.getActiveZone(options.zoneId);
-    const season = options.season || this.#getCurrentSeasonName();
+    const seasonData = this.#getCurrentSeason();
+    const season = options.season || (seasonData ? localize(seasonData.name) : null);
+    const seasonClimate = seasonData?.climate ?? null;
     const customPresets = this.getCustomPresets();
 
     let result;
-    if (!zoneConfig) {
-      log(2, 'No climate zone configured, using random preset');
+    if (!zoneConfig && !seasonClimate) {
+      log(2, 'No climate zone or season climate configured, using random preset');
       const allPresets = getAllPresets(customPresets);
       const randomPreset = allPresets[Math.floor(Math.random() * allPresets.length)];
       const min = randomPreset.tempMin ?? 10;
@@ -205,7 +207,7 @@ export default class WeatherManager {
       const temperature = Math.round(min + Math.random() * (max - min));
       result = { preset: randomPreset, temperature };
     } else {
-      result = generateWeather({ zoneConfig, season, customPresets });
+      result = generateWeather({ seasonClimate, zoneConfig, season, customPresets });
     }
 
     const weather = {
@@ -236,7 +238,6 @@ export default class WeatherManager {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return [];
     const zoneConfig = this.getActiveZone(options.zoneId);
-    if (!zoneConfig) return [];
     const days = options.days || 7;
     const customPresets = this.getCustomPresets();
     const components = game.time.components;
@@ -251,7 +252,8 @@ export default class WeatherManager {
       customPresets,
       getSeasonForDate: (year, month, day) => {
         const season = calendar.getCurrentSeason?.({ year: year - yearZero, month, dayOfMonth: day - 1 });
-        return season ? localize(season.name) : null;
+        if (!season) return null;
+        return { name: localize(season.name), climate: season.climate };
       }
     });
   }
@@ -269,39 +271,46 @@ export default class WeatherManager {
   }
 
   /**
-   * Get current season name.
-   * @returns {string|null} Season name
+   * Get current season object.
+   * @returns {object|null} Season object with name, climate, etc.
    * @private
    */
-  static #getCurrentSeasonName() {
+  static #getCurrentSeason() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar?.getCurrentSeason) return null;
-    const season = calendar.getCurrentSeason(game.time.components);
-    return season ? localize(season.name) : null;
+    return calendar.getCurrentSeason(game.time.components);
   }
 
   /**
    * Generate temperature for a preset based on active zone and season.
+   * Uses season climate as base with zone overrides.
    * @param {string} presetId - Weather preset ID
-   * @returns {number|null} Generated temperature or null if no zone configured
+   * @returns {number|null} Generated temperature or null if no config
    * @private
    */
   static #generateTemperatureForPreset(presetId) {
     const zoneConfig = this.getActiveZone();
-    if (!zoneConfig?.temperatures) {
+    const seasonData = this.#getCurrentSeason();
+    const season = seasonData ? localize(seasonData.name) : null;
+    const seasonClimate = seasonData?.climate;
+    let tempRange = { min: 10, max: 22 };
+    const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
+    if (zoneOverride?.temperatures?.min != null || zoneOverride?.temperatures?.max != null) {
+      tempRange = { min: zoneOverride.temperatures.min ?? 10, max: zoneOverride.temperatures.max ?? 22 };
+    } else if (seasonClimate?.temperatures?.min != null || seasonClimate?.temperatures?.max != null) {
+      tempRange = { min: seasonClimate.temperatures.min ?? 10, max: seasonClimate.temperatures.max ?? 22 };
+    } else if (zoneConfig?.temperatures) {
+      const temps = zoneConfig.temperatures;
+      if (season && temps[season]) tempRange = temps[season];
+      else if (temps._default) tempRange = temps._default;
+    } else {
       const customPresets = this.getCustomPresets();
       const preset = getPreset(presetId, customPresets);
       const min = preset?.tempMin ?? 10;
       const max = preset?.tempMax ?? 25;
       return Math.round(min + Math.random() * (max - min));
     }
-
-    const season = this.#getCurrentSeasonName();
-    const temps = zoneConfig.temperatures;
-    let tempRange = { min: 10, max: 22 };
-    if (season && temps[season]) tempRange = temps[season];
-    else if (temps._default) tempRange = temps._default;
-    const presetConfig = zoneConfig.presets?.find((p) => p.id === presetId);
+    const presetConfig = zoneConfig?.presets?.find((p) => p.id === presetId);
     if (presetConfig?.tempMin != null) tempRange = { ...tempRange, min: presetConfig.tempMin };
     if (presetConfig?.tempMax != null) tempRange = { ...tempRange, max: presetConfig.tempMax };
     return Math.round(tempRange.min + Math.random() * (tempRange.max - tempRange.min));

@@ -164,9 +164,8 @@ export function getClimateZoneTemplateIds() {
 
 /**
  * Get a fully populated zone config object from a template.
- * Includes preset configurations based on the template's weather probabilities.
  * @param {string} templateId - Climate zone template ID
- * @param {string[]} [seasonNames] - Season names for temperature keys
+ * @param {string[]} [seasonNames] - Season names for temperature and override keys
  * @returns {object|null} Populated zone config object
  */
 export function getDefaultZoneConfig(templateId, seasonNames = ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter']) {
@@ -186,7 +185,25 @@ export function getDefaultZoneConfig(templateId, seasonNames = ['CALENDARIA.Seas
     const chance = totalWeight > 0 ? Math.round((weight / totalWeight) * 100 * 100) / 100 : 0;
     presets.push({ id: preset.id, enabled: weight > 0, chance, tempMin: preset.tempMin ?? null, tempMax: preset.tempMax ?? null });
   }
-  return { id: template.id, name: template.name, description: template.description ?? '', temperatures, presets };
+
+  const seasonOverrides = {};
+  for (const season of seasonNames) {
+    const normalizedSeason = normalizeSeasonName(season);
+    const seasonWeather = template.weather?.[normalizedSeason];
+    if (!seasonWeather || normalizedSeason === 'default') continue;
+    const seasonTotal = Object.values(seasonWeather).reduce((sum, w) => sum + w, 0);
+    if (seasonTotal <= 0) continue;
+    const seasonPresets = [];
+    for (const [presetId, weight] of Object.entries(seasonWeather)) {
+      const chance = Math.round((weight / seasonTotal) * 100 * 100) / 100;
+      seasonPresets.push({ id: presetId, chance });
+    }
+
+    const seasonTemp = template.temperatures[season] ?? template.temperatures[normalizedSeason.charAt(0).toUpperCase() + normalizedSeason.slice(1)];
+    seasonOverrides[season] = { temperatures: seasonTemp ? { min: seasonTemp.min, max: seasonTemp.max } : null, presets: seasonPresets };
+  }
+
+  return { id: template.id, name: template.name, description: template.description ?? '', temperatures, presets, seasonOverrides: Object.keys(seasonOverrides).length > 0 ? seasonOverrides : {} };
 }
 
 /**

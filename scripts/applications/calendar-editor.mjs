@@ -47,6 +47,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       moveWeekdayDown: CalendarEditor.#onMoveWeekdayDown,
       addSeason: CalendarEditor.#onAddSeason,
       removeSeason: CalendarEditor.#onRemoveSeason,
+      editSeasonClimate: CalendarEditor.#onEditSeasonClimate,
       addEra: CalendarEditor.#onAddEra,
       removeEra: CalendarEditor.#onRemoveEra,
       addFestival: CalendarEditor.#onAddFestival,
@@ -585,15 +586,27 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   #prepareWeatherContext(context) {
     const weather = this.#calendarData.weather || {};
     const zones = weather.zones || [];
-    const activeZoneId = weather.activeZone || 'temperate';
+    let activeZoneId = weather.activeZone;
+    if (!activeZoneId || !zones.find((z) => z.id === activeZoneId)) {
+      activeZoneId = zones[0]?.id || null;
+      if (activeZoneId) weather.activeZone = activeZoneId;
+    }
     context.zoneOptions = zones.map((z) => ({ value: z.id, label: z.name, selected: z.id === activeZoneId }));
     if (context.zoneOptions.length === 0) context.zoneOptions = [{ value: '', label: 'CALENDARIA.Editor.Weather.Zone.NoZones', selected: true }];
-    const activeZone = zones.find((z) => z.id === activeZoneId) || zones[0] || null;
+    const activeZone = zones.find((z) => z.id === activeZoneId) || null;
     const savedPresets = activeZone?.presets || [];
     const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT) || 'celsius';
     context.tempUnit = tempUnit === 'fahrenheit' ? 'F' : 'C';
     let presetIndex = 0;
     let totalChance = 0;
+    const seasons = this.#calendarData.seasons?.values || [];
+    context.seasonClimateList = seasons.map((season, idx) => ({
+      index: idx,
+      name: season.name,
+      icon: season.icon,
+      color: season.color,
+      hasClimate: !!(season.climate?.temperatures || season.climate?.presets?.length)
+    }));
 
     context.weatherCategories = Object.values(WEATHER_CATEGORIES)
       .map((cat) => {
@@ -642,9 +655,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onSubmit(_event, _form, formData) {
     const oldSeasonType = this.#calendarData.seasons?.type;
+    const oldActiveZone = this.#calendarData.weather?.activeZone;
     this.#updateFromFormData(formData.object);
     const newSeasonType = this.#calendarData.seasons?.type;
+    const newActiveZone = this.#calendarData.weather?.activeZone;
     if (oldSeasonType !== newSeasonType) this.render({ parts: ['seasons'] });
+    if (oldActiveZone !== newActiveZone) this.render({ parts: ['weather'] });
   }
 
   /**
@@ -810,6 +826,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const sortedIndices = [...indices].sort((a, b) => a - b);
     const isPeriodic = this.#calendarData.seasons.type === 'periodic';
+    const existingClimates = this.#calendarData.seasons.values.map((s) => s.climate);
     this.#calendarData.seasons.values.length = 0;
     for (const idx of sortedIndices) {
       const season = {
@@ -817,7 +834,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         abbreviation: data[`seasons.${idx}.abbreviation`] || '',
         icon: data[`seasons.${idx}.icon`] || '',
         color: data[`seasons.${idx}.color`] || '',
-        ordinal: this.#calendarData.seasons.values.length + 1
+        ordinal: this.#calendarData.seasons.values.length + 1,
+        climate: existingClimates[idx] ?? null
       };
       if (isPeriodic) {
         season.duration = this.#parseOptionalInt(data[`seasons.${idx}.duration`]) ?? 91;
@@ -1018,9 +1036,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #updateWeatherFromFormData(data) {
     if (!this.#calendarData.weather) this.#calendarData.weather = { zones: [], activeZone: null, autoGenerate: false };
+    const oldZoneId = this.#calendarData.weather.activeZone;
     const selectedZone = data['weather.activeZone'];
+    const zoneChanged = selectedZone && selectedZone !== oldZoneId;
     if (selectedZone) this.#calendarData.weather.activeZone = selectedZone;
     this.#calendarData.weather.autoGenerate = !!data['weather.autoGenerate'];
+    if (zoneChanged) return;
     const presetIndices = new Set();
     for (const key of Object.keys(data)) {
       const match = key.match(/^weather\.presets\.(\d+)\./);
@@ -1290,6 +1311,79 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.seasons.values.splice(idx, 1);
     this.#reindexArray(this.#calendarData.seasons.values);
     this.render();
+  }
+
+  /**
+   * Edit a season's climate settings.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onEditSeasonClimate(_event, target) {
+    const idx = parseInt(target.dataset.index);
+    const season = this.#calendarData.seasons.values[idx];
+    if (!season) return;
+    const climate = season.climate ?? { temperatures: null, presets: [] };
+    const displayMin = climate.temperatures?.min != null ? toDisplayUnit(climate.temperatures.min) : '';
+    const displayMax = climate.temperatures?.max != null ? toDisplayUnit(climate.temperatures.max) : '';
+    const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT) === 'fahrenheit' ? '°F' : '°C';
+    const presetRows = Object.values(WEATHER_CATEGORIES)
+      .map((cat) => {
+        const categoryPresets = ALL_PRESETS.filter((p) => p.category === cat.id);
+        const rows = categoryPresets
+          .map((preset) => {
+            const existing = climate.presets?.find((p) => p.id === preset.id);
+            return `
+          <div class="preset-row" data-preset-id="${preset.id}">
+            <span class="preset-icon" style="color: ${preset.color}"><i class="fas ${preset.icon}"></i></span>
+            <label>${localize(preset.label)}</label>
+            <input type="number" name="preset_${preset.id}" value="${existing?.chance ?? ''}" min="0" max="100" step="0.1" placeholder="—">
+            <span class="units">%</span>
+          </div>`;
+          })
+          .join('');
+        return `<div class="preset-category"><h4>${localize(cat.label)}</h4>${rows}</div>`;
+      })
+      .join('');
+
+    const content = `
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Editor.Season.Climate.Temperatures')}</label>
+        <div class="temp-fields">
+          <input type="number" name="tempMin" value="${displayMin}" placeholder="${localize('CALENDARIA.Common.Min')}">
+          <span>–</span>
+          <input type="number" name="tempMax" value="${displayMax}" placeholder="${localize('CALENDARIA.Common.Max')}">
+          <span class="units">${tempUnit}</span>
+        </div>
+        <p class="hint">${localize('CALENDARIA.Editor.Season.Climate.TemperaturesHint')}</p>
+      </div>
+      <div class="form-group">
+        <label>${localize('CALENDARIA.Editor.Season.Climate.WeatherChances')}</label>
+        <p class="hint">${localize('CALENDARIA.Editor.Season.Climate.WeatherChancesHint')}</p>
+        <div class="preset-list">${presetRows}</div>
+      </div>`;
+
+    const result = await foundry.applications.api.DialogV2.prompt({
+      classes: ['calendaria', 'climate-settings-dialog'],
+      window: { title: format('CALENDARIA.Editor.Season.Climate.Title', { name: localize(season.name) }) },
+      content,
+      ok: {
+        label: localize('CALENDARIA.Common.Save'),
+        callback: (_event, button) => {
+          const form = button.form;
+          const tempMin = form.elements.tempMin?.value;
+          const tempMax = form.elements.tempMax?.value;
+          const presets = [];
+          for (const preset of ALL_PRESETS) {
+            const chance = parseFloat(form.elements[`preset_${preset.id}`]?.value);
+            if (chance > 0) presets.push({ id: preset.id, chance });
+          }
+          return { temperatures: tempMin !== '' || tempMax !== '' ? { min: fromDisplayUnit(parseFloat(tempMin) || 0), max: fromDisplayUnit(parseFloat(tempMax) || 20) } : null, presets };
+        }
+      }
+    });
+    if (!result) return;
+    season.climate = result.presets.length > 0 || result.temperatures ? result : null;
+    this.render({ parts: ['weather'] });
   }
 
   /**
