@@ -16,6 +16,7 @@ Eras define historical periods with custom year formatting. Each era has:
 ### Era Resolution
 
 When displaying a year, Calendaria finds the matching era by:
+
 1. Sorting eras by `startYear` descending
 2. Finding the first era where `displayYear >= startYear` and `displayYear <= endYear` (or endYear is null)
 3. If no match, falls back to the first era in the list
@@ -34,11 +35,13 @@ Custom templates support these placeholders:
 | `{{era}}` / `{{name}}` | Full era name |
 
 Examples:
+
 - `{{year}} {{short}}` produces "1492 DR"
 - `{{short}} {{yearInEra}}` produces "DR 5"
 - `Year {{yearInEra}} of the {{era}}` produces "Year 5 of the Third Age"
 
 When no template is set, the `format` field controls output:
+
 - `suffix`: "1492 DR"
 - `prefix`: "DR 1492"
 
@@ -70,6 +73,7 @@ Cycles are repeating sequences (zodiac signs, elemental weeks, etc.). Each cycle
 ### Cycle Calculation
 
 The current entry is determined by:
+
 ```javascript
 epochValue = epochValues[cycle.basedOn];
 let cycleNum = Math.floor(epochValue / cycle.length);
@@ -85,10 +89,48 @@ const normalizedIndex = ((cycleIndex % cycle.entries.length) + cycle.entries.len
 ### Display Format
 
 The `cycleFormat` field controls how cycles appear. Placeholders:
+
 - `{{1}}`, `{{2}}`, etc. - current entry name for each cycle
 - `{{n}}` - line break
 
 Example: `{{1}} - Week of {{2}}`
+
+---
+
+## Format Tokens
+
+Use these tokens in date format strings to display era and cycle information.
+
+### Era Tokens
+
+| Token | Description | Example Output |
+|-------|-------------|----------------|
+| `[era]` | Full era name | "Dale Reckoning" |
+| `[eraAbbr]` | Era abbreviation | "DR" |
+
+### Season Tokens
+
+| Token | Description | Example Output |
+|-------|-------------|----------------|
+| `[season]` | Full season name | "Summer" |
+| `[seasonAbbr]` | Season abbreviation | "Sum" |
+
+### Cycle Tokens
+
+| Token | Description | Example Output |
+|-------|-------------|----------------|
+| `[cycle]` | Current cycle number (1-indexed) | "3" |
+| `[cycleName]` | Current cycle entry name | "Gemini" |
+| `[cycleRoman]` | Cycle number as Roman numeral | "III" |
+| `[ch]` | Full formatted cycle string | "Year of the Dragon" |
+| `[chAbbr]` | Abbreviated cycle | "Dragon" |
+
+### Usage Example
+
+```
+"DD MMMM YYYY [eraAbbr] - [cycleName]"
+→ "15 Flamerule 1492 DR - Gemini"
+```
 
 ---
 
@@ -104,9 +146,19 @@ const result = CALENDARIA.api.getCycleValues();
 ```
 
 The `values` array contains objects with:
+
 - `cycleName` - name of the cycle
 - `entryName` - current entry name
-- `index` - current entry index
+- `index` - current entry index (0-based internal, 1-indexed for display)
+
+### getCycleName(cycleIndex)
+
+Returns the current entry name for a specific cycle.
+
+```javascript
+const name = CALENDARIA.api.getCycleName(0);
+// Returns: "Gemini"
+```
 
 ### getCurrentEra()
 

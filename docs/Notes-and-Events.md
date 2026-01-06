@@ -4,7 +4,27 @@ Calendar notes are journal entry pages that attach to specific dates. Notes supp
 
 ## Note Storage
 
-Notes are stored as `JournalEntryPage` documents with type `calendaria.calendarnote`. Each calendar has a dedicated journal entry with month separator pages. Notes are organized under their respective month pages by sort order.
+Notes are stored as individual `JournalEntry` documents within a dedicated folder per calendar. Each note contains a single `JournalEntryPage` of type `calendaria.calendarnote`.
+
+### Folder Structure
+
+```
+📁 [Calendar Name] Notes (hidden from sidebar)
+  📄 Note 1 (JournalEntry)
+  📄 Note 2 (JournalEntry)
+  ...
+```
+
+Calendar infrastructure folders are hidden from the Journal sidebar to reduce clutter. Access notes through the calendar UI instead.
+
+### Migration
+
+Existing worlds with the legacy journal-based storage (single JournalEntry with pages) are automatically migrated to the folder-based system on world load. The migration:
+
+- Creates a folder for each calendar with existing notes
+- Converts each note page to its own JournalEntry
+- Preserves all note data and ownership
+- Cleans up orphaned legacy journals
 
 ## Creating a Note
 
@@ -84,6 +104,8 @@ Set the **Repeat** dropdown to enable recurrence. Available patterns:
 
 - **Max Occurrences**: Limits total recurrences (0 = unlimited)
 - **Repeat End Date**: Stop repeating after this date
+
+**Note:** For monthless calendars (e.g., Traveller), the `monthly` and `weekOfMonth` patterns are hidden since they don't apply.
 
 ### Week of Month
 
@@ -197,8 +219,40 @@ Right-click the icon picker to switch between modes. The icon color is controlle
 
 ## Visibility
 
-- **GM Only**: Note is only visible to GMs
+- **GM Only**: Note is only visible to GMs (uses Foundry ownership system)
 - **Silent**: Suppresses reminders and event announcements
+
+## Player Permissions
+
+Players can create, edit, and delete their own notes. Ownership is determined by standard Foundry document permissions.
+
+### What Players Can Do
+
+- **Create notes**: Using the Add Note button on calendar UI
+- **Edit own notes**: Notes they created (Owner permission)
+- **Delete own notes**: Notes they created
+- **View shared notes**: Notes with appropriate permissions
+
+### What Players Cannot Do
+
+- **View GM-only notes**: Hidden via ownership settings
+- **Edit others' notes**: Unless given explicit permission
+- **Modify time/date**: All time controls are GM-only
+- **Change weather**: Weather picker is GM-only
+
+### Note Ownership
+
+When a player creates a note:
+
+1. The JournalEntry is created with the player as owner
+2. Other players see it based on default permissions
+3. GM always has full access
+
+When a GM creates a note:
+
+1. "GM Only" checkbox controls player visibility
+2. If checked, ownership is set to GM-only
+3. If unchecked, default permissions apply
 
 ## Macro Triggers
 

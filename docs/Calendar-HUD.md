@@ -1,6 +1,6 @@
 # Calendar HUD
 
-The Calendar HUD (`CalendariaHUD`) displays date, time, weather, and events in a draggable widget. Two display modes are available: the full HUD with an animated dome, or a compact calendar view.
+The Calendar HUD (`CalendariaHUD`) displays date, time, weather, and events in a draggable widget. Two display modes are available: the full HUD with an animated dome (or slice), or a compact calendar view.
 
 ---
 
@@ -8,6 +8,7 @@ The Calendar HUD (`CalendariaHUD`) displays date, time, weather, and events in a
 
 - Press **Alt+C** to toggle visibility
 - Automatically opens on world load (if enabled in settings)
+- Double-click the MiniCalendar to open the full calendar
 
 ---
 
@@ -17,8 +18,27 @@ Configured via Settings > HUD tab:
 
 | Mode | Description |
 |------|-------------|
-| `full` | Animated dome with sky gradient, sun/moon arc, and info bar |
-| `compact` | Mini month grid with time controls |
+| `full` | Animated sky view with sun/moon arc and info bar |
+| `compact` | Condensed bar with slice dial (no dome) |
+
+Double-click the HUD bar to toggle between fullsize and compact modes.
+
+---
+
+## Dial Styles
+
+The HUD supports two dial styles for displaying the sun/moon:
+
+| Style | Description |
+|-------|-------------|
+| `dome` | Semi-circular dome above the bar with sun/moon arc |
+| `slice` | Horizontal strip in the bar with sun/moon traveling left-to-right |
+
+Configure via Settings > HUD tab > Dial Style.
+
+### Combat Auto-Compact
+
+When enabled (default ON), the HUD automatically switches to slice style during combat to reduce screen space usage. Configure via Settings > HUD tab > Compact During Combat.
 
 ---
 
@@ -33,16 +53,26 @@ The dome shows a dynamic sky that changes based on time of day:
 - Stars fade in/out during twilight (5:30-7:00 and 17:30-19:00)
 - Clouds visible during daylight (7:00-18:00)
 
-Click the dome or press **Enter/Space** (when focused) to open the Time Dial.
+**GM Only**: Click the dome to open the Time Dial for quick time adjustments.
 
-### Time Dial
+**Players**: The dome is view-only and cannot be clicked.
 
-A circular dial for setting the time:
+### Time Dial (GM Only)
 
-- Drag the handle around the 24-hour dial
-- Type directly in the time input field (accepts formats like "14:30", "2:30pm")
-- The dial shows sun/moon position and sky gradient preview
-- Click outside the dial to close
+Click the dome or slice to open the Time Dial overlay:
+
+- Drag the sun/moon around the arc to set time visually
+- Time updates in real-time as you drag
+- Release to confirm the new time
+- Click outside or press Escape to cancel
+
+### Slice Display
+
+An alternative to the dome showing a horizontal sky strip:
+
+- Sun/moon travels left-to-right across the bar
+- Time displayed over the sky gradient
+- Automatically used in compact mode
 
 ### Info Bar
 
@@ -50,7 +80,7 @@ The bar displays (left to right):
 
 - **Search button** - Opens note search panel
 - **Add Note button** - Creates a new note for today
-- **Date** - Click to open date picker (GM only)
+- **Date** - Click to open Set Date dialog (GM only)
 - **Events** - Icons for today's notes (up to 5); click to open note
 - **Time** - Current time with play/pause button (GM only)
 - **Weather** - Current weather; click to open weather picker (GM only)
@@ -60,20 +90,44 @@ The bar displays (left to right):
 - **Open Calendar** - Opens the full calendar application
 - **Settings** - Opens the settings panel
 
+### Block Visibility
+
+Each indicator block (weather, season, era/cycle) can be hidden via Settings > HUD tab. Hiding blocks shrinks the HUD width automatically.
+
+**Weather Display Modes:**
+
+- Full (icon + label + temperature)
+- Icon + Temperature
+- Icon Only
+- Temperature Only
+
+**Season Display Modes:**
+
+- Icon + Text
+- Icon Only
+- Text Only
+
+Settings are user-scoped - each player can customize their view.
+
 ### Time Controls Tray (GM Only)
 
-Hover over the bar or enable sticky tray to reveal:
+Hover over the bar to reveal time controls:
 
 | Button | Action |
 |--------|--------|
 | Sunrise | Advance to sunrise |
 | Midday | Advance to solar noon |
 | Reverse | Step backward by increment |
-| Multiplier dropdown | Set time multiplier (0.25x to 10x) |
 | Increment dropdown | Set step size (second, round, minute, hour, day, week, month, season, year) |
 | Forward | Step forward by increment |
 | Sunset | Advance to sunset |
 | Midnight | Advance to midnight (next day) |
+
+**Note:** Real-time clock speed is configured in Settings > Time tab, not on the HUD.
+
+### Custom Time Jumps
+
+Configure custom jump buttons (e.g., skip 8 hours) via Settings > HUD tab > Custom Time Jumps. Each increment can have its own jump values.
 
 ---
 
@@ -83,11 +137,18 @@ A mini month view with integrated time controls.
 
 ### Navigation
 
-- **Arrow buttons** - Previous/next month
+- **Arrow buttons** - Previous/next month (or week for monthless calendars)
 - **Today button** - Return to current date
 - Click a day to select it
 - Click a grayed-out day to navigate to that month
-- Double-click a day to set it as current date (GM) or view notes
+
+### Monthless Calendars
+
+For calendars without months (like Traveller), the MiniCalendar shows a 3-week view:
+
+- Previous week, current week, and next week
+- Navigation moves by week instead of month
+- Header displays "Week X, Year"
 
 ### Day Cells
 
@@ -101,13 +162,12 @@ Each day cell may show:
 
 ### Sidebar
 
-Appears on hover (or sticky):
+Appears on hover (or when sticky):
 
 - Close
 - Open Full Calendar
-- Pin Controls (opens sticky options menu)
 - Today
-- Set Current Date (when a date is selected)
+- Set Current Date (when a date is selected, GM only)
 - Add Note
 - Search Notes
 - View Notes (when notes exist on selected date)
@@ -138,6 +198,24 @@ Revealed on hover:
 - Forward, Forward 5x
 - Sunset, Midnight shortcuts
 
+### Double-Click Behavior
+
+- Double-click MiniCalendar to open the full Calendar Application
+- Double-click the full Calendar Application to return to MiniCalendar
+
+---
+
+## Clock Sync
+
+The real-time clock syncs with game state:
+
+- **Pause Sync**: Clock stops when game is paused, resumes at 1:1 when unpaused
+- **Combat Sync**: Clock stops during combat (time advances per-turn via system)
+
+When sync is enabled and blocked (paused or in combat), manually starting the clock shows a warning notification.
+
+Configure sync behavior in Settings > Time tab.
+
 ---
 
 ## Search
@@ -159,13 +237,30 @@ Both HUD modes include a search panel:
 
 Position is saved per-client.
 
+### Sticky Zones
+
+Drag the HUD near predefined zones for automatic snapping:
+
+| Zone | Location |
+|------|----------|
+| `top-center` | Centered at top of viewport |
+| `above-hotbar` | Above the macro hotbar |
+| `above-players` | Above the players list |
+| `below-controls` | Below the scene controls |
+
+When dragging into a zone, the HUD wobbles to indicate snapping will occur. Release to snap into position.
+
+Toggle sticky zones via Settings > HUD tab > Enable Sticky Zones.
+
+Debug visualization: `game.calendaria.showDebugZones()` or enable Dev Mode.
+
 ### Dome Visibility (Full HUD)
 
 The dome automatically fades when approaching the top of the viewport and hides entirely if insufficient space.
 
 ### Locking Position
 
-Enable "Lock Position" in settings or via the pin button context menu.
+Enable "Lock Position" in settings to prevent dragging.
 
 ### Resetting Position
 
@@ -173,49 +268,68 @@ Settings > HUD tab (or MiniCalendar tab) > Reset Position
 
 ---
 
-## Sticky Options
+## TimeKeeper HUD
 
-Access via the pin button. Options persist across sessions.
+A minimal time-only display for GMs who want a smaller footprint.
 
-### Full HUD
+### Features
 
-| Option | Effect |
-|--------|--------|
-| Sticky Tray | Keep time controls tray visible |
-| Lock Position | Prevent dragging |
+- Fixed compact width
+- Controls hidden on idle, revealed on hover
+- Play/pause as hover overlay on time display
+- Right-click for context menu (Settings, Close)
+- Configurable time jump buttons per increment
+- "Off" format option to hide date display
 
-### MiniCalendar
+### Controls
 
-| Option | Effect |
-|--------|--------|
-| Sticky Time Controls | Keep time controls visible |
-| Sticky Sidebar | Keep sidebar visible |
-| Lock Position | Prevent dragging |
+Hover to reveal:
+
+- Reverse/Forward buttons
+- Increment selector
+
+Configure jump buttons via Settings > TimeKeeper tab.
 
 ---
 
-## Settings
+## Settings Summary
 
 ### HUD Tab
 
 | Setting | Description |
 |---------|-------------|
-| Show Calendar HUD | Enable/disable HUD on world load |
-| HUD Mode | `full` or `compact` |
-| Sticky Tray | Keep tray open (Full HUD) |
+| Show Calendar HUD | Display on world load |
+| HUD Mode | `fullsize` or `compact` |
+| Dial Style | `dome` or `slice` |
+| Compact During Combat | Auto-switch to slice in combat |
+| Show Weather | Display weather indicator |
+| Weather Display Mode | full/icon+temp/icon-only/temp-only |
+| Show Season | Display season indicator |
+| Season Display Mode | icon+text/icon-only/text-only |
+| Show Era/Cycle | Display era and cycle indicators |
+| Enable Sticky Zones | Allow snapping to predefined positions |
+| Sticky Tray | Keep controls visible |
 | Lock Position | Prevent dragging |
-| Reset Position | Reset to default position |
+| Reset Position | Reset to default |
 
 ### MiniCalendar Tab
 
 | Setting | Description |
 |---------|-------------|
-| Show MiniCalendar | Enable/disable on world load |
-| Controls Delay | Seconds before controls auto-hide (1-10s) |
+| Show MiniCalendar | Display on world load |
+| Controls Delay | Seconds before auto-hide (1-10s) |
 | Sticky Time Controls | Keep time controls visible |
 | Sticky Sidebar | Keep sidebar visible |
 | Lock Position | Prevent dragging |
-| Reset Position | Reset to default position |
+| Reset Position | Reset to default |
+
+### TimeKeeper Tab
+
+| Setting | Description |
+|---------|-------------|
+| Show TimeKeeper | Display on world load |
+| Custom Time Jumps | Configure jump buttons per increment |
+| Reset Position | Reset to default |
 
 ---
 
@@ -224,5 +338,15 @@ Access via the pin button. Options persist across sessions.
 | Shortcut | Action |
 |----------|--------|
 | Alt+C | Toggle HUD visibility |
-| Enter/Space | Open time dial (when dome focused) |
 | Escape | Close search panel |
+
+---
+
+## Player Permissions
+
+Players have limited HUD interaction:
+
+- **Can**: View date/time/weather, search notes, view non-GM notes, create notes
+- **Cannot**: Open Set Date dialog, change time, change weather, access time controls
+
+The dome and all time-related controls are non-interactive for players.

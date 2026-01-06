@@ -72,6 +72,7 @@ Seven built-in climate zone templates define temperature ranges and weather prob
 ### Zone Configuration
 
 Each zone defines:
+
 - **Seasonal temperatures**: `Spring`, `Summer`, `Autumn`, `Winter`, and `_default` fallback
 - **Weather weights**: Per-season relative probabilities for each weather preset
 
@@ -83,9 +84,34 @@ When `calendar.weather.autoGenerate` is `true`, weather regenerates automaticall
 
 ---
 
+## Season-Specific Climate
+
+Each season can override the base zone climate with custom temperature ranges and weather preset chances.
+
+### Climate Layering
+
+Climate configuration follows a layered approach (first matching value wins):
+
+1. **Season override in zone** - Per-season settings within a zone
+2. **Zone defaults** - Base zone temperature and preset chances
+3. **Global defaults** - Fallback values
+
+### Configuring Season Climate
+
+In Calendar Editor > Weather tab:
+
+1. Select a climate zone
+2. Click the gear icon next to a season name
+3. Configure:
+   - **Temperature Range**: Override min/max for this season in this zone
+   - **Preset Chances**: Adjust probability weights for weather conditions
+
+---
+
 ## Temperature Units
 
 Stored in Celsius internally. Display unit configurable via `SETTINGS.TEMPERATURE_UNIT`:
+
 - `celsius` (default)
 - `fahrenheit`
 
@@ -111,6 +137,7 @@ Conversion handled by `WeatherManager.formatTemperature(celsius)`.
 ## Weather Picker
 
 `openWeatherPicker()` opens a dialog displaying all presets grouped by category. Features:
+
 - Climate zone selector (if zones configured)
 - Select preset directly
 - Random generation button
@@ -119,21 +146,27 @@ Conversion handled by `WeatherManager.formatTemperature(celsius)`.
 
 ## Custom Presets
 
-GMs can add custom weather presets stored in `SETTINGS.CUSTOM_WEATHER_PRESETS`.
+GMs can create custom weather conditions that appear alongside built-in presets.
 
-```javascript
-await CALENDARIA.api.addWeatherPreset({
-  id: 'my-weather',
-  label: 'My Weather',
-  description: 'Custom description',
-  icon: 'fa-cloud',
-  color: '#888888'
-});
+### Settings UI
 
-await CALENDARIA.api.removeWeatherPreset('my-weather');
-```
+Access via **Settings > Weather tab > Custom Weather Presets**:
 
-Custom presets appear in the "Custom" category with `category: 'custom'`.
+1. Click "Add Preset" to create a new condition
+2. Configure:
+   - **Name**: Display name for the condition
+   - **Icon**: FontAwesome icon class (e.g., `fa-cloud`)
+   - **Color**: Hex color for the icon
+   - **Temperature Range**: Min/max temperature for this condition
+3. Click Save
+
+Custom presets appear in:
+
+- Weather Picker under "Custom" category
+- Calendar Editor Weather tab preset lists
+- Climate settings dialog preset chances
+
+Custom presets are stored in `SETTINGS.CUSTOM_WEATHER_PRESETS` with `category: 'custom'`. See API Reference for `addWeatherPreset()` and `removeWeatherPreset()`.
 
 ---
 
@@ -277,5 +310,28 @@ Hooks.on('calendaria.weatherChange', ({ previous, current, remote }) => {
     { id: 'rain', enabled: true, chance: 10, tempMin: null, tempMax: null },
     // ...
   ]
+}
+```
+
+### Zone Config with Season Overrides
+
+```javascript
+{
+  id: 'temperate',
+  temperatures: {
+    Spring: { min: 8, max: 18 },
+    Summer: { min: 18, max: 30 },
+    // ...
+  },
+  presets: [/* base presets */],
+  seasonOverrides: {
+    Winter: {
+      temperatures: { min: -10, max: 2 },
+      presets: [
+        { id: 'snow', enabled: true, chance: 30 },
+        { id: 'blizzard', enabled: true, chance: 10 }
+      ]
+    }
+  }
 }
 ```

@@ -97,6 +97,20 @@ await CALENDARIA.api.advanceTimeToPreset('midnight');
 
 ---
 
+### skipNextHooks()
+
+Skip hook triggers for the next time change. Useful for timepoint jumps where you don't want to re-trigger events that already fired. GM only.
+
+```javascript
+CALENDARIA.api.skipNextHooks();
+await CALENDARIA.api.setDateTime({ year: 1492, month: 5, day: 15 });
+// No hooks fire for this change
+```
+
+**Returns:** `void`
+
+---
+
 ## Calendar Access
 
 ### getActiveCalendar()
@@ -222,6 +236,40 @@ const cycles = CALENDARIA.api.getCycleValues();
 ```
 
 **Returns:** `object|null` - Current cycle values.
+
+---
+
+### getCycleName(cycleIndex)
+
+Get the current entry name for a specific cycle.
+
+```javascript
+const name = CALENDARIA.api.getCycleName(0);
+// Returns: "Gemini"
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `cycleIndex` | `number` | Index of the cycle (default: 0) |
+
+**Returns:** `string|null` - Current cycle entry name.
+
+---
+
+### getDaysInYear(year)
+
+Get the total number of days in a year. Useful for monthless calendars.
+
+```javascript
+const days = CALENDARIA.api.getDaysInYear(1492);
+// Returns: 365
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `year` | `number` | The year to check (defaults to current year) |
+
+**Returns:** `number` - Total days in the year.
 
 ---
 
@@ -592,7 +640,7 @@ const note = CALENDARIA.api.getNote("abc123");
 
 ### createNote(options)
 
-Create a new calendar note. GM only.
+Create a new calendar note. Players can create their own notes; GM can create notes for anyone.
 
 ```javascript
 const note = await CALENDARIA.api.createNote({

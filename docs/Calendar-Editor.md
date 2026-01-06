@@ -45,10 +45,10 @@ Configure fundamental calendar properties.
 ### Leap Year Configuration
 
 - **Leap Rule** — Select how leap years are calculated:
-  - **None** — No leap years
-  - **Simple** — Every N years
-  - **Gregorian** — Standard Earth calendar rules (every 4 years, except centuries, except 400-year marks)
-  - **Custom** — Pattern-based rules
+    - **None** — No leap years
+    - **Simple** — Every N years
+    - **Gregorian** — Standard Earth calendar rules (every 4 years, except centuries, except 400-year marks)
+    - **Custom** — Pattern-based rules
 
 #### Simple Leap Year Fields
 
@@ -119,8 +119,8 @@ Give each week a name (like "Week of the Wolf" or "Tenday of Stars").
 
 - **Enabled** — Turn named weeks on/off
 - **Type** — How weeks are numbered:
-  - **Yearly** — Week numbers continue through the entire year
-  - **Monthly** — Week numbers reset at the start of each month
+    - **Yearly** — Week numbers continue through the entire year
+    - **Monthly** — Week numbers reset at the start of each month
 
 ### Named Weeks List
 
@@ -246,9 +246,9 @@ Define historical periods for your calendar.
 ### Era Template
 <!-- TODO: Convert to new formatting system -->
 - **Template** — Custom format string for year display using placeholders:
-  - `{{year}}` — The year number
-  - `{{abbreviation}}` — Era abbreviation
-  - Example: `{{year}} {{abbreviation}}` → "1492 DR"
+    - `{{year}}` — The year number
+    - `{{abbreviation}}` — Era abbreviation
+    - Example: `{{year}} {{abbreviation}}` → "1492 DR"
 - **Preview** — Live preview of the template output
 
 ### Era Controls
@@ -269,8 +269,11 @@ Create holidays and special days that appear on the calendar.
 | **Name** | Festival name (e.g., "Midwinter") |
 | **Month** | Which month the festival falls in |
 | **Day** | Day of the month |
+| **Day of Year** | For monthless calendars, the absolute day of year (1-365) |
 | **Leap Year Only** | Checkbox — festival only occurs in leap years |
 | **Counts for Weekday** | Checkbox — whether this day advances weekday counting (uncheck for intercalary days that exist "outside" normal weeks) |
+
+**Note:** For monthless calendars (like Traveller), use the Day of Year field instead of Month/Day to position festivals.
 
 ### Festival Controls
 
