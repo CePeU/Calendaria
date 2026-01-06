@@ -9,6 +9,7 @@ import { BUNDLED_CALENDARS } from '../../calendar/calendar-loader.mjs';
 import CalendarManager from '../../calendar/calendar-manager.mjs';
 import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import TimeKeeper, { getTimeIncrements } from '../../time/time-keeper.mjs';
+import { DEFAULT_FORMAT_PRESETS } from '../../utils/format-utils.mjs';
 import { format, localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
@@ -120,24 +121,20 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
-
-    // Handle theme mode dropdown change
     const themeModeSelect = this.element.querySelector('select[name="themeMode"]');
-    themeModeSelect?.addEventListener('change', async (e) => {
-      const mode = e.target.value;
-      if (!mode) return;
-
-      await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, mode);
-
-      if (mode === 'custom') {
-        const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
-        applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
-      } else {
-        applyPreset(mode);
-      }
-
-      this.render({ force: true, parts: ['appearance'] });
-    });
+    if (themeModeSelect && !themeModeSelect.dataset.listenerAttached) {
+      themeModeSelect.dataset.listenerAttached = 'true';
+      themeModeSelect.addEventListener('change', async (e) => {
+        const mode = e.target.value;
+        if (!mode) return;
+        await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, mode);
+        if (mode === 'custom') {
+          const customColors = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
+          applyCustomColors({ ...DEFAULT_COLORS, ...customColors });
+        } else applyPreset(mode);
+        this.render({ force: true, parts: ['appearance'] });
+      });
+    }
   }
 
   /** @override */
@@ -780,20 +777,22 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const newFormats = { ...currentFormats };
       for (const [locationId, formats] of Object.entries(data.displayFormats)) {
         if (formats) {
-          // If preset is 'custom', use custom field; otherwise use the preset name
-          let gmFormat = formats.gmPreset === 'custom' ? formats.gmCustom?.trim() : formats.gmPreset;
-          let playerFormat = formats.playerPreset === 'custom' ? formats.playerCustom?.trim() : formats.playerPreset;
-          // Fallback to 'long' if empty
-          newFormats[locationId] = {
-            gm: gmFormat || 'long',
-            player: playerFormat || 'long'
-          };
+          let gmFormat, playerFormat;
+          if (formats.gmPreset === 'custom') {
+            const customValue = formats.gmCustom?.trim();
+            gmFormat = customValue || currentFormats[locationId]?.gm || 'long';
+          } else gmFormat = formats.gmPreset || 'long';
+          if (formats.playerPreset === 'custom') {
+            const customValue = formats.playerCustom?.trim();
+            playerFormat = customValue || currentFormats[locationId]?.player || 'long';
+          } else playerFormat = formats.playerPreset || 'long';
+          newFormats[locationId] = { gm: gmFormat, player: playerFormat };
         }
       }
       await game.settings.set(MODULE.ID, SETTINGS.DISPLAY_FORMATS, newFormats);
-
-      // Trigger re-render of all HUDs to apply new format settings
       Hooks.callAll('calendaria.displayFormatsChanged', newFormats);
+      const settingsPanel = foundry.applications.instances.get('calendaria-settings-panel');
+      if (settingsPanel?.rendered) settingsPanel.render({ parts: ['formats'] });
     }
   }
 
@@ -1243,6 +1242,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
           if (customInput) {
             if (event.target.value === 'custom') {
               customInput.classList.remove('hidden');
+              // Pre-populate with current format string if empty (fixes #199)
+              if (!customInput.value.trim()) {
+                const savedFormats = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
+                const currentFormat = savedFormats[locationId]?.[role] || 'long';
+                // Convert preset name to format string, or use as-is if already custom
+                customInput.value = DEFAULT_FORMAT_PRESETS[currentFormat] || currentFormat;
+              }
               customInput.focus();
             } else {
               customInput.classList.add('hidden');

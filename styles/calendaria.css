@@ -341,6 +341,7 @@
 .calendaria {
   /* Override rogue system color overrides */
   color: var(--calendaria-text) !important;
+
   --input-text-color: var(--calendaria-text) !important;
 }
 
