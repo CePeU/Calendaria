@@ -32,6 +32,17 @@ export default class TimeTracker {
   /** @type {boolean|null} Last known rest day status */
   static #lastRestDay = null;
 
+  /** @type {boolean} Flag to skip threshold/period hooks on next update (for timepoint jumps) */
+  static #skipNextHooks = false;
+
+  /**
+   * Skip threshold and period hooks on the next time update.
+   * Used when jumping to timepoints to prevent re-triggering events.
+   */
+  static skipNextHooks() {
+    this.#skipNextHooks = true;
+  }
+
   /**
    * Initialize the time tracker.
    * Called during module initialization.
@@ -60,6 +71,18 @@ export default class TimeTracker {
       this.#lastWorldTime = worldTime;
       this.#lastComponents = foundry.utils.deepClone(currentComponents);
       this.#lastSeason = currentComponents?.season ?? null;
+      return;
+    }
+
+    if (this.#skipNextHooks) {
+      this.#skipNextHooks = false;
+      log(3, 'Skipping threshold/period hooks (timepoint jump)');
+      this.#lastWorldTime = worldTime;
+      this.#lastComponents = foundry.utils.deepClone(currentComponents);
+      this.#lastSeason = currentComponents?.season ?? null;
+      this.#lastMoonPhases = this.#getCurrentMoonPhases();
+      this.#lastRestDay = this.#isCurrentDayRestDay();
+      this.#fireDateTimeChangeHook(this.#lastComponents, currentComponents, delta, calendar);
       return;
     }
 

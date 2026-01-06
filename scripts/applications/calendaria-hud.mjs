@@ -18,6 +18,7 @@ import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import { CalendarApplication } from './calendar-application.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
+import { SetDateDialog } from './set-date-dialog.mjs';
 import { SettingsPanel } from './settings/settings-panel.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -1348,7 +1349,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Handle click on date to open date picker dialog.
+   * Handle click on date to open Set Date dialog.
    * @param {Event} _event - Click event
    * @param {HTMLElement} _target - Target element
    */
@@ -1357,54 +1358,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       ui.notifications.warn('CALENDARIA.Common.GMOnly', { localize: true });
       return;
     }
-
-    const calendar = this.calendar;
-    const components = game.time.components;
-    const yearZero = calendar.years?.yearZero ?? 0;
-    const displayYear = components.year + yearZero;
-    const daysInMonth = calendar.getDaysInMonth(components.month, displayYear);
-    const currentDay = (components.dayOfMonth ?? 0) + 1;
-    const content = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.DATE_PICKER, {
-      formClass: 'set-date-form',
-      year: displayYear,
-      months: calendar.months.values.map((m, i) => ({ index: i, name: localize(m.name), selected: i === components.month })),
-      days: Array.from({ length: daysInMonth }, (_, i) => i + 1),
-      currentDay
-    });
-
-    const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: localize('CALENDARIA.HUD.SetDate') },
-      content,
-      ok: {
-        label: localize('CALENDARIA.HUD.SetDate'),
-        icon: 'fas fa-calendar-check',
-        callback: (_event, _button, dialog) => {
-          const yearInput = dialog.element.querySelector('input[name="year"]');
-          const monthSelect = dialog.element.querySelector('select[name="month"]');
-          const daySelect = dialog.element.querySelector('select[name="day"]');
-          return { year: parseInt(yearInput.value) - yearZero, month: parseInt(monthSelect.value), day: parseInt(daySelect.value) };
-        }
-      },
-      rejectClose: false
-    });
-
-    if (result) {
-      // Calculate day of year from month and day
-      let dayOfYear = result.day - 1;
-      for (let i = 0; i < result.month; i++) {
-        dayOfYear += calendar.months.values[i]?.days ?? 30;
-      }
-      const newTimeComponents = {
-        year: result.year,
-        month: result.month,
-        day: dayOfYear,
-        hour: components.hour,
-        minute: components.minute,
-        second: components.second ?? 0
-      };
-      const newTime = calendar.componentsToTime(newTimeComponents);
-      await game.time.advance(newTime - game.time.worldTime);
-    }
+    SetDateDialog.open();
   }
 
   /**

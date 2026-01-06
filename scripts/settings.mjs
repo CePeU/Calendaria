@@ -562,6 +562,18 @@ export function registerSettings() {
   });
 
   // ========================================//
+  //  Timepoints                             //
+  // ========================================//
+
+  /** Saved timepoints for quick time navigation */
+  game.settings.register(MODULE.ID, SETTINGS.SAVED_TIMEPOINTS, {
+    name: 'Saved Timepoints',
+    scope: 'world',
+    config: false,
+    type: new ArrayField(new ObjectField())
+  });
+
+  // ========================================//
   //  Macro Triggers                         //
   // ========================================//
 

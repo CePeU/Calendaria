@@ -5218,6 +5218,7 @@
   100% {
     transform: rotate(-1.5deg);
   }
+
   50% {
     transform: rotate(1.5deg);
   }
@@ -5271,7 +5272,6 @@
   top: auto !important;
   margin-bottom: 8px;
 }
-
 
 /* ======================================== */
 /* HUD Sections                             */
@@ -7193,6 +7193,306 @@
 
       &:hover {
         background: var(--button-hover-background-color);
+      }
+    }
+  }
+}
+
+/* ======================================== */
+/* Set Date Dialog                          */
+/* ======================================== */
+
+.set-date-dialog {
+  .window-content {
+    padding: 0;
+  }
+
+  .set-date-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .set-date-section {
+    h3 {
+      margin: 0 0 0.5rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--calendaria-border-light);
+      font-size: var(--font-size-14);
+      font-weight: 600;
+      color: var(--calendaria-text-heading);
+    }
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75rem;
+
+    &.time-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    > label {
+      font-size: var(--font-size-11);
+      font-weight: 500;
+      color: var(--calendaria-text-dim);
+    }
+
+    input:not([type='checkbox']),
+    select {
+      box-sizing: border-box;
+      height: 30px;
+      padding: 0 0.5rem;
+      border: 1px solid var(--calendaria-input-border);
+      border-radius: 4px;
+      font-size: var(--font-size-13);
+      line-height: 28px;
+      text-align: center;
+      background: var(--calendaria-input-bg);
+      color: var(--calendaria-text);
+
+      &:focus {
+        outline: none;
+        border-color: var(--calendaria-primary);
+      }
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 10px;
+      padding-right: 24px;
+    }
+
+    input[type='number'] {
+      appearance: textfield;
+      -moz-appearance: textfield;
+
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+  }
+
+  .checkbox-group {
+    padding: 0.5rem 0;
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: var(--font-size-13);
+      cursor: pointer;
+    }
+
+    .hint {
+      margin: 0.25rem 0 0 1.75rem;
+      font-size: var(--font-size-11);
+      color: var(--calendaria-text-dim);
+    }
+  }
+
+  /* Timepoints Section */
+  .timepoints-section {
+    border: 1px solid var(--calendaria-border-light);
+    border-radius: 4px;
+    background: var(--calendaria-bg-lighter);
+
+    .timepoints-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        background: var(--calendaria-bg-hover);
+      }
+
+      i {
+        width: 12px;
+        font-size: var(--font-size-10);
+        color: var(--calendaria-text-dim);
+      }
+
+      h3 {
+        flex: 1;
+        margin: 0;
+        font-size: var(--font-size-13);
+        font-weight: 600;
+        color: var(--calendaria-text);
+      }
+
+      .timepoints-count {
+        padding: 0.125rem 0.5rem;
+        border-radius: 10px;
+        font-size: var(--font-size-11);
+        background: var(--calendaria-primary);
+      }
+    }
+
+    .timepoints-content {
+      padding: 0.5rem;
+      border-top: 1px solid var(--calendaria-border-light);
+    }
+
+    .timepoints-list {
+      max-height: 180px;
+      margin: 0 0 0.5rem;
+      padding: 0;
+      overflow-y: auto;
+      list-style: none;
+    }
+
+    .timepoint-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+
+      &:hover {
+        background: var(--calendaria-bg-hover);
+      }
+
+      .timepoint-info {
+        flex: 1;
+        min-width: 0;
+        cursor: pointer;
+
+        .timepoint-name {
+          display: block;
+          overflow: hidden;
+          font-size: var(--font-size-13);
+          font-weight: 500;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: var(--calendaria-text);
+        }
+
+        .timepoint-date {
+          display: block;
+          font-size: var(--font-size-11);
+          color: var(--calendaria-text-dim);
+        }
+      }
+
+      .timepoint-name-input {
+        flex: 1;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--calendaria-primary);
+        border-radius: 3px;
+        font-size: var(--font-size-13);
+        background: var(--calendaria-input-bg);
+        color: var(--calendaria-text);
+
+        &:focus {
+          outline: none;
+        }
+      }
+
+      .timepoint-actions {
+        display: flex;
+        gap: 0.25rem;
+      }
+
+      .timepoint-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border: 1px solid var(--calendaria-border);
+        border-radius: 4px;
+        font-size: var(--font-size-12);
+        background: var(--calendaria-button-bg);
+        color: var(--calendaria-text-dim);
+        cursor: pointer;
+
+        &:hover {
+          background: var(--calendaria-button-hover);
+          color: var(--calendaria-text);
+        }
+
+        &.jump:hover {
+          border-color: var(--calendaria-primary);
+          color: var(--calendaria-primary);
+        }
+
+        &.delete:hover {
+          border-color: var(--calendaria-error);
+          color: var(--calendaria-error);
+        }
+      }
+    }
+
+    .no-timepoints {
+      margin: 0;
+      padding: 1rem;
+      font-size: var(--font-size-12);
+      text-align: center;
+      color: var(--calendaria-text-dim);
+    }
+
+    .save-timepoint-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px dashed var(--calendaria-border);
+      border-radius: 4px;
+      font-size: var(--font-size-12);
+      background: transparent;
+      color: var(--calendaria-text-dim);
+      cursor: pointer;
+
+      &:hover {
+        border-color: var(--calendaria-primary);
+        background: var(--calendaria-primary);
+        background: rgb(74 144 226 / 10%);
+        color: var(--calendaria-primary);
+      }
+    }
+  }
+
+  /* Form Footer */
+  .form-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--calendaria-border-light);
+
+    .submit-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      font-size: var(--font-size-13);
+      font-weight: 500;
+      background: var(--calendaria-primary);
+      cursor: pointer;
+
+      &:hover {
+        background: rgb(60 130 210);
       }
     }
   }

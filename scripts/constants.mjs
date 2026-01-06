@@ -50,6 +50,7 @@ export const SETTINGS = {
   MINI_CALENDAR_STICKY_STATES: 'miniCalendarStickyStates',
   POSITION_LOCKED: 'positionLocked',
   PRIMARY_GM: 'primaryGM',
+  SAVED_TIMEPOINTS: 'savedTimepoints',
   SHOW_CALENDAR_HUD: 'showCalendarHUD',
   SHOW_MINI_CALENDAR: 'showMiniCalendar',
   SHOW_MOON_PHASES: 'showMoonPhases',
@@ -141,7 +142,8 @@ export const TEMPLATES = {
   },
   IMPORTER: { APP: `modules/${MODULE.ID}/templates/importers/importer-app.hbs` },
   WEATHER: { PICKER: `modules/${MODULE.ID}/templates/weather/weather-picker.hbs` },
-  SEARCH: { PANEL: `modules/${MODULE.ID}/templates/search/search-panel.hbs` }
+  SEARCH: { PANEL: `modules/${MODULE.ID}/templates/search/search-panel.hbs` },
+  SET_DATE_DIALOG: `modules/${MODULE.ID}/templates/set-date-dialog.hbs`
 };
 
 /** Asset paths */
