@@ -415,13 +415,20 @@ export function injectContextMenuInfo(target, calendar) {
   const monthName = monthData ? localize(monthData.name) : '';
   const yearDisplay = calendar.formatYearWithEra?.(year) ?? String(year);
   const fullDate = `${monthName} ${day}, ${yearDisplay}`;
-  const season = calendar.getCurrentSeason?.();
+  let dayOfYear = day - 1;
+  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, year);
+  const targetComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
+  const season = calendar.getCurrentSeason?.(targetComponents);
   const seasonName = season ? localize(season.name) : null;
-  const sunriseHour = calendar.sunrise?.() ?? 6;
-  const sunsetHour = calendar.sunset?.() ?? 18;
+  const sunriseHour = calendar.sunrise?.(targetComponents) ?? 6;
+  const sunsetHour = calendar.sunset?.(targetComponents) ?? 18;
   const formatTime = (hours) => {
-    const h = Math.floor(hours);
-    const m = Math.round((hours - h) * 60);
+    let h = Math.floor(hours);
+    let m = Math.round((hours - h) * 60);
+    if (m === 60) {
+      m = 0;
+      h += 1;
+    }
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
   };
   const infoHeader = document.createElement('div');
