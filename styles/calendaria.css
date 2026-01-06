@@ -335,6 +335,16 @@
 }
 
 /* ======================================== */
+/* Global Calendaria Scope Override         */
+/* ======================================== */
+
+.calendaria {
+  /* Override rogue system color overrides */
+  color: var(--calendaria-text) !important;
+  --input-text-color: var(--calendaria-text) !important;
+}
+
+/* ======================================== */
 /* Calendar Application Styles              */
 /* ======================================== */
 
@@ -6456,7 +6466,7 @@
       width: fit-content;
       border: 1px solid var(--button-border-color);
       border-radius: 4px;
-      color: inherit;
+      color: var(--calendaria-text);
       text-decoration: none;
       cursor: pointer;
       background: var(--button-background-color);
