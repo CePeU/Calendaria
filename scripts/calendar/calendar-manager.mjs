@@ -566,7 +566,8 @@ export default class CalendarManager {
   static getCalendarTemplates() {
     const templates = [];
     for (const [id, calendar] of CalendarRegistry.getAll()) {
-      templates.push({ id, name: calendar.name || id, description: calendar.metadata?.description || '', isCustom: calendar.metadata?.isCustom || false });
+      const name = calendar.name ? localize(calendar.name) : id;
+      templates.push({ id, name, description: calendar.metadata?.description || '', isCustom: calendar.metadata?.isCustom || false });
     }
     return templates;
   }

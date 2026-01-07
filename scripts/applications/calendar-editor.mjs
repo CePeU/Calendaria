@@ -65,10 +65,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       removeCanonicalHour: CalendarEditor.#onRemoveCanonicalHour,
       addNamedWeek: CalendarEditor.#onAddNamedWeek,
       removeNamedWeek: CalendarEditor.#onRemoveNamedWeek,
-      loadCalendar: CalendarEditor.#onLoadCalendar,
+      duplicateCalendar: CalendarEditor.#onDuplicateCalendar,
       saveCalendar: CalendarEditor.#onSaveCalendar,
       resetCalendar: CalendarEditor.#onResetCalendar,
-      resetToDefault: CalendarEditor.#onResetToDefault,
       deleteCalendar: CalendarEditor.#onDeleteCalendar,
       toggleCategory: CalendarEditor.#onToggleCategory,
       resetWeatherPreset: CalendarEditor.#onResetWeatherPreset,
@@ -432,15 +431,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#prepareWeatherContext(context);
     context.buttons = [
       { type: 'button', action: 'saveCalendar', icon: 'fas fa-save', label: 'CALENDARIA.Common.Save' },
-      { type: 'button', action: 'resetCalendar', icon: 'fas fa-undo', label: 'CALENDARIA.Common.Reset' }
+      { type: 'button', action: 'resetCalendar', icon: 'fas fa-undo', label: 'CALENDARIA.Common.Reset' },
+      { type: 'button', action: 'deleteCalendar', icon: 'fas fa-trash', label: 'CALENDARIA.Common.DeleteCalendar', cssClass: 'delete-button' }
     ];
-
-    if (this.#calendarId && CalendarManager.hasDefaultOverride(this.#calendarId)) {
-      context.buttons.push({ type: 'button', action: 'resetToDefault', icon: 'fas fa-history', label: 'CALENDARIA.Common.Reset' });
-    }
-    if (this.#calendarId && CalendarManager.isCustomCalendar(this.#calendarId)) {
-      context.buttons.push({ type: 'button', action: 'deleteCalendar', icon: 'fas fa-trash', label: 'CALENDARIA.Common.DeleteCalendar', cssClass: 'delete-button' });
-    }
 
     return context;
   }
@@ -502,6 +495,26 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       };
       updatePreview(templateInput);
       templateInput.addEventListener('input', (event) => updatePreview(event.target));
+    }
+    // Disable delete button for unsaved calendars
+    const deleteBtn = this.element.querySelector('button[data-action="deleteCalendar"]');
+    if (deleteBtn && (!this.#calendarId || !this.#isEditing)) {
+      deleteBtn.disabled = true;
+      deleteBtn.dataset.tooltip = localize('CALENDARIA.Info.SaveBeforeDelete');
+    }
+    // Calendar dropdown: switch to selected calendar on change
+    const calendarSelect = this.element.querySelector('select[name="calendarSelect"]');
+    if (calendarSelect) {
+      calendarSelect.value = this.#calendarId || '';
+      calendarSelect.addEventListener('change', (event) => {
+        const id = event.target.value;
+        if (id && id !== this.#calendarId) {
+          this.#calendarId = id;
+          this.#isEditing = true;
+          this.#loadExistingCalendar(id);
+          this.render();
+        }
+      });
     }
     this.#setupWeatherTotalListener();
   }
@@ -1903,63 +1916,39 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Load a calendar for editing or as a template.
+   * Duplicate the currently loaded calendar.
    * @param {Event} _event - Click event
    * @param {HTMLElement} _target - Target element
    */
-  static async #onLoadCalendar(_event, _target) {
-    const dropdown = this.element.querySelector('select[name="calendarSelect"]');
-    const calendarId = dropdown?.value;
-    if (!calendarId) {
+  static async #onDuplicateCalendar(_event, _target) {
+    if (!this.#calendarId) {
       ui.notifications.warn('CALENDARIA.Editor.SelectCalendarFirst', { localize: true });
       return;
     }
 
-    const calendar = CalendarManager.getCalendar(calendarId);
+    const calendar = CalendarManager.getCalendar(this.#calendarId);
     if (!calendar) {
-      ui.notifications.error(format('CALENDARIA.Editor.CalendarNotFound', { id: calendarId }));
+      ui.notifications.error(format('CALENDARIA.Editor.CalendarNotFound', { id: this.#calendarId }));
       return;
     }
 
-    const isCustom = CalendarManager.isCustomCalendar(calendarId);
-    const calendarName = localize(calendar.name || calendarId);
-    const buttons = [];
-
-    if (isCustom) {
-      buttons.push({ action: 'edit', label: localize('CALENDARIA.Editor.EditCalendar'), icon: 'fas fa-edit', default: true });
-      buttons.push({ action: 'template', label: localize('CALENDARIA.Editor.UseAsTemplate'), icon: 'fas fa-copy' });
-    } else {
-      buttons.push({ action: 'editCopy', label: localize('CALENDARIA.Editor.EditAsCopy'), icon: 'fas fa-copy', default: true });
+    const calendarName = localize(calendar.name || this.#calendarId);
+    this.#calendarData = calendar.toObject();
+    preLocalizeCalendar(this.#calendarData);
+    this.#calendarData.name = format('CALENDARIA.Editor.CopyOfName', { name: calendarName });
+    if (!this.#calendarData.seasons) this.#calendarData.seasons = { values: [] };
+    if (!this.#calendarData.eras) this.#calendarData.eras = [];
+    if (!this.#calendarData.festivals) this.#calendarData.festivals = [];
+    if (!this.#calendarData.moons) this.#calendarData.moons = [];
+    if (this.#calendarData.metadata) {
+      delete this.#calendarData.metadata.id;
+      delete this.#calendarData.metadata.isCustom;
     }
-    buttons.push({ action: 'cancel', label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' });
-    const result = await foundry.applications.api.DialogV2.wait({
-      window: { title: localize('CALENDARIA.Editor.LoadCalendar') },
-      content: `<p>${format('CALENDARIA.Editor.LoadCalendarPrompt', { name: calendarName })}</p>`,
-      buttons
-    });
 
-    if (result === 'edit') {
-      await this.close();
-      CalendarEditor.edit(calendarId);
-    } else if (result === 'template' || result === 'editCopy') {
-      this.#calendarData = calendar.toObject();
-      preLocalizeCalendar(this.#calendarData);
-      this.#calendarData.name = format('CALENDARIA.Editor.CopyOfName', { name: calendarName });
-      if (!this.#calendarData.seasons) this.#calendarData.seasons = { values: [] };
-      if (!this.#calendarData.eras) this.#calendarData.eras = [];
-      if (!this.#calendarData.festivals) this.#calendarData.festivals = [];
-      if (!this.#calendarData.moons) this.#calendarData.moons = [];
-      if (this.#calendarData.metadata) {
-        delete this.#calendarData.metadata.id;
-        delete this.#calendarData.metadata.isCustom;
-      }
-
-      this.#calendarId = null;
-      this.#isEditing = false;
-      const messageKey = result === 'editCopy' ? 'CALENDARIA.Editor.DefaultCopied' : 'CALENDARIA.Editor.TemplateLoaded';
-      ui.notifications.info(format(messageKey, { name: calendarName }));
-      this.render();
-    }
+    this.#calendarId = null;
+    this.#isEditing = false;
+    ui.notifications.info(format('CALENDARIA.Editor.Duplicated', { name: calendarName }));
+    this.render();
   }
 
   /**
@@ -2095,34 +2084,46 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Reset a default calendar to its original state (remove override).
-   * @param {Event} _event - Click event
-   * @param {HTMLElement} _target - Target element
-   */
-  static async #onResetToDefault(_event, _target) {
-    if (!this.#calendarId || !CalendarManager.hasDefaultOverride(this.#calendarId)) return;
-    const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Common.Reset') },
-      content: `<p>${localize('CALENDARIA.Editor.ConfirmResetToDefault')}</p>`,
-      yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-history', callback: () => true },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
-    });
-
-    if (!confirmed) return;
-    const reset = await CalendarManager.resetDefaultCalendar(this.#calendarId);
-    if (reset) {
-      this.#loadExistingCalendar(this.#calendarId);
-      this.render();
-    }
-  }
-
-  /**
-   * Delete the calendar.
+   * Delete the calendar (custom) or reset to default (bundled with overrides).
    * @param {Event} _event - Click event
    * @param {HTMLElement} _target - Target element
    */
   static async #onDeleteCalendar(_event, _target) {
-    if (!this.#calendarId || !this.#isEditing) return;
+    // Can't delete unsaved calendar
+    if (!this.#calendarId || !this.#isEditing) {
+      ui.notifications.info(localize('CALENDARIA.Info.SaveBeforeDelete'));
+      return;
+    }
+
+    const isCustom = CalendarManager.isCustomCalendar(this.#calendarId);
+    const hasOverride = CalendarManager.hasDefaultOverride(this.#calendarId);
+
+    // Bundled calendar without overrides - can't delete
+    if (!isCustom && !hasOverride) {
+      ui.notifications.info(localize('CALENDARIA.Info.CannotDeleteBundled'));
+      return;
+    }
+
+    // Bundled calendar with overrides - reset to default
+    if (!isCustom && hasOverride) {
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+        window: { title: localize('CALENDARIA.Editor.ResetToDefault') },
+        content: `<p>${localize('CALENDARIA.Editor.ConfirmResetToDefault')}</p>`,
+        yes: { label: localize('CALENDARIA.Editor.ResetToDefault'), icon: 'fas fa-history', callback: () => true },
+        no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+      });
+
+      if (!confirmed) return;
+      const reset = await CalendarManager.resetDefaultCalendar(this.#calendarId);
+      if (reset) {
+        ui.notifications.info(localize('CALENDARIA.Info.CalendarResetToDefault'));
+        this.#loadExistingCalendar(this.#calendarId);
+        this.render();
+      }
+      return;
+    }
+
+    // Custom calendar - delete
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: localize('CALENDARIA.Common.DeleteCalendar') },
       content: `<p>${format('CALENDARIA.Editor.ConfirmDelete', { name: this.#calendarData.name })}</p>`,
@@ -2131,6 +2132,16 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     });
 
     if (!confirmed) return;
+
+    // If deleting active calendar, switch to Gregorian first
+    if (CalendarRegistry.getActiveId() === this.#calendarId) {
+      const switched = await CalendarManager.switchCalendar('gregorian');
+      if (!switched) {
+        ui.notifications.error(localize('CALENDARIA.Error.CalendarDeleteFailed'));
+        return;
+      }
+    }
+
     const deleted = await CalendarManager.deleteCustomCalendar(this.#calendarId);
     if (deleted) {
       const activeCalendar = CalendarManager.getActiveCalendar();
@@ -2144,6 +2155,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         this.#initializeBlankCalendar();
       }
       this.render();
+    } else {
+      ui.notifications.error(localize('CALENDARIA.Error.CalendarDeleteFailed'));
     }
   }
 
