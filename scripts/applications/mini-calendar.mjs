@@ -253,10 +253,10 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const { year, month } = date;
     const monthData = calendar.months?.values?.[month];
     if (!monthData) return null;
-    const daysInMonth = calendar.getDaysInMonth(month, year);
-    const daysInWeek = calendar.days?.values?.length || 7;
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalYear = year - yearZero;
+    const daysInMonth = calendar.getDaysInMonth(month, internalYear);
+    const daysInWeek = calendar.days?.values?.length || 7;
     const weeks = [];
     let currentWeek = [];
     const hasFixedStart = monthData?.startingWeekday != null;
@@ -267,12 +267,11 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       let remainingSlots = startDayOfWeek;
       let checkMonth = month === 0 ? totalMonths - 1 : month - 1;
       let checkYear = month === 0 ? year - 1 : year;
-      let checkDay = calendar.getDaysInMonth(checkMonth, checkYear);
+      let checkDay = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
 
       // Collect previous month days, skipping intercalary days
       while (remainingSlots > 0 && checkDay > 0) {
-        const checkInternalYear = checkYear - yearZero;
-        const festivalDay = calendar.findFestivalDay({ year: checkInternalYear, month: checkMonth, dayOfMonth: checkDay - 1 });
+        const festivalDay = calendar.findFestivalDay({ year: checkYear - yearZero, month: checkMonth, dayOfMonth: checkDay - 1 });
         const isIntercalary = festivalDay?.countsForWeekday === false;
 
         if (!isIntercalary) {
@@ -284,7 +283,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
         if (checkDay < 1 && remainingSlots > 0) {
           checkMonth = checkMonth === 0 ? totalMonths - 1 : checkMonth - 1;
           if (checkMonth === totalMonths - 1) checkYear--;
-          checkDay = calendar.getDaysInMonth(checkMonth, checkYear);
+          checkDay = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
         }
       }
 
@@ -372,9 +371,8 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       if (checkMonth === 0) checkYear++;
 
       while (remainingSlots > 0) {
-        const checkMonthDays = calendar.getDaysInMonth(checkMonth, checkYear);
-        const checkInternalYear = checkYear - yearZero;
-        const festivalDay = calendar.findFestivalDay({ year: checkInternalYear, month: checkMonth, dayOfMonth: dayInMonth - 1 });
+        const checkMonthDays = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
+        const festivalDay = calendar.findFestivalDay({ year: checkYear - yearZero, month: checkMonth, dayOfMonth: dayInMonth - 1 });
         const isIntercalary = festivalDay?.countsForWeekday === false;
 
         if (!isIntercalary) {
@@ -432,8 +430,8 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const { year } = date;
     const viewedDay = date.day || 1;
     const daysInWeek = calendar.days?.values?.length || 7;
-    const daysInYear = calendar.getDaysInYear(year);
     const yearZero = calendar.years?.yearZero ?? 0;
+    const daysInYear = calendar.getDaysInYear(year - yearZero);
     const weekNumber = Math.floor((viewedDay - 1) / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
     const weeks = [];
@@ -444,19 +442,17 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       for (let i = 0; i < daysInWeek; i++) {
         let dayNum = weekStartDay + i;
         let dayYear = year;
-        const targetYearDays = calendar.getDaysInYear(dayYear);
+        const targetYearDays = calendar.getDaysInYear(dayYear - yearZero);
         if (dayNum > targetYearDays) {
           dayNum -= targetYearDays;
           dayYear++;
         } else if (dayNum < 1) {
-          const prevYearDays = calendar.getDaysInYear(dayYear - 1);
+          const prevYearDays = calendar.getDaysInYear(dayYear - yearZero - 1);
           dayNum += prevYearDays;
           dayYear--;
         }
-
-        const dayInternalYear = dayYear - yearZero;
         const noteCount = this._countNotesOnDay(visibleNotes, dayYear, 0, dayNum);
-        const festivalDay = calendar.findFestivalDay({ year: dayInternalYear, month: 0, dayOfMonth: dayNum - 1 });
+        const festivalDay = calendar.findFestivalDay({ year: dayYear - yearZero, month: 0, dayOfMonth: dayNum - 1 });
         const moonData = ViewUtils.getFirstMoonPhase(calendar, dayYear, 0, dayNum);
         const isIntercalary = festivalDay?.countsForWeekday === false;
         const dayData = {
@@ -1011,14 +1007,15 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     if (calendar.isMonthless) {
       const daysInWeek = calendar.days?.values?.length || 7;
-      const daysInYear = calendar.getDaysInYear(current.year);
+      const yearZero = calendar.years?.yearZero ?? 0;
+      const daysInYear = calendar.getDaysInYear(current.year - yearZero);
       let newDay = (current.day || 1) + direction * daysInWeek;
       let newYear = current.year;
       if (newDay > daysInYear) {
         newDay -= daysInYear;
         newYear++;
       } else if (newDay < 1) {
-        const prevYearDays = calendar.getDaysInYear(newYear - 1);
+        const prevYearDays = calendar.getDaysInYear(newYear - yearZero - 1);
         newDay += prevYearDays;
         newYear--;
       }

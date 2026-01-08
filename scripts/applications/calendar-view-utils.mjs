@@ -181,9 +181,10 @@ export function getNotesForDay(notes, year, month, day) {
 export function getFirstMoonPhase(calendar, year, month, day) {
   if (!game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES)) return null;
   if (!calendar?.moons?.[0]) return null;
+  const internalYear = year - (calendar.years?.yearZero ?? 0);
   let dayOfYear = day - 1;
-  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, year);
-  const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
+  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, internalYear);
+  const dayComponents = { year: internalYear, month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
   const phase = calendar.getMoonPhase(0, dayWorldTime);
   if (!phase) return null;
@@ -202,9 +203,10 @@ export function getFirstMoonPhase(calendar, year, month, day) {
 export function getAllMoonPhases(calendar, year, month, day) {
   if (!game.settings.get(MODULE.ID, SETTINGS.SHOW_MOON_PHASES)) return null;
   if (!calendar?.moons?.length) return null;
+  const internalYear = year - (calendar.years?.yearZero ?? 0);
   let dayOfYear = day - 1;
-  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, year);
-  const dayComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
+  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, internalYear);
+  const dayComponents = { year: internalYear, month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
   return calendar.moons
     .map((moon, index) => {
@@ -262,10 +264,11 @@ export function getNotesOnDay(year, month, day) {
 export async function setDateTo(year, month, day, calendar = null) {
   calendar = calendar || CalendarManager.getActiveCalendar();
   const yearZero = calendar?.years?.yearZero ?? 0;
+  const internalYear = year - yearZero;
   let dayOfYear = day - 1;
-  for (let i = 0; i < month; i++) dayOfYear += calendar.getDaysInMonth(i, year);
+  for (let i = 0; i < month; i++) dayOfYear += calendar.getDaysInMonth(i, internalYear);
   const currentComponents = game.time.components;
-  const newComponents = { year: year - yearZero, month, day: dayOfYear, hour: currentComponents.hour, minute: currentComponents.minute, second: currentComponents.second };
+  const newComponents = { year: internalYear, month, day: dayOfYear, hour: currentComponents.hour, minute: currentComponents.minute, second: currentComponents.second };
   const newWorldTime = calendar.componentsToTime(newComponents);
   await game.time.advance(newWorldTime - game.time.worldTime);
 }
@@ -411,13 +414,14 @@ export function injectContextMenuInfo(target, calendar) {
   const year = parseInt(target.dataset.year);
   const month = parseInt(target.dataset.month);
   const day = parseInt(target.dataset.day);
+  const internalYear = year - (calendar.years?.yearZero ?? 0);
   const monthData = calendar.months?.values?.[month];
   const monthName = monthData ? localize(monthData.name) : '';
   const yearDisplay = calendar.formatYearWithEra?.(year) ?? String(year);
   const fullDate = `${monthName} ${day}, ${yearDisplay}`;
   let dayOfYear = day - 1;
-  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, year);
-  const targetComponents = { year: year - (calendar.years?.yearZero ?? 0), month, day: dayOfYear, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
+  for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, internalYear);
+  const targetComponents = { year: internalYear, month, day: dayOfYear, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
   const season = calendar.getCurrentSeason?.(targetComponents);
   const seasonName = season ? localize(season.name) : null;
   const sunriseHour = calendar.sunrise?.(targetComponents) ?? 6;

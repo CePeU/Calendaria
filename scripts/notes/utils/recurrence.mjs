@@ -34,9 +34,11 @@ function seededRandom(seed, year, dayOfYear) {
 function getDayOfYear(date) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return date.day;
+  const yearZero = calendar.years?.yearZero ?? 0;
+  const internalYear = date.year - yearZero;
   let dayOfYear = 0;
   for (let m = 0; m < date.month; m++) {
-    dayOfYear += calendar.getDaysInMonth(m, date.year);
+    dayOfYear += calendar.getDaysInMonth(m, internalYear);
   }
   return dayOfYear + date.day;
 }
@@ -544,7 +546,8 @@ export function resolveComputedDate(computedConfig, year) {
 function resolveAnchor(anchorType, year, calendar) {
   const seasons = calendar?.seasons?.values || [];
   const daylight = calendar?.daylight || {};
-  const totalDays = calendar.getDaysInYear(year);
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const totalDays = calendar.getDaysInYear(year - yearZero);
 
   switch (anchorType) {
     case 'springEquinox': {
@@ -1059,7 +1062,8 @@ function matchesYearly(startDate, targetDate, interval) {
 function getLastDayOfMonth(date) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return 30;
-  return calendar.getDaysInMonth(date.month, date.year);
+  const yearZero = calendar.years?.yearZero ?? 0;
+  return calendar.getDaysInMonth(date.month, date.year - yearZero);
 }
 
 /**
@@ -1161,11 +1165,13 @@ function isInSeasonRange(dayOfYear, start, end) {
 
 /**
  * Get total days in year from calendar, accounting for leap years.
- * @param {number} [year] - The year to check (defaults to current year)
+ * @param {number} [year] - The display year to check
  * @returns {number} - Total days in the year
  */
 function getTotalDaysInYear(year) {
-  return CalendarManager.getActiveCalendar().getDaysInYear(year);
+  const calendar = CalendarManager.getActiveCalendar();
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  return calendar.getDaysInYear(year - yearZero);
 }
 
 /**
@@ -1180,7 +1186,8 @@ function getTotalDaysInYear(year) {
 function findWeekdayInMonth(year, month, weekday, weekNumber) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
-  const daysInMonth = calendar.getDaysInMonth(month, year);
+  const yearZero = calendar.years?.yearZero ?? 0;
+  const daysInMonth = calendar.getDaysInMonth(month, year - yearZero);
   const occurrences = [];
   for (let day = 1; day <= daysInMonth; day++) {
     const date = { year, month, day };

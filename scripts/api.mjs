@@ -543,8 +543,8 @@ export const CalendariaAPI = {
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
     const internalYear = year - yearZero;
-    const daysInMonth = calendar?.getDaysInMonth(month, year) ?? 30;
-    return NoteManager.getNotesInRange({ year: internalYear, month, day: 0 }, { year: internalYear, month, day: daysInMonth - 1 });
+    const daysInMonth = calendar?.getDaysInMonth(month, internalYear) ?? 30;
+    return NoteManager.getNotesInRange({ year: internalYear, month, day: 1 }, { year: internalYear, month, day: daysInMonth });
   },
 
   /**

@@ -360,18 +360,20 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /**
    * Check if a given year is a leap year.
    * Supports complex leap year patterns (e.g., "400,!100,4" for Gregorian).
-   * @param {number} year - The display year to check (with yearZero applied)
+   * @param {number} year - The internal year to check (0-based from calendar epoch)
    * @returns {boolean} True if the year is a leap year
    */
   isLeapYear(year) {
+    const yearZero = this.years?.yearZero ?? 0;
+    const displayYear = year + yearZero;
     const advancedConfig = this.leapYearConfig;
-    if (advancedConfig?.rule && advancedConfig.rule !== 'none') return LeapYearUtils.isLeapYear(advancedConfig, year, true);
+    if (advancedConfig?.rule && advancedConfig.rule !== 'none') return LeapYearUtils.isLeapYear(advancedConfig, displayYear, true);
     const leapConfig = this.years?.leapYear;
     if (!leapConfig) return false;
     const interval = leapConfig.leapInterval;
     const start = leapConfig.leapStart ?? 0;
     if (!interval || interval <= 0) return false;
-    return LeapYearUtils.isLeapYear({ rule: 'simple', interval, start }, year, true);
+    return LeapYearUtils.isLeapYear({ rule: 'simple', interval, start }, displayYear, true);
   }
 
   /**
@@ -381,14 +383,13 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   isCurrentYearLeapYear(time = game.time.worldTime) {
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const displayYear = components.year + (this.years?.yearZero ?? 0);
-    return this.isLeapYear(displayYear);
+    return this.isLeapYear(components.year);
   }
 
   /**
    * Get the number of days in a month, accounting for leap years.
    * @param {number} monthIndex - The 0-indexed month
-   * @param {number} year - The display year
+   * @param {number} year - The internal year (0-based from calendar epoch)
    * @returns {number} Number of days in the month
    */
   getDaysInMonth(monthIndex, year) {
@@ -400,7 +401,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /**
    * Get total days in a year, accounting for leap years.
-   * @param {number} year - The display year
+   * @param {number} year - The internal year (0-based from calendar epoch)
    * @returns {number} - Total days in the year
    */
   getDaysInYear(year) {
@@ -561,8 +562,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   findFestivalDay(time = game.time.worldTime) {
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const displayYear = components.year + (this.years?.yearZero ?? 0);
-    const isLeap = this.isLeapYear(displayYear);
+    const isLeap = this.isLeapYear(components.year);
     const currentDayOfYear = this._calculateDayOfYear(components);
     return (
       this.festivals?.find((f) => {
@@ -604,8 +604,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   countNonWeekdayFestivalsBefore(time) {
     if (!this.festivals?.length) return 0;
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
-    const displayYear = components.year + (this.years?.yearZero ?? 0);
-    const isLeap = this.isLeapYear(displayYear);
+    const isLeap = this.isLeapYear(components.year);
     const currentDayOfYear = this._calculateDayOfYear(components) + 1;
     const currentMonth = components.month + 1;
     const currentDay = components.dayOfMonth + 1;
@@ -660,7 +659,6 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   countNonWeekdayFestivalsBeforeYear(year) {
     if (!this.festivals?.length || year === 0) return 0;
-    const yearZero = this.years?.yearZero ?? 0;
     let regularCount = 0;
     let leapOnlyCount = 0;
     for (const festival of this.festivals) {
@@ -671,12 +669,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
     if (year > 0) {
       let leapYears = 0;
-      for (let y = 0; y < year; y++) if (this.isLeapYear(y + yearZero)) leapYears++;
+      for (let y = 0; y < year; y++) if (this.isLeapYear(y)) leapYears++;
       const regularYears = year - leapYears;
       return regularYears * regularCount + leapYears * (regularCount + leapOnlyCount);
     } else {
       let leapYears = 0;
-      for (let y = -1; y >= year; y--) if (this.isLeapYear(y + yearZero)) leapYears++;
+      for (let y = -1; y >= year; y--) if (this.isLeapYear(y)) leapYears++;
       const totalYears = -year;
       const regularYears = totalYears - leapYears;
       return -(regularYears * regularCount + leapYears * (regularCount + leapOnlyCount));
@@ -845,7 +843,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     let dayOfYear = components.dayOfMonth;
     for (let i = 0; i < components.month; i++) dayOfYear += this.months.values[i]?.days ?? 0;
     if (this.seasons.type === 'periodic') {
-      const totalDays = this.getDaysInYear(components.year + (this.years?.yearZero ?? 0));
+      const totalDays = this.getDaysInYear(components.year);
       for (let i = 0; i < this.seasons.values.length; i++) {
         const { dayStart, dayEnd } = this._calculatePeriodicSeasonBounds(i, totalDays);
         if (dayStart <= dayEnd) {

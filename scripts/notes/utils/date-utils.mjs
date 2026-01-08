@@ -116,11 +116,15 @@ export function dayOfWeek(date) {
 
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalYear = date.year - yearZero;
-    const daysPerYear = calendar.days?.daysPerYear ?? 365;
     let dayOfYear = (date.day ?? 1) - 1;
-    const monthDays = calendar.months?.values || [];
-    for (let m = 0; m < date.month && m < monthDays.length; m++) dayOfYear += monthDays[m]?.days || 30;
-    const totalDays = internalYear * daysPerYear + dayOfYear;
+    for (let m = 0; m < date.month; m++) dayOfYear += calendar.getDaysInMonth(m, internalYear);
+    let totalDaysFromPriorYears = 0;
+    if (internalYear > 0) {
+      for (let y = 0; y < internalYear; y++) totalDaysFromPriorYears += calendar.getDaysInYear(y);
+    } else if (internalYear < 0) {
+      for (let y = -1; y >= internalYear; y--) totalDaysFromPriorYears -= calendar.getDaysInYear(y);
+    }
+    const totalDays = totalDaysFromPriorYears + dayOfYear;
     const nonCountingInYear = calendar.countNonWeekdayFestivalsBefore?.({ year: internalYear, month: date.month, dayOfMonth: (date.day ?? 1) - 1 }) ?? 0;
     const totalFromPriorYears = calendar.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
     const totalNonCounting = totalFromPriorYears + nonCountingInYear;
@@ -171,6 +175,7 @@ export function addDays(date, days) {
 export function addMonths(date, months) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return date;
+  const yearZero = calendar.years?.yearZero ?? 0;
   let newYear = date.year;
   let newMonth = date.month + months;
   const monthsPerYear = calendar.months?.values?.length || 12;
@@ -184,7 +189,7 @@ export function addMonths(date, months) {
     newYear--;
   }
 
-  const maxDays = calendar.getDaysInMonth(newMonth, newYear);
+  const maxDays = calendar.getDaysInMonth(newMonth, newYear - yearZero);
   const newDay = Math.min(date.day, maxDays);
   return { year: newYear, month: newMonth, day: newDay, hour: date.hour, minute: date.minute };
 }
@@ -198,15 +203,16 @@ export function addMonths(date, months) {
 export function addYears(date, years) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return date;
+  const yearZero = calendar.years?.yearZero ?? 0;
   const newYear = date.year + years;
-  const maxDays = calendar.getDaysInMonth(date.month, newYear);
+  const maxDays = calendar.getDaysInMonth(date.month, newYear - yearZero);
   const newDay = Math.min(date.day, maxDays);
   return { year: newYear, month: date.month, day: newDay, hour: date.hour, minute: date.minute };
 }
 
 /**
  * Get current date from game time.
- * @returns {object}  Current date components (day is 1-indexed to match note storage)
+ * @returns {object}  Current date components using display year (day is 1-indexed)
  */
 export function getCurrentDate() {
   const components = game.time.components;
@@ -227,13 +233,15 @@ export function isValidDate(date) {
   if (typeof date.day !== 'number') return false;
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return true;
+  const yearZero = calendar.years?.yearZero ?? 0;
+  const internalYear = date.year - yearZero;
   if (calendar.isMonthless) {
     if (date.month !== 0) return false;
-    const maxDays = calendar.getDaysInYear(date.year);
+    const maxDays = calendar.getDaysInYear(internalYear);
     if (date.day < 1 || date.day > maxDays) return false;
   } else {
     if (date.month < 0 || date.month >= calendar.months.values.length) return false;
-    const maxDays = calendar.getDaysInMonth(date.month, date.year);
+    const maxDays = calendar.getDaysInMonth(date.month, internalYear);
     if (date.day < 1 || date.day > maxDays) return false;
   }
   if (date.hour !== undefined) {
