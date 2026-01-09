@@ -991,16 +991,12 @@ export function migrateDeprecatedTokens(formatStr) {
 }
 
 /**
- * Migrate deprecated tokens in calendar data and save changes.
- * @param {object} calendar - Calendar data to migrate
- * @param {string} calendarId - Calendar ID for saving
- * @param {string} calendarName - Display name for notifications
- * @returns {Promise<Array<{from: string, to: string}>>} List of all token changes made
+ * Migrate deprecated tokens in a single calendar data object (in-place).
+ * @param {object} calendar - Raw calendar data object to migrate
+ * @returns {Array<{from: string, to: string}>} List of token changes made
  */
-export async function migrateCalendarDeprecatedTokens(calendar, calendarId, calendarName) {
-  if (!game.user?.isGM) return [];
+function migrateCalendarDataDeprecatedTokens(calendar) {
   const allChanges = [];
-  let modified = false;
   if (calendar?.dateFormats) {
     for (const [key, fmt] of Object.entries(calendar.dateFormats)) {
       if (typeof fmt === 'string') {
@@ -1008,7 +1004,6 @@ export async function migrateCalendarDeprecatedTokens(calendar, calendarId, cale
         if (changes.length) {
           calendar.dateFormats[key] = migrated;
           allChanges.push(...changes);
-          modified = true;
         }
       }
     }
@@ -1022,7 +1017,6 @@ export async function migrateCalendarDeprecatedTokens(calendar, calendarId, cale
         if (changes.length) {
           era.template = migrated;
           allChanges.push(...changes);
-          modified = true;
         }
       }
     }
@@ -1033,27 +1027,7 @@ export async function migrateCalendarDeprecatedTokens(calendar, calendarId, cale
     if (changes.length) {
       calendar.cycleFormat = migrated;
       allChanges.push(...changes);
-      modified = true;
     }
-  }
-
-  if (modified && calendarId) {
-    try {
-      const MODULE_ID = 'calendaria';
-      const customCalendars = game.settings.get(MODULE_ID, 'customCalendars') || {};
-      if (customCalendars[calendarId]) {
-        customCalendars[calendarId] = calendar;
-        await game.settings.set(MODULE_ID, 'customCalendars', customCalendars);
-      }
-    } catch (e) {
-      log(2, `Could not save migrated calendar "${calendarName}"`, e);
-    }
-  }
-
-  if (allChanges.length > 0) {
-    const uniqueChanges = [...new Map(allChanges.map((c) => [`${c.from}→${c.to}`, c])).values()];
-    const changeList = uniqueChanges.map((c) => `${c.from} → ${c.to}`).join(', ');
-    log(3, `Migrated deprecated tokens in calendar "${calendarName}": ${changeList}`);
   }
 
   return allChanges;
@@ -1103,18 +1077,45 @@ export async function migrateDisplayFormatsDeprecatedTokens() {
 }
 
 /**
- * Run all deprecated token migrations and notify GM of changes.
- * @param {Map<string, object>} calendars - Map of calendar ID to calendar data
+ * Run all deprecated token migrations on settings data and save changes.
  * @returns {Promise<void>}
  */
-export async function migrateAllDeprecatedTokens(calendars) {
+export async function migrateAllDeprecatedTokens() {
   if (!game.user?.isGM) return;
+  const MODULE_ID = 'calendaria';
   const allChanges = [];
-  for (const [id, calendar] of calendars) {
-    const rawName = calendar?.metadata?.name || calendar?.name || id;
-    const name = game.i18n?.localize(rawName) || rawName;
-    const changes = await migrateCalendarDeprecatedTokens(calendar, id, name);
-    allChanges.push(...changes);
+  try {
+    const customCalendars = game.settings.get(MODULE_ID, 'customCalendars') || {};
+    let customModified = false;
+    for (const [id, calendar] of Object.entries(customCalendars)) {
+      const changes = migrateCalendarDataDeprecatedTokens(calendar);
+      if (changes.length) {
+        const name = game.i18n?.localize(calendar?.metadata?.name || calendar?.name || id) || id;
+        log(3, `Migrated deprecated tokens in custom calendar "${name}": ${changes.map((c) => `${c.from} → ${c.to}`).join(', ')}`);
+        allChanges.push(...changes);
+        customModified = true;
+      }
+    }
+    if (customModified) await game.settings.set(MODULE_ID, 'customCalendars', customCalendars);
+  } catch (e) {
+    log(2, 'Could not migrate custom calendars deprecated tokens', e);
+  }
+
+  try {
+    const defaultOverrides = game.settings.get(MODULE_ID, 'defaultOverrides') || {};
+    let overridesModified = false;
+    for (const [id, calendar] of Object.entries(defaultOverrides)) {
+      const changes = migrateCalendarDataDeprecatedTokens(calendar);
+      if (changes.length) {
+        const name = game.i18n?.localize(calendar?.metadata?.name || calendar?.name || id) || id;
+        log(3, `Migrated deprecated tokens in calendar override "${name}": ${changes.map((c) => `${c.from} → ${c.to}`).join(', ')}`);
+        allChanges.push(...changes);
+        overridesModified = true;
+      }
+    }
+    if (overridesModified) await game.settings.set(MODULE_ID, 'defaultOverrides', defaultOverrides);
+  } catch (e) {
+    log(2, 'Could not migrate default overrides deprecated tokens', e);
   }
 
   const displayChanges = await migrateDisplayFormatsDeprecatedTokens();

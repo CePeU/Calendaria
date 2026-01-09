@@ -50,6 +50,9 @@ const SKY_KEYFRAMES = [
  * System-agnostic implementation using AppV2.
  */
 export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
+  /** @type {boolean} Tracks if HUD was closed due to combat (for reopening) */
+  static #closedForCombat = false;
+
   /** @type {number|null} Hook ID for updateWorldTime */
   #timeHookId = null;
 
@@ -283,7 +286,6 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       name: 'calendaria.displayFormatsChanged',
       id: Hooks.on('calendaria.displayFormatsChanged', () => this.render({ parts: ['bar'] }))
     });
-    // Combat hooks for auto-compact
     this.#hooks.push({
       name: 'combatStart',
       id: Hooks.on('combatStart', () => this.#onCombatChange(true))
@@ -292,17 +294,33 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       name: 'deleteCombat',
       id: Hooks.on('deleteCombat', () => this.#onCombatChange(false))
     });
-    // Check initial combat state
+    this.#hooks.push({
+      name: 'updateCombat',
+      id: Hooks.on('updateCombat', () => this.#onCombatChange(!!game.combat?.started))
+    });
     this.#inCombat = !!game.combat?.started;
+    if (this.#inCombat && game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) {
+      CalendariaHUD.#closedForCombat = true;
+      this.close({ combat: true });
+    }
   }
 
   /**
-   * Handle combat state changes for auto-compact.
+   * Handle combat state changes for auto-compact and auto-hide.
    * @param {boolean} inCombat - Whether combat is now active
    */
   #onCombatChange(inCombat) {
     if (this.#inCombat === inCombat) return;
     this.#inCombat = inCombat;
+    if (game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) {
+      if (inCombat) {
+        CalendariaHUD.#closedForCombat = true;
+        this.close({ combat: true });
+      }
+      return;
+    }
+
+    // Auto-compact mode
     if (game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_COMPACT)) {
       this.render();
     }
@@ -310,8 +328,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   async close(options = {}) {
-    // Prevent non-GMs from closing if force display is enabled
-    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) {
+    if (!options.combat && !game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) {
       ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
       return;
     }
@@ -1682,9 +1699,10 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Show the HUD.
-   * @returns {CalendariaHUD} The HUD instance
+   * @returns {CalendariaHUD|null} The HUD instance, or null if blocked by combat hide
    */
   static show() {
+    if (game.combat?.started && game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) return null;
     const existing = foundry.applications.instances.get('calendaria-hud');
     if (existing) {
       existing.render({ force: true });
@@ -1721,5 +1739,37 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       this.hide();
       this.show();
     }
+  }
+
+  /**
+   * Register global combat hooks for hide during combat functionality.
+   * Should be called once during module initialization.
+   */
+  static registerCombatHooks() {
+    Hooks.on('combatStart', () => {
+      if (!game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE)) return;
+      const instance = foundry.applications.instances.get('calendaria-hud');
+      if (instance?.rendered) {
+        CalendariaHUD.#closedForCombat = true;
+        instance.close({ combat: true });
+      }
+    });
+
+    Hooks.on('deleteCombat', () => {
+      CalendariaHUD.#onCombatEnd();
+    });
+
+    Hooks.on('updateCombat', () => {
+      if (!game.combat?.started) CalendariaHUD.#onCombatEnd();
+    });
+  }
+
+  /**
+   * Handle combat ending - reopen HUD if it was closed due to combat.
+   */
+  static #onCombatEnd() {
+    if (!CalendariaHUD.#closedForCombat) return;
+    CalendariaHUD.#closedForCombat = false;
+    if (game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE) && game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) CalendariaHUD.show();
   }
 }

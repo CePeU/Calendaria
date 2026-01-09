@@ -1857,6 +1857,8 @@
   "CALENDARIA.Settings.ForceMiniCalendar.Name": "Force Display for All",
   "CALENDARIA.Settings.HUDCombatCompact.Hint": "Automatically switch to slice mode during combat to reduce screen clutter.",
   "CALENDARIA.Settings.HUDCombatCompact.Name": "Combat Auto-Compact",
+  "CALENDARIA.Settings.HUDCombatHide.Hint": "Completely hide the HUD when combat is active. The HUD will reappear when combat ends.",
+  "CALENDARIA.Settings.HUDCombatHide.Name": "Hide During Combat",
   "CALENDARIA.Settings.HUDDialStyle.DisabledHint": "Compact mode always uses the slice view.",
   "CALENDARIA.Settings.HUDDialStyle.Dome": "Dome (semicircle above bar)",
   "CALENDARIA.Settings.HUDDialStyle.Hint": "Choose between the dome (semicircle above bar) or slice (horizontal strip in center).",

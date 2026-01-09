@@ -244,6 +244,15 @@ export function registerSettings() {
     type: new BooleanField({ initial: true })
   });
 
+  /** Calendar HUD hide during combat */
+  game.settings.register(MODULE.ID, SETTINGS.HUD_COMBAT_HIDE, {
+    name: 'CALENDARIA.Settings.HUDCombatHide.Name',
+    hint: 'CALENDARIA.Settings.HUDCombatHide.Hint',
+    scope: 'user',
+    config: false,
+    type: new BooleanField({ initial: false })
+  });
+
   /** Calendar HUD width scale (fullsize mode only) */
   game.settings.register(MODULE.ID, SETTINGS.HUD_WIDTH_SCALE, {
     name: 'CALENDARIA.Settings.HUDWidthScale.Name',

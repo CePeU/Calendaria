@@ -15,6 +15,7 @@ export const MODULE = {
 export const SETTINGS = {
   ACTIVE_CALENDAR: 'activeCalendar',
   ADVANCE_TIME_ON_REST: 'advanceTimeOnRest',
+  AMBIENCE_SYNC: 'ambienceSync',
   CALENDAR_HUD_LOCKED: 'calendarHUDLocked',
   CALENDAR_HUD_MODE: 'calendarHUDMode',
   CALENDAR_HUD_POSITION: 'calendarHUDPosition',
@@ -29,7 +30,6 @@ export const SETTINGS = {
   CUSTOM_TIME_JUMPS: 'customTimeJumps',
   CUSTOM_WEATHER_PRESETS: 'customWeatherPresets',
   DARKNESS_SYNC: 'darknessSync',
-  AMBIENCE_SYNC: 'ambienceSync',
   DEFAULT_BRIGHTNESS_MULTIPLIER: 'defaultBrightnessMultiplier',
   DEFAULT_OVERRIDES: 'defaultOverrides',
   DEV_MODE: 'devMode',
@@ -37,6 +37,7 @@ export const SETTINGS = {
   FORCE_HUD: 'forceHUD',
   FORCE_MINI_CALENDAR: 'forceMiniCalendar',
   HUD_COMBAT_COMPACT: 'hudCombatCompact',
+  HUD_COMBAT_HIDE: 'hudCombatHide',
   HUD_DIAL_STYLE: 'hudDialStyle',
   HUD_SEASON_DISPLAY_MODE: 'hudSeasonDisplayMode',
   HUD_SHOW_ERA: 'hudShowEra',
