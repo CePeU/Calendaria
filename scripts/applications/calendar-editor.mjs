@@ -794,7 +794,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const month = {
         name: data[`months.${idx}.name`] || '',
         abbreviation: data[`months.${idx}.abbreviation`] || '',
-        days: parseInt(data[`months.${idx}.days`]) || 30,
+        days: this.#parseOptionalInt(data[`months.${idx}.days`]) ?? 30,
         leapDays: this.#parseOptionalInt(data[`months.${idx}.leapDays`]),
         startingWeekday: this.#parseOptionalInt(data[`months.${idx}.startingWeekday`]),
         ordinal: this.#calendarData.months.values.length + 1
@@ -2065,6 +2065,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         if (setActive && calendarId) {
           await CalendarManager.switchCalendar(calendarId);
           foundry.utils.debouncedReload();
+        } else {
+          CalendarManager.rerenderCalendarUIs();
         }
       }
     } catch (error) {

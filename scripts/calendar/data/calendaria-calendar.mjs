@@ -682,6 +682,82 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
+   * Count days in intercalary months before a given date in the same year.
+   * @param {number|object} time - Time to check up to.
+   * @returns {number} Number of intercalary days before this date in the year.
+   */
+  countIntercalaryDaysBefore(time) {
+    const months = this.months?.values;
+    if (!months?.length) return 0;
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const isLeap = this.isLeapYear(components.year);
+    let count = 0;
+    for (let i = 0; i < components.month; i++) {
+      const month = months[i];
+      if (month.type !== 'intercalary') continue;
+      const days = isLeap && month.leapDays != null ? month.leapDays : month.days;
+      count += days;
+    }
+    const currentMonth = months[components.month];
+    if (currentMonth?.type === 'intercalary') count += components.dayOfMonth;
+    return count;
+  }
+
+  /**
+   * Count intercalary days per year (non-leap).
+   * @returns {number} Total intercalary days in a regular year.
+   */
+  countIntercalaryDaysInYear() {
+    const months = this.months?.values;
+    if (!months?.length) return 0;
+    let count = 0;
+    for (const month of months) {
+      if (month.type !== 'intercalary') continue;
+      count += month.days ?? 0;
+    }
+    return count;
+  }
+
+  /**
+   * Count intercalary days per leap year.
+   * @returns {number} Total intercalary days in a leap year.
+   */
+  countIntercalaryDaysInLeapYear() {
+    const months = this.months?.values;
+    if (!months?.length) return 0;
+    let count = 0;
+    for (const month of months) {
+      if (month.type !== 'intercalary') continue;
+      count += month.leapDays ?? month.days ?? 0;
+    }
+    return count;
+  }
+
+  /**
+   * Count all intercalary days between the epoch (year 0) and the given year.
+   * @param {number} year - Internal year (0-based from calendar epoch)
+   * @returns {number} Total intercalary days (negative for years before epoch).
+   */
+  countIntercalaryDaysBeforeYear(year) {
+    const months = this.months?.values;
+    if (!months?.length || year === 0) return 0;
+    const regularCount = this.countIntercalaryDaysInYear();
+    const leapCount = this.countIntercalaryDaysInLeapYear();
+    if (year > 0) {
+      let leapYears = 0;
+      for (let y = 0; y < year; y++) if (this.isLeapYear(y)) leapYears++;
+      const regularYears = year - leapYears;
+      return regularYears * regularCount + leapYears * leapCount;
+    } else {
+      let leapYears = 0;
+      for (let y = -1; y >= year; y--) if (this.isLeapYear(y)) leapYears++;
+      const totalYears = -year;
+      const regularYears = totalYears - leapYears;
+      return -(regularYears * regularCount + leapYears * leapCount);
+    }
+  }
+
+  /**
    * Get the current phase of a moon using FC-style distribution.
    * Primary phases (new/full moon) get floor(cycleLength/8) days each,
    * remaining phases split the leftover days evenly.

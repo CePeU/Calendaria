@@ -112,7 +112,10 @@ export function dayOfWeek(date) {
     const monthData = calendar.months?.values?.[date.month];
     if (monthData?.startingWeekday != null) {
       const dayIndex = (date.day ?? 1) - 1;
-      const nonCountingDays = calendar.countNonWeekdayFestivalsBefore?.({ year: date.year - (calendar.years?.yearZero ?? 0), month: date.month, dayOfMonth: (date.day ?? 1) - 1 }) ?? 0;
+      const components = { year: date.year - (calendar.years?.yearZero ?? 0), month: date.month, dayOfMonth: (date.day ?? 1) - 1 };
+      const nonCountingFestivals = calendar.countNonWeekdayFestivalsBefore?.(components) ?? 0;
+      const nonCountingIntercalary = calendar.countIntercalaryDaysBefore?.(components) ?? 0;
+      const nonCountingDays = nonCountingFestivals + nonCountingIntercalary;
       return (monthData.startingWeekday + dayIndex - nonCountingDays + daysInWeek * 100) % daysInWeek;
     }
 
@@ -127,9 +130,12 @@ export function dayOfWeek(date) {
       for (let y = -1; y >= internalYear; y--) totalDaysFromPriorYears -= calendar.getDaysInYear(y);
     }
     const totalDays = totalDaysFromPriorYears + dayOfYear;
-    const nonCountingInYear = calendar.countNonWeekdayFestivalsBefore?.({ year: internalYear, month: date.month, dayOfMonth: (date.day ?? 1) - 1 }) ?? 0;
-    const totalFromPriorYears = calendar.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
-    const totalNonCounting = totalFromPriorYears + nonCountingInYear;
+    const components = { year: internalYear, month: date.month, dayOfMonth: (date.day ?? 1) - 1 };
+    const nonCountingFestivalsInYear = calendar.countNonWeekdayFestivalsBefore?.(components) ?? 0;
+    const nonCountingFestivalsFromPriorYears = calendar.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
+    const intercalaryInYear = calendar.countIntercalaryDaysBefore?.(components) ?? 0;
+    const intercalaryFromPriorYears = calendar.countIntercalaryDaysBeforeYear?.(internalYear) ?? 0;
+    const totalNonCounting = nonCountingFestivalsFromPriorYears + nonCountingFestivalsInYear + intercalaryFromPriorYears + intercalaryInYear;
     const firstWeekday = calendar.years?.firstWeekday ?? 0;
     const countingDays = totalDays - totalNonCounting;
     return (((countingDays + firstWeekday) % daysInWeek) + daysInWeek) % daysInWeek;

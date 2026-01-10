@@ -36,7 +36,7 @@
         <div class="month-row-main flexrow">
           <input type="text" name="months.{{this.index}}.name" value="{{this.name}}" class="col-name">
           <input type="text" name="months.{{this.index}}.abbreviation" value="{{this.abbreviation}}" class="col-abbr">
-          <input type="number" name="months.{{this.index}}.days" value="{{this.days}}" min="1" class="col-days">
+          <input type="number" name="months.{{this.index}}.days" value="{{this.days}}" min="0" class="col-days">
           <input type="number" name="months.{{this.index}}.leapDays" value="{{this.leapDays}}" min="0" class="col-leap">
           <select name="months.{{this.index}}.startingWeekday" class="col-start-weekday">
             <option value="" {{#unless this.hasStartingWeekday}}selected{{/unless}}>

@@ -1015,6 +1015,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
 
     let newMonth = current.month + direction;
     let newYear = current.year;
+    const yearZero = calendar.years?.yearZero ?? 0;
     if (newMonth >= calendar.months.values.length) {
       newMonth = 0;
       newYear++;
@@ -1022,6 +1023,21 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       newMonth = calendar.months.values.length - 1;
       newYear--;
     }
+
+    let attempts = 0;
+    const maxAttempts = calendar.months.values.length;
+    while (calendar.getDaysInMonth(newMonth, newYear - yearZero) === 0 && attempts < maxAttempts) {
+      newMonth += direction;
+      if (newMonth >= calendar.months.values.length) {
+        newMonth = 0;
+        newYear++;
+      } else if (newMonth < 0) {
+        newMonth = calendar.months.values.length - 1;
+        newYear--;
+      }
+      attempts++;
+    }
+
     this.viewedDate = { year: newYear, month: newMonth, day: 1 };
     await this.render();
   }

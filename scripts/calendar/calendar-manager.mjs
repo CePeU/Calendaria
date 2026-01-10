@@ -229,16 +229,15 @@ export default class CalendarManager {
 
     await this.saveCalendars();
     Hooks.callAll(HOOKS.CALENDAR_SWITCHED, id, calendar);
-    this.#rerenderCalendarUIs();
+    this.rerenderCalendarUIs();
     log(3, `Switched to calendar: ${id}`);
     return true;
   }
 
   /**
    * Re-render all calendar-related UI applications.
-   * @private
    */
-  static #rerenderCalendarUIs() {
+  static rerenderCalendarUIs() {
     for (const app of foundry.applications.instances.values()) {
       const name = app.constructor.name;
       if (['CalendariaHUD', 'TimeKeeperHUD', 'MiniCalendar', 'CalendarApplication'].includes(name)) app.render();
@@ -267,7 +266,7 @@ export default class CalendarManager {
     const calendarName = calendar?.name || id;
     ui.notifications.info(format('CALENDARIA.Info.CalendarSwitched', { name: calendarName }));
     Hooks.callAll(HOOKS.REMOTE_CALENDAR_SWITCH, id, calendar);
-    this.#rerenderCalendarUIs();
+    this.rerenderCalendarUIs();
   }
 
   /**

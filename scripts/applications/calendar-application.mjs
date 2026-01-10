@@ -628,6 +628,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    */
   _generateYearData(calendar, date) {
     const { year } = date;
+    const yearZero = calendar.years?.yearZero ?? 0;
     const yearGrid = [];
     const startYear = year - 4;
     for (let row = 0; row < 3; row++) {
@@ -642,7 +643,16 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
               const localizedName = localize(m.name);
               const localizedAbbrev = m.abbreviation ? localize(m.abbreviation) : localizedName;
               const abbrevData = this._abbreviateMonthName(localizedAbbrev);
-              return { localizedName, abbreviation: abbrevData.abbrev, fullAbbreviation: localizedAbbrev, tooltipText: `${localizedName} (${localizedAbbrev})`, month: idx, year: displayYear };
+              const daysInMonth = calendar.getDaysInMonth(idx, displayYear - yearZero);
+              return {
+                localizedName,
+                abbreviation: abbrevData.abbrev,
+                fullAbbreviation: localizedAbbrev,
+                tooltipText: `${localizedName} (${localizedAbbrev})`,
+                month: idx,
+                year: displayYear,
+                hasNoDays: daysInMonth === 0
+              };
             }) || []
         });
       }
@@ -1231,6 +1241,21 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
           newMonth = calendar.months.values.length - 1;
           newYear--;
         }
+
+        let attempts = 0;
+        const maxAttempts = calendar.months.values.length;
+        while (calendar.getDaysInMonth(newMonth, newYear - yearZero) === 0 && attempts < maxAttempts) {
+          newMonth += direction;
+          if (newMonth >= calendar.months.values.length) {
+            newMonth = 0;
+            newYear++;
+          } else if (newMonth < 0) {
+            newMonth = calendar.months.values.length - 1;
+            newYear--;
+          }
+          attempts++;
+        }
+
         this.viewedDate = { year: newYear, month: newMonth, day: 1 };
         break;
       }
@@ -1369,8 +1394,21 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
    * @param {HTMLElement} target - The clicked element with year/month data
    */
   static async _onSelectMonth(_event, target) {
-    const year = parseInt(target.dataset.year);
-    const month = parseInt(target.dataset.month);
+    const calendar = this.calendar;
+    const yearZero = calendar.years?.yearZero ?? 0;
+    let year = parseInt(target.dataset.year);
+    let month = parseInt(target.dataset.month);
+    let attempts = 0;
+    const maxAttempts = calendar.months.values.length;
+    while (calendar.getDaysInMonth(month, year - yearZero) === 0 && attempts < maxAttempts) {
+      month++;
+      if (month >= calendar.months.values.length) {
+        month = 0;
+        year++;
+      }
+      attempts++;
+    }
+
     this._displayMode = 'month';
     this.viewedDate = { year, month, day: 1 };
     await this.render();

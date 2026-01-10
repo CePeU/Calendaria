@@ -1126,6 +1126,12 @@
     color: var(--calendaria-text-on-color);
     background: var(--calendaria-primary);
   }
+
+  &.no-days {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+  }
 }
 
 /* -------------------------------------------- */

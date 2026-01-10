@@ -66,9 +66,12 @@ export function dateFormattingParts(calendar, components) {
   const daysPerYear = calendar?.days?.daysPerYear ?? 365;
   const firstWeekday = calendar?.years?.firstWeekday ?? 0;
   const totalDays = internalYear * daysPerYear + dayOfYear - 1;
-  const nonCountingInYear = calendar?.countNonWeekdayFestivalsBefore?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 }) ?? 0;
-  const nonCountingFromPriorYears = calendar?.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
-  const countingDays = totalDays - nonCountingFromPriorYears - nonCountingInYear;
+  const nonCountingFestivalsInYear = calendar?.countNonWeekdayFestivalsBefore?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 }) ?? 0;
+  const nonCountingFestivalsFromPriorYears = calendar?.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
+  const intercalaryInYear = calendar?.countIntercalaryDaysBefore?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 }) ?? 0;
+  const intercalaryFromPriorYears = calendar?.countIntercalaryDaysBeforeYear?.(internalYear) ?? 0;
+  const nonCountingTotal = nonCountingFestivalsFromPriorYears + nonCountingFestivalsInYear + intercalaryFromPriorYears + intercalaryInYear;
+  const countingDays = totalDays - nonCountingTotal;
   const weekday = weekdays.length > 0 ? (((countingDays + firstWeekday) % weekdays.length) + weekdays.length) % weekdays.length : 0;
   const weekdayData = weekdays[weekday];
   const weekdayName = weekdayData ? localize(weekdayData.name) : '';
