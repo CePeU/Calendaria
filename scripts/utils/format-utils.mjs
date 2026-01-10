@@ -56,8 +56,12 @@ export function dateFormattingParts(calendar, components) {
   const displayYear = year;
   const isMonthless = calendar?.isMonthless ?? false;
   const monthData = isMonthless ? null : calendar?.months?.values?.[month];
-  const monthName = isMonthless ? '' : monthData ? localize(monthData.name) : `Month ${month + 1}`;
-  const monthAbbr = isMonthless ? '' : monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
+  const festivalDay = calendar?.findFestivalDay?.(components);
+  const isIntercalaryMonth = monthData?.type === 'intercalary';
+  const isIntercalaryFestival = festivalDay?.countsForWeekday === false || isIntercalaryMonth;
+  const intercalaryName = festivalDay ? localize(festivalDay.name) : monthData ? localize(monthData.name) : '';
+  const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Calendar.MonthFallback', { num: month + 1 });
+  const monthAbbr = isIntercalaryFestival ? intercalaryName.slice(0, 3) : isMonthless ? '' : monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
   const weekdays = calendar?.days?.values || [];
   const daysInMonthsBefore = isMonthless ? 0 : (calendar?.months?.values || []).slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
   const dayOfYear = isMonthless ? dayOfMonth : daysInMonthsBefore + dayOfMonth;
@@ -121,17 +125,17 @@ export function dateFormattingParts(calendar, components) {
     yy: String(displayYear).slice(-2),
     yyyy: String(displayYear).padStart(4, '0'),
 
-    // Month (empty for monthless calendars)
-    M: isMonthless ? '' : month + 1,
-    MM: isMonthless ? '' : String(month + 1).padStart(2, '0'),
+    // Month (empty for monthless calendars and intercalary festivals, festival name for MMMM/MMM)
+    M: isIntercalaryFestival || isMonthless ? '' : month + 1,
+    MM: isIntercalaryFestival || isMonthless ? '' : String(month + 1).padStart(2, '0'),
     MMM: monthAbbr,
     MMMM: monthName,
-    Mo: isMonthless ? '' : ordinal(month + 1),
+    Mo: isIntercalaryFestival || isMonthless ? '' : ordinal(month + 1),
 
-    // Day (for monthless calendars, D is day-of-year)
-    D: isMonthless ? dayOfYear : dayOfMonth,
-    DD: isMonthless ? String(dayOfYear).padStart(2, '0') : String(dayOfMonth).padStart(2, '0'),
-    Do: isMonthless ? ordinal(dayOfYear) : ordinal(dayOfMonth),
+    // Day (empty for intercalary festivals, day-of-year for monthless calendars)
+    D: isIntercalaryFestival ? '' : isMonthless ? dayOfYear : dayOfMonth,
+    DD: isIntercalaryFestival ? '' : isMonthless ? String(dayOfYear).padStart(2, '0') : String(dayOfMonth).padStart(2, '0'),
+    Do: isIntercalaryFestival ? '' : isMonthless ? ordinal(dayOfYear) : ordinal(dayOfMonth),
     DDD: String(dayOfYear).padStart(3, '0'),
 
     // Weekday (E tokens are UTS #35 standard, d tokens deprecated)
