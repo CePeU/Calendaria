@@ -67,7 +67,7 @@
       <label>{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
       <div class="form-fields">
         <input type="range" name="miniCalendarIdleOpacity" min="0" max="100" value="{{miniCalendarIdleOpacity}}" {{#unless miniCalendarAutoFade}}disabled{{/unless}}>
-        <span class="range-value">{{miniCalendarIdleOpacity}}%</span>
+        <input type="number" class="range-value" min="0" max="100" value="{{miniCalendarIdleOpacity}}" style="width: 48px; flex: none" {{#unless miniCalendarAutoFade}}disabled{{/unless}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
     </div>

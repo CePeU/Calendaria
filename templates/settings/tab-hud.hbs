@@ -100,7 +100,7 @@
       <label>{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
       <div class="form-fields">
         <input type="range" name="hudIdleOpacity" min="0" max="100" value="{{hudIdleOpacity}}" {{#unless hudAutoFade}}disabled{{/unless}}>
-        <span class="range-value">{{hudIdleOpacity}}%</span>
+        <input type="number" class="range-value" min="0" max="100" value="{{hudIdleOpacity}}" style="width: 48px; flex: none" {{#unless hudAutoFade}}disabled{{/unless}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
     </div>

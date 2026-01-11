@@ -806,6 +806,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const settingsPanel = foundry.applications.instances.get('calendaria-settings-panel');
       if (settingsPanel?.rendered) settingsPanel.render({ parts: ['formats'] });
     }
+
+    // Re-render applications when their settings change
+    const timekeeperKeys = ['timeKeeperAutoFade', 'timeKeeperIdleOpacity'];
+    if (timekeeperKeys.some((k) => k in data)) foundry.applications.instances.get('time-keeper-hud')?.render();
+
+    const hudKeys = ['hudDialStyle', 'hudTrayDirection', 'hudCombatCompact', 'hudCombatHide', 'hudAutoFade', 'hudIdleOpacity', 'hudWidthScale', 'hudShowWeather', 'hudWeatherDisplayMode', 'hudShowSeason', 'hudSeasonDisplayMode', 'hudShowEra', 'hudStickyTray'];
+    if (hudKeys.some((k) => k in data)) foundry.applications.instances.get('calendaria-hud')?.render();
+
+    const miniCalKeys = ['miniCalendarAutoFade', 'miniCalendarIdleOpacity', 'miniCalendarControlsDelay', 'miniCalendarStickyTimeControls', 'miniCalendarStickySidebar', 'miniCalendarStickyPosition'];
+    if (miniCalKeys.some((k) => k in data)) foundry.applications.instances.get('mini-calendar')?.render();
   }
 
   /* -------------------------------------------- */
@@ -1324,20 +1334,62 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     // Range slider value display update
     if (partId === 'timekeeper') {
       const rangeInput = htmlElement.querySelector('input[name="timeKeeperIdleOpacity"]');
-      const rangeValue = htmlElement.querySelector('.range-value');
-      if (rangeInput && rangeValue) {
+      const rangeGroup = rangeInput?.closest('.form-group');
+      const numberInput = rangeGroup?.querySelector('.range-value');
+      if (rangeInput && numberInput) {
         rangeInput.addEventListener('input', (e) => {
-          rangeValue.textContent = `${e.target.value}%`;
+          numberInput.value = e.target.value;
+        });
+        numberInput.addEventListener('input', (e) => {
+          const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+          rangeInput.value = val;
+          rangeInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      }
+
+      // Auto-fade checkbox toggles opacity slider
+      const autoFadeCheckbox = htmlElement.querySelector('input[name="timeKeeperAutoFade"]');
+      if (autoFadeCheckbox && rangeInput && rangeGroup && numberInput) {
+        autoFadeCheckbox.addEventListener('change', () => {
+          rangeInput.disabled = !autoFadeCheckbox.checked;
+          numberInput.disabled = !autoFadeCheckbox.checked;
+          rangeGroup.classList.toggle('disabled', !autoFadeCheckbox.checked);
         });
       }
     }
 
     if (partId === 'miniCalendar') {
-      const rangeInput = htmlElement.querySelector('input[name="miniCalendarControlsDelay"]');
-      const rangeValue = htmlElement.querySelector('.range-value');
-      if (rangeInput && rangeValue) {
-        rangeInput.addEventListener('input', (e) => {
-          rangeValue.textContent = `${e.target.value}s`;
+      const controlsDelayInput = htmlElement.querySelector('input[name="miniCalendarControlsDelay"]');
+      const controlsDelayGroup = controlsDelayInput?.closest('.form-group');
+      const controlsDelayValue = controlsDelayGroup?.querySelector('.range-value');
+      if (controlsDelayInput && controlsDelayValue) {
+        controlsDelayInput.addEventListener('input', (e) => {
+          controlsDelayValue.textContent = `${e.target.value}s`;
+        });
+      }
+
+      // Opacity range slider with number input
+      const opacityInput = htmlElement.querySelector('input[name="miniCalendarIdleOpacity"]');
+      const opacityGroup = opacityInput?.closest('.form-group');
+      const opacityNumber = opacityGroup?.querySelector('.range-value');
+      if (opacityInput && opacityNumber) {
+        opacityInput.addEventListener('input', (e) => {
+          opacityNumber.value = e.target.value;
+        });
+        opacityNumber.addEventListener('input', (e) => {
+          const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+          opacityInput.value = val;
+          opacityInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      }
+
+      // Auto-fade checkbox toggles opacity slider
+      const autoFadeCheckbox = htmlElement.querySelector('input[name="miniCalendarAutoFade"]');
+      if (autoFadeCheckbox && opacityInput && opacityGroup && opacityNumber) {
+        autoFadeCheckbox.addEventListener('change', () => {
+          opacityInput.disabled = !autoFadeCheckbox.checked;
+          opacityNumber.disabled = !autoFadeCheckbox.checked;
+          opacityGroup.classList.toggle('disabled', !autoFadeCheckbox.checked);
         });
       }
     }
@@ -1379,6 +1431,31 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         };
         hudModeSelect.addEventListener('change', updateCompactState);
         updateCompactState();
+      }
+
+      // Opacity range slider with number input
+      const opacityInput = htmlElement.querySelector('input[name="hudIdleOpacity"]');
+      const opacityGroup = opacityInput?.closest('.form-group');
+      const opacityNumber = opacityGroup?.querySelector('.range-value');
+      if (opacityInput && opacityNumber) {
+        opacityInput.addEventListener('input', (e) => {
+          opacityNumber.value = e.target.value;
+        });
+        opacityNumber.addEventListener('input', (e) => {
+          const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+          opacityInput.value = val;
+          opacityInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      }
+
+      // Auto-fade checkbox toggles opacity slider
+      const autoFadeCheckbox = htmlElement.querySelector('input[name="hudAutoFade"]');
+      if (autoFadeCheckbox && opacityInput && opacityGroup && opacityNumber) {
+        autoFadeCheckbox.addEventListener('change', () => {
+          opacityInput.disabled = !autoFadeCheckbox.checked;
+          opacityNumber.disabled = !autoFadeCheckbox.checked;
+          opacityGroup.classList.toggle('disabled', !autoFadeCheckbox.checked);
+        });
       }
     }
 
