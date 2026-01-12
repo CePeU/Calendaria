@@ -75,7 +75,7 @@ Hooks.once('ready', async () => {
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CALENDAR)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_MINI_CALENDAR)) MiniCalendar.show();
-  if (game.system.id === 'dnd5e') {
+  if (game.system.id === 'dnd5e' && foundry.utils.isNewerVersion(game.system.version, '5.1.10')) {
     const calendarConfig = game.settings.get('dnd5e', 'calendarConfig');
     if (calendarConfig?.enabled) {
       await game.settings.set('dnd5e', 'calendarConfig', { ...calendarConfig, enabled: false });
