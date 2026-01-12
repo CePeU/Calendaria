@@ -535,6 +535,36 @@
   cursor: help;
 }
 
+/* Moon icon for [moonIcon] format token */
+img.calendaria-moon-icon {
+  display: inline;
+  width: auto;
+  height: 1em;
+  vertical-align: middle;
+}
+
+span.calendaria-moon-icon {
+  display: inline-flex;
+  align-items: center;
+  height: 1em;
+  vertical-align: middle;
+
+  img {
+    width: auto;
+    height: 100%;
+  }
+
+  &.tinted {
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
+
+    img {
+      mix-blend-mode: multiply;
+    }
+  }
+}
+
 .moon-tooltip-row {
   gap: 6px;
   display: flex;
@@ -5538,6 +5568,9 @@
 }
 
 .calendaria-hud-date {
+  gap: 0.25em;
+  display: inline-flex;
+  align-items: center;
   overflow: hidden;
   color: var(--calendaria-text);
   font-weight: 500;

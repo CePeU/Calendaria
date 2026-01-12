@@ -41,7 +41,7 @@
 
       <div class="calendaria-hud-info-panel">
         <span class="calendaria-hud-date"{{#if canChangeDateTime}} data-action="setDate"
-          data-tooltip="{{dateDisplay}} (Click to set date)"{{else}} data-tooltip="{{dateDisplay}}"{{/if}}>{{dateDisplay}}</span>
+          data-tooltip="{{dateDisplay}} ({{localize 'CALENDARIA.HUD.ClickToSetDate'}})"{{else}} data-tooltip="{{dateDisplay}}"{{/if}}>{{{dateDisplayHtml}}}</span>
         {{#if hasEvents}}
         <div class="calendaria-hud-events">
           {{#each liveEvents}}

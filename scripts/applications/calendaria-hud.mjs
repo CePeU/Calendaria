@@ -10,7 +10,7 @@ import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../constants.m
 import NoteManager from '../notes/note-manager.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
-import { formatForLocation } from '../utils/format-utils.mjs';
+import { formatForLocation, hasMoonIconMarkers, renderMoonIcons, stripMoonIconMarkers } from '../utils/format-utils.mjs';
 import { localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { canChangeDateTime, canChangeWeather } from '../utils/permissions.mjs';
@@ -200,7 +200,9 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     context.time = this.#formatTime(components);
-    context.dateDisplay = this.#formatDateDisplay(components);
+    const dateFormatted = this.#formatDateDisplay(components);
+    context.dateDisplay = stripMoonIconMarkers(dateFormatted);
+    context.dateDisplayHtml = renderMoonIcons(dateFormatted);
     const showWeatherBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_WEATHER);
     const showSeasonBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_SEASON);
     const showEraBlock = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ERA);
@@ -887,7 +889,11 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const timeEl = this.element.querySelector('.calendaria-hud-time');
     if (timeEl) timeEl.textContent = this.#formatTime(components);
     const dateEl = this.element.querySelector('.calendaria-hud-date');
-    if (dateEl) dateEl.textContent = this.#formatDateDisplay(components);
+    if (dateEl) {
+      const dateFormatted = this.#formatDateDisplay(components);
+      if (hasMoonIconMarkers(dateFormatted)) dateEl.innerHTML = renderMoonIcons(dateFormatted);
+      else dateEl.textContent = dateFormatted;
+    }
     const hud = this.element.querySelector('.calendaria-hud');
     if (hud) hud.classList.toggle('time-flowing', TimeKeeper.running);
     this.#updateCelestialDisplay();

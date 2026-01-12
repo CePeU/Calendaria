@@ -417,7 +417,6 @@ export function formatCustom(calendar, components, formatStr) {
   const cycleNum = getCycleNumber(calendar, components);
   const customContext = {
     moon: getMoonPhaseName(calendar, components),
-    moonIcon: getMoonPhaseIcon(calendar, components),
     era: parts.era,
     eraAbbr: parts.eraAbbr,
     yearInEra: parts.eraYear,
@@ -434,8 +433,18 @@ export function formatCustom(calendar, components, formatStr) {
   };
 
   return formatStr.replace(TOKEN_REGEX, (match, customToken) => {
-    // Custom token in brackets - return value if known, otherwise literal text
-    if (customToken) return customContext[customToken] ?? customToken;
+    if (customToken) {
+      if (customToken.startsWith('moonIcon')) {
+        const paramPart = customToken.slice(9);
+        let moonSelector;
+        if (paramPart) {
+          if ((paramPart.startsWith("'") && paramPart.endsWith("'")) || (paramPart.startsWith('"') && paramPart.endsWith('"'))) moonSelector = paramPart.slice(1, -1);
+          else moonSelector = /^\d+$/.test(paramPart) ? parseInt(paramPart, 10) : paramPart;
+        }
+        return getMoonPhaseIcon(calendar, components, moonSelector);
+      }
+      return customContext[customToken] ?? customToken;
+    }
 
     // Standard token - map to parts
     const tokenMap = {
@@ -522,25 +531,87 @@ function getMoonPhaseName(calendar, components) {
 }
 
 /**
- * Get moon phase icon for the given date.
+ * Get moon phase icon marker for the given date.
  * @param {object} calendar - Calendar data
  * @param {object} components - Date components
- * @returns {string} Moon phase icon
+ * @param {string|number} [moonSelector] - Moon name or index (default: first moon)
+ * @returns {string} Moon phase icon marker (use renderMoonIcons to convert to HTML)
  */
-function getMoonPhaseIcon(calendar, components) {
-  const { year, month, dayOfMonth } = components;
+function getMoonPhaseIcon(calendar, components, moonSelector) {
   if (!calendar?.moons?.length) return '';
-  const moon = calendar.moons[0];
-  if (!moon.phases?.length) return '';
-  const cycleLength = moon.cycleLength || 29;
-  const refDate = moon.referenceDate || { year: 0, month: 0, day: 1 };
-  const refDays = refDate.year * 365 + refDate.month * 30 + refDate.day;
-  const currentDays = year * 365 + month * 30 + dayOfMonth;
-  const daysSinceRef = currentDays - refDays;
-  const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
-  const phaseIndex = Math.floor(cyclePosition * moon.phases.length);
-  const phase = moon.phases[phaseIndex];
-  return phase?.icon || '';
+  let moonIndex = 0;
+  if (moonSelector !== undefined && moonSelector !== null && moonSelector !== '') {
+    if (typeof moonSelector === 'number') moonIndex = moonSelector;
+    else if (/^\d+$/.test(moonSelector)) moonIndex = parseInt(moonSelector, 10);
+    else {
+      const selectorLower = String(moonSelector).toLowerCase();
+      const foundIndex = calendar.moons.findIndex((m) => {
+        const moonName = localize(m.name).toLowerCase();
+        const rawName = (m.name || '').toLowerCase();
+        return moonName === selectorLower || rawName === selectorLower;
+      });
+      if (foundIndex >= 0) moonIndex = foundIndex;
+    }
+  }
+
+  const moon = calendar.moons[moonIndex];
+  if (!moon) return '';
+  let phase;
+  if (calendar.getMoonPhase && calendar.componentsToTime) {
+    const worldTime = calendar.componentsToTime(components);
+    const phaseData = calendar.getMoonPhase(moonIndex, worldTime);
+    if (phaseData) phase = { name: phaseData.name, icon: phaseData.icon };
+  }
+
+  if (!phase && moon.phases?.length) {
+    const { year, month, dayOfMonth } = components;
+    const cycleLength = moon.cycleLength || 29;
+    const refDate = moon.referenceDate || { year: 0, month: 0, day: 1 };
+    const refDays = refDate.year * 365 + refDate.month * 30 + refDate.day;
+    const currentDays = year * 365 + month * 30 + dayOfMonth;
+    const daysSinceRef = currentDays - refDays;
+    const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
+    const phaseIndex = Math.floor(cyclePosition * moon.phases.length);
+    phase = moon.phases[phaseIndex];
+  }
+
+  if (!phase?.icon) return '';
+  const phaseName = localize(phase.name);
+  const moonName = localize(moon.name);
+  const moonColor = moon.color || '';
+  return `${'__MOONICON:'}${phase.icon}|${phaseName}|${moonName}: ${phaseName}|${moonColor}${'__'}`;
+}
+
+/**
+ * Check if a formatted string contains moon icon markers.
+ * @param {string} str - Formatted string
+ * @returns {boolean} True if string contains moon icon markers
+ */
+export function hasMoonIconMarkers(str) {
+  return str?.includes('__MOONICON:') ?? false;
+}
+
+/**
+ * Convert moon icon markers in a string to HTML img elements.
+ * @param {string} str - String with moon icon markers
+ * @returns {string} String with markers replaced by <img> elements
+ */
+export function renderMoonIcons(str) {
+  if (!str || !hasMoonIconMarkers(str)) return str;
+  return str.replace(/__MOONICON:([^|]*)\|([^|]*)\|([^|]*)\|(.*?)__/g, (_, src, alt, tooltip, color) => {
+    if (color) return `<span class="calendaria-moon-icon tinted" style="--moon-color: ${color}" data-tooltip="${tooltip}"><img src="${src}" alt="${alt}"></span>`;
+    return `<img class="calendaria-moon-icon" src="${src}" alt="${alt}" data-tooltip="${tooltip}">`;
+  });
+}
+
+/**
+ * Strip moon icon markers from a string (for text-only contexts).
+ * @param {string} str - String with moon icon markers
+ * @returns {string} String with markers removed
+ */
+export function stripMoonIconMarkers(str) {
+  if (!str || !hasMoonIconMarkers(str)) return str;
+  return str.replace(/__MOONICON:([^|]*)\|([^|]*)\|([^|]*)\|(.*?)__/g, '');
 }
 
 /**
@@ -553,9 +624,7 @@ function getCanonicalHour(calendar, components) {
   const { hour = 0 } = components;
   if (!calendar?.canonicalHours?.length) return '';
   for (const ch of calendar.canonicalHours) {
-    if (hour >= ch.startHour && hour < ch.endHour) {
-      return localize(ch.name);
-    }
+    if (hour >= ch.startHour && hour < ch.endHour) return localize(ch.name);
   }
   return '';
 }
@@ -570,9 +639,7 @@ function getCanonicalHourAbbr(calendar, components) {
   const { hour = 0 } = components;
   if (!calendar?.canonicalHours?.length) return '';
   for (const ch of calendar.canonicalHours) {
-    if (hour >= ch.startHour && hour < ch.endHour) {
-      return ch.abbreviation ? localize(ch.abbreviation) : localize(ch.name).slice(0, 3);
-    }
+    if (hour >= ch.startHour && hour < ch.endHour) return ch.abbreviation ? localize(ch.abbreviation) : localize(ch.name).slice(0, 3);
   }
   return '';
 }
