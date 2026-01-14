@@ -27,13 +27,13 @@
     </div>
 
     {{#if isGM}}
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.ForceHUD.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="forceHUD" {{#if forceHUD}}checked{{/if}}>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.ForceHUD.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="forceHUD" {{#if forceHUD}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForceHUD.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.ForceHUD.Hint"}}</p>
-    </div>
     {{/if}}
 
     <div class="form-group">
@@ -41,7 +41,7 @@
       <div class="form-fields">
         <select name="calendarHUDMode">
           {{#each hudModeOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -53,11 +53,13 @@
       <div class="form-fields">
         <select name="hudDialStyle" {{#if isCompactMode}}disabled{{/if}}>
           {{#each dialStyleOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
-      <p class="hint">{{#if isCompactMode}}{{localize "CALENDARIA.Settings.HUDDialStyle.DisabledHint"}}{{else}}{{localize "CALENDARIA.Settings.HUDDialStyle.Hint"}}{{/if}}</p>
+      <p class="hint">
+        {{#if isCompactMode}}{{localize "CALENDARIA.Settings.HUDDialStyle.DisabledHint"}}{{else}}{{localize "CALENDARIA.Settings.HUDDialStyle.Hint"}}{{/if}}
+      </p>
     </div>
 
     <div class="form-group">
@@ -65,7 +67,7 @@
       <div class="form-fields">
         <select name="hudTrayDirection">
           {{#each trayDirectionOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
@@ -75,7 +77,8 @@
     <div class="form-group{{#if hudCombatHide}} disabled{{/if}}">
       <label>{{localize "CALENDARIA.Settings.HUDCombatCompact.Name"}}</label>
       <div class="form-fields">
-        <input type="checkbox" name="hudCombatCompact" {{#if hudCombatCompact}}checked{{/if}} {{#if hudCombatHide}}disabled{{/if}}>
+        <input type="checkbox" name="hudCombatCompact" {{#if hudCombatCompact}}checked{{/if}}
+          {{#if hudCombatHide}}disabled{{/if}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDCombatCompact.Hint"}}</p>
     </div>
@@ -99,8 +102,10 @@
     <div class="form-group{{#unless hudAutoFade}} disabled{{/unless}}">
       <label>{{localize "CALENDARIA.Settings.IdleOpacity.Name"}}</label>
       <div class="form-fields">
-        <input type="range" name="hudIdleOpacity" min="0" max="100" value="{{hudIdleOpacity}}" {{#unless hudAutoFade}}disabled{{/unless}}>
-        <input type="number" class="range-value" min="0" max="100" value="{{hudIdleOpacity}}" style="width: 48px; flex: none" {{#unless hudAutoFade}}disabled{{/unless}}>
+        <input type="range" name="hudIdleOpacity" min="0" max="100" value="{{hudIdleOpacity}}"
+          {{#unless hudAutoFade}}disabled{{/unless}}>
+        <input type="number" class="range-value" min="0" max="100" value="{{hudIdleOpacity}}"
+          style="width: 48px; flex: none" {{#unless hudAutoFade}}disabled{{/unless}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.IdleOpacity.Hint"}}</p>
     </div>
@@ -108,10 +113,13 @@
     <div class="form-group{{#if isCompactMode}} disabled{{/if}}">
       <label>{{localize "CALENDARIA.Settings.HUDWidthScale.Name"}}</label>
       <div class="form-fields range-field">
-        <input type="range" name="hudWidthScale" min="0.5" max="2" step="0.05" value="{{hudWidthScale}}" {{#if isCompactMode}}disabled{{/if}}>
+        <input type="range" name="hudWidthScale" min="0.5" max="2" step="0.05" value="{{hudWidthScale}}"
+          {{#if isCompactMode}}disabled{{/if}}>
         <span class="range-value">{{hudWidthScale}}x ({{hudWidthScalePixels}}px)</span>
       </div>
-      <p class="hint">{{#if isCompactMode}}{{localize "CALENDARIA.Settings.HUDWidthScale.DisabledHint"}}{{else}}{{localize "CALENDARIA.Settings.HUDWidthScale.Hint"}}{{/if}}</p>
+      <p class="hint">
+        {{#if isCompactMode}}{{localize "CALENDARIA.Settings.HUDWidthScale.DisabledHint"}}{{else}}{{localize "CALENDARIA.Settings.HUDWidthScale.Hint"}}{{/if}}
+      </p>
     </div>
   </fieldset>
 
@@ -128,17 +136,17 @@
     </div>
 
     {{#unless isCompactMode}}
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
-      <div class="form-fields">
-        <select name="hudWeatherDisplayMode">
-          {{#each weatherDisplayModeOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-          {{/each}}
-        </select>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Name"}}</label>
+        <div class="form-fields">
+          <select name="hudWeatherDisplayMode">
+            {{#each weatherDisplayModeOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.HUDWeatherDisplayMode.Hint"}}</p>
-    </div>
     {{/unless}}
 
     <div class="form-group">
@@ -150,17 +158,17 @@
     </div>
 
     {{#unless isCompactMode}}
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
-      <div class="form-fields">
-        <select name="hudSeasonDisplayMode">
-          {{#each seasonDisplayModeOptions}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-          {{/each}}
-        </select>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Name"}}</label>
+        <div class="form-fields">
+          <select name="hudSeasonDisplayMode">
+            {{#each seasonDisplayModeOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.HUDSeasonDisplayMode.Hint"}}</p>
-    </div>
     {{/unless}}
 
     <div class="form-group">
@@ -194,23 +202,27 @@
   </fieldset>
 
   {{#if isGM}}
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}</legend>
-    <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.CustomTimeJumps"}}</p>
+    <fieldset>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.CustomTimeJumps"}}</legend>
+      <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.CustomTimeJumps"}}</p>
 
-    {{#each customTimeJumps}}
-    <div class="form-group custom-time-jumps-row">
-      <label>{{label}}</label>
-      <div class="form-fields custom-jumps-inputs">
-        <input type="number" name="customTimeJumps.{{key}}.dec2" value="{{jumps.dec2}}" placeholder="-" class="jump-input">
-        <input type="number" name="customTimeJumps.{{key}}.dec1" value="{{jumps.dec1}}" placeholder="-" class="jump-input">
-        <span class="jump-separator">/</span>
-        <input type="number" name="customTimeJumps.{{key}}.inc1" value="{{jumps.inc1}}" placeholder="+" class="jump-input">
-        <input type="number" name="customTimeJumps.{{key}}.inc2" value="{{jumps.inc2}}" placeholder="+" class="jump-input">
-      </div>
-    </div>
-    {{/each}}
-  </fieldset>
+      {{#each customTimeJumps}}
+        <div class="form-group custom-time-jumps-row">
+          <label>{{label}}</label>
+          <div class="form-fields custom-jumps-inputs">
+            <input type="number" name="customTimeJumps.{{key}}.dec2" value="{{jumps.dec2}}" placeholder="-"
+              class="jump-input">
+            <input type="number" name="customTimeJumps.{{key}}.dec1" value="{{jumps.dec1}}" placeholder="-"
+              class="jump-input">
+            <span class="jump-separator">/</span>
+            <input type="number" name="customTimeJumps.{{key}}.inc1" value="{{jumps.inc1}}" placeholder="+"
+              class="jump-input">
+            <input type="number" name="customTimeJumps.{{key}}.inc2" value="{{jumps.inc2}}" placeholder="+"
+              class="jump-input">
+          </div>
+        </div>
+      {{/each}}
+    </fieldset>
   {{/if}}
 
 </section>

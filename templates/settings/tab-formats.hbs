@@ -3,52 +3,45 @@
   <p class="hint section-hint">{{localize "CALENDARIA.Format.SettingsHint"}}</p>
 
   {{#each formatCategories}}
-  <fieldset>
-    <legend>{{label}}</legend>
+    <fieldset>
+      <legend>{{label}}</legend>
 
-    {{#each locations}}
-    <div class="format-location" data-location="{{id}}">
-      <div class="form-group">
-        <label>{{label}}</label>
-      </div>
+      {{#each locations}}
+        <div class="format-location" data-location="{{id}}">
+          <div class="form-group">
+            <label>{{label}}</label>
+          </div>
 
-      <div class="format-row">
-        <div class="format-column">
-          <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}}</span>
-          <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
-            {{#each gmPresetOptions}}
-            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-          <input type="text"
-            name="displayFormats.{{id}}.gmCustom"
-            value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
-            placeholder="D MMMM YYYY"
-            class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
-            data-location="{{id}}"
-            data-role="gm">
+          <div class="format-row">
+            <div class="format-column">
+              <span class="format-label">{{localize "CALENDARIA.Format.GMFormat"}}</span>
+              <select name="displayFormats.{{id}}.gmPreset" data-location="{{id}}" data-role="gm">
+                {{#each gmPresetOptions}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+              <input type="text" name="displayFormats.{{id}}.gmCustom" value="{{#if isCustomGM}}{{gmFormat}}{{/if}}"
+                placeholder="D MMMM YYYY" class="format-custom-input {{#unless isCustomGM}}hidden{{/unless}}"
+                data-location="{{id}}" data-role="gm">
+            </div>
+
+            <div class="format-column">
+              <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}}</span>
+              <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
+                {{#each playerPresetOptions}}
+                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
+              <input type="text" name="displayFormats.{{id}}.playerCustom"
+                value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}" placeholder="D MMMM YYYY"
+                class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}" data-location="{{id}}"
+                data-role="player">
+            </div>
+          </div>
         </div>
+      {{/each}}
 
-        <div class="format-column">
-          <span class="format-label">{{localize "CALENDARIA.Format.PlayerFormat"}}</span>
-          <select name="displayFormats.{{id}}.playerPreset" data-location="{{id}}" data-role="player">
-            {{#each playerPresetOptions}}
-            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-          <input type="text"
-            name="displayFormats.{{id}}.playerCustom"
-            value="{{#if isCustomPlayer}}{{playerFormat}}{{/if}}"
-            placeholder="D MMMM YYYY"
-            class="format-custom-input {{#unless isCustomPlayer}}hidden{{/unless}}"
-            data-location="{{id}}"
-            data-role="player">
-        </div>
-      </div>
-    </div>
-    {{/each}}
-
-  </fieldset>
+    </fieldset>
   {{/each}}
 
   <fieldset>
@@ -59,12 +52,12 @@
       <div class="form-fields stopwatch-format-fields">
         <select name="stopwatchRealtimeSelect" data-format-target="stopwatchFormatRealtime">
           {{#each stopwatchRealtimeOptions}}
-          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
         <input type="text" name="stopwatchFormatRealtime" value="{{stopwatchRealtimeValue}}"
-               class="stopwatch-custom-format" placeholder="HH:mm:ss.SSS"
-               {{#unless stopwatchRealtimeCustom}}style="display:none"{{/unless}}>
+          class="stopwatch-custom-format" placeholder="HH:mm:ss.SSS"
+          {{#unless stopwatchRealtimeCustom}}style="display:none" {{/unless}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Format.StopwatchRealtimeHint"}}</p>
     </div>
@@ -74,12 +67,12 @@
       <div class="form-fields stopwatch-format-fields">
         <select name="stopwatchGametimeSelect" data-format-target="stopwatchFormatGametime">
           {{#each stopwatchGametimeOptions}}
-          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
         <input type="text" name="stopwatchFormatGametime" value="{{stopwatchGametimeValue}}"
-               class="stopwatch-custom-format" placeholder="HH:mm:ss"
-               {{#unless stopwatchGametimeCustom}}style="display:none"{{/unless}}>
+          class="stopwatch-custom-format" placeholder="HH:mm:ss" {{#unless stopwatchGametimeCustom}}style="display:none"
+          {{/unless}}>
       </div>
       <p class="hint">{{localize "CALENDARIA.Format.StopwatchGametimeHint"}}</p>
     </div>

@@ -30,11 +30,12 @@ import { migrateAllDeprecatedTokens, migrateCustomCalendars } from './scripts/ut
 import { registerKeybindings, toggleCalendarVisibility } from './scripts/utils/keybinds.mjs';
 import { initializeLogger, log } from './scripts/utils/logger.mjs';
 import * as Permissions from './scripts/utils/permissions.mjs';
-const { canViewMiniCalendar, canViewTimeKeeper } = Permissions;
 import { CalendariaSocket } from './scripts/utils/socket.mjs';
 import * as StickyZones from './scripts/utils/sticky-zones.mjs';
 import { initializeTheme } from './scripts/utils/theme-utils.mjs';
 import WeatherManager from './scripts/weather/weather-manager.mjs';
+
+const { canViewMiniCalendar, canViewTimeKeeper } = Permissions;
 
 Hooks.once('init', async () => {
   Hooks.callAll(HOOKS.INIT);

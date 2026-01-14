@@ -6,7 +6,7 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../constants.mjs';
+import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { dayOfWeek } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
@@ -17,6 +17,7 @@ import { format, localize } from '../utils/localization.mjs';
 import { canChangeDateTime, canChangeWeather, canViewMiniCalendar } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import * as StickyZones from '../utils/sticky-zones.mjs';
+import * as WidgetManager from '../utils/widget-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import { CalendarApplication } from './calendar-application.mjs';
@@ -213,7 +214,81 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       context.cycleValues = cycleResult.values;
     }
 
+    context.widgets = this.#prepareWidgetContext(context);
     return context;
+  }
+
+  /**
+   * Prepare widget context for template rendering.
+   * @param {object} context - The template context
+   * @returns {object} Widget context
+   */
+  #prepareWidgetContext(context) {
+    const widgets = {};
+    widgets.sidebar = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.MINICAL_SIDEBAR, 'minical');
+    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.WEATHER_INDICATOR, this.#renderWeatherIndicator(context), 'minical');
+    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.SEASON_INDICATOR, this.#renderSeasonIndicator(context), 'minical');
+    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, this.#renderEraIndicator(context), 'minical');
+    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.CYCLE_INDICATOR, this.#renderCycleIndicator(context), 'minical');
+    widgets.indicators = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'minical');
+    widgets.hasIndicators = WidgetManager.hasWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS);
+    return widgets;
+  }
+
+  /**
+   * Render weather indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  #renderWeatherIndicator(context) {
+    const { weather, canChangeWeather } = context;
+    if (weather) {
+      const clickable = canChangeWeather ? ' clickable' : '';
+      const action = canChangeWeather ? 'data-action="openWeatherPicker"' : '';
+      const temp = weather.temperature ? `<span class="weather-temp">${weather.temperature}</span>` : '';
+      return `<span class="weather-indicator${clickable}" ${action}
+        style="--weather-color: ${weather.color}" data-tooltip="${weather.tooltip}">
+        <i class="fas ${weather.icon}"></i> ${weather.label} ${temp}
+      </span>`;
+    } else if (canChangeWeather) {
+      return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
+        data-tooltip="${localize('CALENDARIA.Weather.ClickToGenerate')}">
+        <i class="fas fa-cloud"></i> ${localize('CALENDARIA.Weather.None')}
+      </span>`;
+    }
+    return '';
+  }
+
+  /**
+   * Render season indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  #renderSeasonIndicator(context) {
+    const season = context.calendarData?.currentSeason;
+    if (!season) return '';
+    return `<span class="season-indicator" style="--season-color: ${season.color}" data-tooltip="${localize('CALENDARIA.UI.CurrentSeason')}"><i class="${season.icon}"></i> ${localize(season.name)}</span>`;
+  }
+
+  /**
+   * Render era indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  #renderEraIndicator(context) {
+    const era = context.calendarData?.currentEra;
+    if (!era) return '';
+    return `<span class="era-indicator" data-tooltip="${localize('CALENDARIA.UI.CurrentEra')}"><i class="fas fa-hourglass-half"></i> ${localize(era.name)}</span>`;
+  }
+
+  /**
+   * Render cycle indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  #renderCycleIndicator(context) {
+    if (!context.cycleText) return '';
+    return `<span class="cycle-indicator" data-tooltip="${localize('CALENDARIA.UI.CurrentCycle')}"><i class="fas fa-arrows-rotate"></i> ${context.cycleText}</span>`;
   }
 
   /**
@@ -713,6 +788,8 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       timeControls.addEventListener('mouseenter', showControls);
       timeControls.addEventListener('mouseleave', hideControls);
     }
+
+    WidgetManager.attachWidgetListeners(this.element);
   }
 
   /** @override */
@@ -752,6 +829,7 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
     });
 
     this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
+    this.#hooks.push({ name: HOOKS.WIDGETS_REFRESH, id: Hooks.on(HOOKS.WIDGETS_REFRESH, () => this.render()) });
     this.#hooks.push({ name: 'calendaria.displayFormatsChanged', id: Hooks.on('calendaria.displayFormatsChanged', () => this.render()) });
 
     // Right-click context menu for close

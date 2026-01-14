@@ -1,73 +1,73 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   {{#if isGM}}
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.RealTimeSpeed"}}</legend>
+    <fieldset>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.RealTimeSpeed"}}</legend>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Name"}}</label>
-      <div class="form-fields time-speed-fields">
-        <input type="number" name="timeSpeedMultiplier" value="{{timeSpeedMultiplier}}" min="1" step="1">
-        <select name="timeSpeedIncrement">
-          {{#each timeSpeedIncrements}}
-          <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-          {{/each}}
-        </select>
-        <span class="time-speed-suffix">{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Suffix"}}</span>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Name"}}</label>
+        <div class="form-fields time-speed-fields">
+          <input type="number" name="timeSpeedMultiplier" value="{{timeSpeedMultiplier}}" min="1" step="1">
+          <select name="timeSpeedIncrement">
+            {{#each timeSpeedIncrements}}
+              <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+          <span class="time-speed-suffix">{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Suffix"}}</span>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.TimeSpeedMultiplier.Hint"}}</p>
-    </div>
-  </fieldset>
+    </fieldset>
 
-  <fieldset>
-    <legend>{{localize "CALENDARIA.SettingsPanel.Section.TimeIntegration"}}</legend>
+    <fieldset>
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.TimeIntegration"}}</legend>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.DarknessSync.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="darknessSync" {{#if darknessSync}}checked{{/if}}>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.DarknessSync.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="darknessSync" {{#if darknessSync}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.DarknessSync.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.DarknessSync.Hint"}}</p>
-    </div>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.AmbienceSync.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="ambienceSync" {{#if ambienceSync}}checked{{/if}}>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.AmbienceSync.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="ambienceSync" {{#if ambienceSync}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.AmbienceSync.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.AmbienceSync.Hint"}}</p>
-    </div>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="advanceTimeOnRest" {{#if advanceTimeOnRest}}checked{{/if}}>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="advanceTimeOnRest" {{#if advanceTimeOnRest}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.AdvanceTimeOnRest.Hint"}}</p>
-    </div>
 
-    <div class="form-group">
-      <label>{{localize "CALENDARIA.Settings.SyncClockPause.Name"}}</label>
-      <div class="form-fields">
-        <input type="checkbox" name="syncClockPause" {{#if syncClockPause}}checked{{/if}}>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.SyncClockPause.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="syncClockPause" {{#if syncClockPause}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.SyncClockPause.Hint"}}</p>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.SyncClockPause.Hint"}}</p>
-    </div>
-  </fieldset>
+    </fieldset>
 
-  {{#if roundTimeDisabled}}
-  <div class="notification warning">
-    <i class="fas fa-exclamation-triangle"></i>
-    <p>{{localize "CALENDARIA.SettingsPanel.TimeTab.RoundTimeDisabledWarning"}}</p>
-  </div>
-  {{/if}}
+    {{#if roundTimeDisabled}}
+      <div class="notification warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>{{localize "CALENDARIA.SettingsPanel.TimeTab.RoundTimeDisabledWarning"}}</p>
+      </div>
+    {{/if}}
   {{/if}}
 
   {{#unless isGM}}
-  <div class="info-box">
-    <i class="fas fa-info-circle"></i>
-    <p>{{localize "CALENDARIA.SettingsPanel.TimeTab.PlayerMessage"}}</p>
-  </div>
+    <div class="info-box">
+      <i class="fas fa-info-circle"></i>
+      <p>{{localize "CALENDARIA.SettingsPanel.TimeTab.PlayerMessage"}}</p>
+    </div>
   {{/unless}}
 
 </section>

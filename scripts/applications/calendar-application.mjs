@@ -7,7 +7,7 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../constants.mjs';
+import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, TEMPLATES, WIDGET_POINTS } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { addDays, dayOfWeek, daysBetween } from '../notes/utils/date-utils.mjs';
 import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
@@ -15,6 +15,7 @@ import SearchManager from '../search/search-manager.mjs';
 import { formatForLocation } from '../utils/format-utils.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { canViewFullCalendar } from '../utils/permissions.mjs';
+import * as WidgetManager from '../utils/widget-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
@@ -190,7 +191,81 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
     context.searchTerm = this._searchTerm;
     context.searchOpen = this._searchOpen;
     context.searchResults = this._searchResults || [];
+    context.widgets = this._prepareWidgetContext(context);
     return context;
+  }
+
+  /**
+   * Prepare widget context for template rendering.
+   * @param {object} context - The template context
+   * @returns {object} Widget context
+   */
+  _prepareWidgetContext(context) {
+    const widgets = {};
+    widgets.actions = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.FULLCAL_ACTIONS, 'fullcal');
+    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.WEATHER_INDICATOR, this._renderWeatherIndicator(context), 'fullcal');
+    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.SEASON_INDICATOR, this._renderSeasonIndicator(context), 'fullcal');
+    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, this._renderEraIndicator(context), 'fullcal');
+    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.CYCLE_INDICATOR, this._renderCycleIndicator(context), 'fullcal');
+    widgets.indicators = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'fullcal');
+    widgets.hasIndicators = WidgetManager.hasWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS);
+    return widgets;
+  }
+
+  /**
+   * Render weather indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  _renderWeatherIndicator(context) {
+    const { weather, editable } = context;
+    if (weather) {
+      const clickable = editable ? ' clickable' : '';
+      const action = editable ? 'data-action="openWeatherPicker"' : '';
+      const temp = weather.temperature ? `<span class="weather-temp">${weather.temperature}</span>` : '';
+      return `<span class="weather-indicator${clickable}" ${action}
+        style="--weather-color: ${weather.color}" data-tooltip="${weather.tooltip}">
+        <i class="fas ${weather.icon}"></i> ${weather.label} ${temp}
+      </span>`;
+    } else if (editable) {
+      return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
+        data-tooltip="${localize('CALENDARIA.Weather.ClickToGenerate')}">
+        <i class="fas fa-cloud"></i> ${localize('CALENDARIA.Weather.None')}
+      </span>`;
+    }
+    return '';
+  }
+
+  /**
+   * Render season indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  _renderSeasonIndicator(context) {
+    const season = context.calendarData?.currentSeason;
+    if (!season) return '';
+    return `<span class="season-indicator" style="--season-color: ${season.color}" data-tooltip="${localize('CALENDARIA.UI.CurrentSeason')}"><i class="${season.icon}"></i> ${localize(season.name)}</span>`;
+  }
+
+  /**
+   * Render era indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  _renderEraIndicator(context) {
+    const era = context.calendarData?.currentEra;
+    if (!era) return '';
+    return `<span class="era-indicator" data-tooltip="${localize('CALENDARIA.UI.CurrentEra')}"><i class="fas fa-hourglass-half"></i> ${localize(era.name)}</span>`;
+  }
+
+  /**
+   * Render cycle indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  _renderCycleIndicator(context) {
+    if (!context.cycleText) return '';
+    return `<span class="cycle-indicator" data-tooltip="${localize('CALENDARIA.UI.CurrentCycle')}"><i class="fas fa-arrows-rotate"></i> ${context.cycleText}</span>`;
   }
 
   /**
@@ -1077,6 +1152,8 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
         }, 100);
       }
     }
+
+    WidgetManager.attachWidgetListeners(this.element);
   }
 
   /**
@@ -1179,6 +1256,7 @@ export class CalendarApplication extends HandlebarsApplicationMixin(ApplicationV
       })
     });
     this._hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
+    this._hooks.push({ name: HOOKS.WIDGETS_REFRESH, id: Hooks.on(HOOKS.WIDGETS_REFRESH, () => debouncedRender()) });
     this._hooks.push({ name: 'updateWorldTime', id: Hooks.on('updateWorldTime', this._onUpdateWorldTime.bind(this)) });
   }
 

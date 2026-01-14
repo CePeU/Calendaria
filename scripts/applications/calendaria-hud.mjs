@@ -6,7 +6,7 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../constants.mjs';
+import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../constants.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import SearchManager from '../search/search-manager.mjs';
 import TimeKeeper, { getTimeIncrements } from '../time/time-keeper.mjs';
@@ -16,6 +16,7 @@ import { log } from '../utils/logger.mjs';
 import { canChangeDateTime, canChangeWeather } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import * as StickyZones from '../utils/sticky-zones.mjs';
+import * as WidgetManager from '../utils/widget-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
 import { CalendarApplication } from './calendar-application.mjs';
@@ -244,7 +245,86 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.searchResults = this.#searchResults || [];
     context.useSliceMode = this.useSliceMode;
     context.inCombat = this.#inCombat;
+    context.widgets = this.#prepareWidgetContext(context);
     return context;
+  }
+
+  /**
+   * Prepare widget context for template rendering.
+   * @param {object} context - Main context object
+   * @returns {object} Widget HTML strings
+   */
+  #prepareWidgetContext(context) {
+    const widgets = {};
+    widgets.buttonsLeft = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_BUTTONS_LEFT, 'hud');
+    widgets.buttonsRight = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_BUTTONS_RIGHT, 'hud');
+    widgets.indicators = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_INDICATORS, 'hud');
+    widgets.tray = WidgetManager.renderWidgetsForPoint(WIDGET_POINTS.HUD_TRAY, 'hud');
+    widgets.weatherIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.WEATHER_INDICATOR, this.#renderWeatherIndicator(context), 'hud');
+    widgets.seasonIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.SEASON_INDICATOR, this.#renderSeasonIndicator(context), 'hud');
+    widgets.eraIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.ERA_INDICATOR, this.#renderEraIndicator(context), 'hud');
+    widgets.cycleIndicator = WidgetManager.renderReplacementOrOriginal(REPLACEABLE_ELEMENTS.CYCLE_INDICATOR, this.#renderCycleIndicator(context), 'hud');
+    return widgets;
+  }
+
+  /**
+   * Render the built-in weather indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  #renderWeatherIndicator(context) {
+    if (context.weather) {
+      const clickable = context.canChangeWeather ? 'clickable' : '';
+      const action = context.canChangeWeather ? 'data-action="openWeatherPicker"' : '';
+      const icon = context.showWeatherIcon ? `<i class="${context.weather.icon}"></i>` : '';
+      const label = context.showWeatherLabel ? `<span class="weather-label">${context.weather.label}</span>` : '';
+      const temp = context.showWeatherTemp ? `<span class="weather-temp">${context.weather.temp}</span>` : '';
+      return `<span class="weather-indicator ${clickable} weather-mode-${context.weatherDisplayMode}"
+        ${action} style="--weather-color: ${context.weather.color}" data-tooltip="${context.weather.tooltip}">
+        ${icon}${label}${temp}
+      </span>`;
+    } else if (context.showWeatherBlock && context.canChangeWeather) {
+      return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker"
+        data-tooltip="${localize('CALENDARIA.Weather.ClickToGenerate')}">
+        <i class="fas fa-cloud"></i>
+      </span>`;
+    }
+    return '';
+  }
+
+  /**
+   * Render the built-in season indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  #renderSeasonIndicator(context) {
+    if (!context.currentSeason) return '';
+    const icon = context.showSeasonIcon ? `<i class="${context.currentSeason.icon}"></i>` : '';
+    const label = context.showSeasonLabel ? `<span class="season-label">${context.currentSeason.name}</span>` : '';
+    return `<span class="season-indicator" style="--season-color: ${context.currentSeason.color}"
+      data-tooltip="${context.currentSeason.name}">
+      ${icon}${label}
+    </span>`;
+  }
+
+  /**
+   * Render the built-in era indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  #renderEraIndicator(context) {
+    if (!context.currentEra) return '';
+    return `<span class="era-indicator" data-tooltip="${context.currentEra.name}"><i class="fas fa-hourglass-half"></i></span>`;
+  }
+
+  /**
+   * Render the built-in cycle indicator HTML.
+   * @param {object} context - Template context
+   * @returns {string} HTML string
+   */
+  #renderCycleIndicator(context) {
+    if (!context.cycleText) return '';
+    return `<span class="cycle-indicator" data-tooltip="${context.cycleText}"><i class="fas fa-arrows-rotate"></i></span>`;
   }
 
   /** @override */
@@ -273,6 +353,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#updateCelestialDisplay();
     this.#updateDomeVisibility();
     this.#setupEventListeners();
+    WidgetManager.attachWidgetListeners(this.element);
     if (!this.#timeHookId) this.#timeHookId = Hooks.on('updateWorldTime', this.#onUpdateWorldTime.bind(this));
     const c = game.time.components;
     this.#lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
@@ -284,6 +365,7 @@ export class CalendariaHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#restoreStickyStates();
     this.#hooks.push({ name: HOOKS.CLOCK_START_STOP, id: Hooks.on(HOOKS.CLOCK_START_STOP, () => this.#onClockStateChange()) });
     this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => this.render({ parts: ['bar'] })) });
+    this.#hooks.push({ name: HOOKS.WIDGETS_REFRESH, id: Hooks.on(HOOKS.WIDGETS_REFRESH, () => this.render({ parts: ['bar'] })) });
     const debouncedRender = foundry.utils.debounce(() => this.render({ parts: ['bar'] }), 100);
     this.#hooks.push({
       name: 'updateJournalEntryPage',

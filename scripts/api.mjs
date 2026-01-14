@@ -8,7 +8,7 @@ import { CalendarApplication } from './applications/calendar-application.mjs';
 import { CalendarEditor } from './applications/calendar-editor.mjs';
 import { MiniCalendar } from './applications/mini-calendar.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
-import { HOOKS, SOCKET_TYPES } from './constants.mjs';
+import { HOOKS, REPLACEABLE_ELEMENTS, SOCKET_TYPES, WIDGET_POINTS } from './constants.mjs';
 import NoteManager from './notes/note-manager.mjs';
 import { addDays, addMonths, addYears, compareDates, compareDays, dayOfWeek, daysBetween, isSameDay, isValidDate, monthsBetween } from './notes/utils/date-utils.mjs';
 import SearchManager from './search/search-manager.mjs';
@@ -17,6 +17,7 @@ import { log } from './utils/logger.mjs';
 import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canEditNotes } from './utils/permissions.mjs';
 import { CalendariaSocket } from './utils/socket.mjs';
 
+import * as WidgetManager from './utils/widget-manager.mjs';
 import WeatherManager from './weather/weather-manager.mjs';
 
 /**
@@ -1003,7 +1004,79 @@ export const CalendariaAPI = {
    */
   getNoteDocument(pageId) {
     return NoteManager.getFullNote(pageId);
-  }
+  },
 
-  // Widget API - TODO: implement with insertion points
+  /**
+   * Get available widget insertion points.
+   * @returns {object} Object containing insertion point constants
+   */
+  get widgetPoints() {
+    return { ...WIDGET_POINTS };
+  },
+
+  /**
+   * Get replaceable element IDs.
+   * @returns {object} Object containing replaceable element constants
+   */
+  get replaceableElements() {
+    return { ...REPLACEABLE_ELEMENTS };
+  },
+
+  /**
+   * Register a widget to be displayed in Calendaria UIs.
+   * @param {string} moduleId - Your module's ID
+   * @param {object} config - Widget configuration
+   * @param {string} config.id - Unique widget ID within your module
+   * @param {string} config.type - Widget type: 'button' | 'indicator' | 'custom'
+   * @param {string} [config.insertAt] - Insertion point (use widgetPoints constants)
+   * @param {string} [config.replaces] - Built-in element ID to replace (use replaceableElements constants)
+   * @param {string|Function} [config.icon] - Icon class or function returning icon
+   * @param {string|Function} [config.label] - Label text or function for dynamic content
+   * @param {string|Function} [config.color] - Color or function
+   * @param {string|Function} [config.tooltip] - Tooltip or function
+   * @param {Function} [config.onClick] - Click handler (receives event)
+   * @param {Function} [config.render] - Custom render function for type='custom'
+   * @param {Function} [config.onAttach] - Called when widget attached to DOM
+   * @param {Function} [config.onDetach] - Called when widget detached
+   * @param {boolean} [config.disabled] - If true with replaces, hides element entirely
+   * @returns {boolean} True if registered successfully
+   */
+  registerWidget(moduleId, config) {
+    return WidgetManager.registerWidget(moduleId, config);
+  },
+
+  /**
+   * Unregister a widget. If replacing a built-in element, the original is restored.
+   * @param {string} moduleId - Your module's ID
+   * @param {string} widgetId - The widget ID used during registration
+   * @returns {boolean} True if unregistered successfully
+   */
+  unregisterWidget(moduleId, widgetId) {
+    return WidgetManager.unregisterWidget(moduleId, widgetId);
+  },
+
+  /**
+   * Get all registered widgets, optionally filtered by insertion point.
+   * @param {string} [insertPoint] - Filter by insertion point
+   * @returns {Array<object>} Array of widget configurations
+   */
+  getRegisteredWidgets(insertPoint) {
+    return WidgetManager.getRegisteredWidgets(insertPoint);
+  },
+
+  /**
+   * Get the widget that is replacing a built-in element.
+   * @param {string} elementId - The built-in element ID
+   * @returns {object|null} Widget config or null if not replaced
+   */
+  getWidgetByReplacement(elementId) {
+    return WidgetManager.getWidgetByReplacement(elementId);
+  },
+
+  /**
+   * Refresh all widget displays. Call after dynamic content changes.
+   */
+  refreshWidgets() {
+    WidgetManager.refreshWidgets();
+  }
 };

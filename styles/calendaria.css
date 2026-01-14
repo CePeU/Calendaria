@@ -6226,6 +6226,73 @@ span.calendaria-moon-icon {
 }
 
 /* ======================================== */
+/* Widget Indicators                        */
+/* ======================================== */
+.calendaria-widget-indicator {
+  gap: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
+}
+
+.calendaria-widget-indicator i {
+  font-size: 0.65rem;
+}
+
+.calendaria-widget-indicator .widget-label {
+  font-size: 0.65rem;
+}
+
+.calendaria-widget-indicator.clickable {
+  cursor: pointer;
+}
+
+.calendaria-hud-indicators .calendaria-widget-indicator {
+  color: var(--widget-color, rgb(160 160 160));
+}
+
+.calendaria-hud-indicators .calendaria-widget-indicator i {
+  color: var(--widget-color, rgb(160 160 160));
+}
+
+/* MiniCalendar / Full Calendar widget indicators */
+.calendar-indicators .calendaria-widget-indicator {
+  gap: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  color: var(--widget-color, var(--calendaria-text-dim));
+  font-size: 0.75rem;
+}
+
+.calendar-indicators .calendaria-widget-indicator i {
+  color: var(--widget-color, var(--calendaria-text-dim));
+  font-size: 0.75rem;
+}
+
+.calendar-indicators .calendaria-widget-indicator .widget-label {
+  font-size: 0.75rem;
+}
+
+.mini-calendar-container .calendar-indicators .calendaria-widget-indicator {
+  font-size: 0.7rem;
+}
+
+.mini-calendar-container .calendar-indicators .calendaria-widget-indicator i,
+.mini-calendar-container .calendar-indicators .calendaria-widget-indicator .widget-label {
+  font-size: 0.7rem;
+}
+
+/* Custom widgets */
+.calendaria-widget-custom {
+  display: flex;
+  align-items: center;
+}
+
+.calendaria-hud-tray .calendaria-widget-custom {
+  font-size: var(--font-size-11, 0.6875rem);
+}
+
+/* ======================================== */
 /* Hover Tray                               */
 /* ======================================== */
 .calendaria-hud-tray {
@@ -6471,7 +6538,13 @@ span.calendaria-moon-icon {
 .calendaria-hud-wrapper.compact .calendaria-hud-indicators .weather-indicator,
 .calendaria-hud-wrapper.compact .calendaria-hud-indicators .season-indicator,
 .calendaria-hud-wrapper.compact .calendaria-hud-indicators .era-indicator,
-.calendaria-hud-wrapper.compact .calendaria-hud-indicators .cycle-indicator {
+.calendaria-hud-wrapper.compact .calendaria-hud-indicators .cycle-indicator,
+.calendaria-hud-wrapper.compact .calendaria-hud-indicators .calendaria-widget-indicator {
+  font-size: var(--font-size-10, 0.625rem);
+}
+
+.calendaria-hud-wrapper.compact .calendaria-hud-indicators .calendaria-widget-indicator i,
+.calendaria-hud-wrapper.compact .calendaria-hud-indicators .calendaria-widget-indicator .widget-label {
   font-size: var(--font-size-10, 0.625rem);
 }
 

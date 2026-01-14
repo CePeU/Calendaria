@@ -220,6 +220,9 @@ export const HOOKS = {
   SUNRISE: 'calendaria.sunrise',
   SUNSET: 'calendaria.sunset',
   WEATHER_CHANGE: 'calendaria.weatherChange',
+  WIDGET_REGISTERED: 'calendaria.widgetRegistered',
+  WIDGET_UNREGISTERED: 'calendaria.widgetUnregistered',
+  WIDGETS_REFRESH: 'calendaria.widgetsRefresh',
   YEAR_CHANGE: 'calendaria.yearChange'
 };
 
@@ -244,4 +247,23 @@ export const SOCKET_TYPES = {
   TIME_REQUEST: 'timeRequest',
   WEATHER_CHANGE: 'weatherChange',
   WEATHER_REQUEST: 'weatherRequest'
+};
+
+/** @enum {string} Widget insertion points for external modules */
+export const WIDGET_POINTS = {
+  HUD_BUTTONS_LEFT: 'hud.buttons.left',
+  HUD_BUTTONS_RIGHT: 'hud.buttons.right',
+  HUD_INDICATORS: 'hud.indicators',
+  HUD_TRAY: 'hud.tray',
+  MINICAL_SIDEBAR: 'minical.sidebar',
+  FULLCAL_ACTIONS: 'fullcal.actions'
+};
+
+/** @enum {string} Built-in elements that can be replaced by widgets */
+export const REPLACEABLE_ELEMENTS = {
+  WEATHER_INDICATOR: 'weather-indicator',
+  WEATHER_PICKER: 'weather-picker',
+  SEASON_INDICATOR: 'season-indicator',
+  ERA_INDICATOR: 'era-indicator',
+  CYCLE_INDICATOR: 'cycle-indicator'
 };
