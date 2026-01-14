@@ -96,6 +96,46 @@ export default class BaseImporter {
   }
 
   /**
+   * Extract the current date from source data.
+   * Override in subclasses to return the date the source module was displaying.
+   * @param {object} _data - Raw source data
+   * @returns {{year: number, month: number, day: number, hour?: number, minute?: number}|null} Current date or null
+   */
+  extractCurrentDate(_data) {
+    return null;
+  }
+
+  /**
+   * Apply a date to the imported calendar by setting worldTime.
+   * Uses the calendar's jumpToDate method to set the correct time.
+   * @param {{year: number, month: number, day: number, hour?: number, minute?: number}} dateComponents - Date to apply
+   * @param {string} calendarId - Calendar ID to apply the date to
+   * @returns {Promise<boolean>} True if date was applied successfully
+   */
+  async applyCurrentDate(dateComponents, calendarId) {
+    if (!dateComponents) return false;
+    try {
+      const calendar = CalendarManager.getCalendar(calendarId);
+      if (!calendar) {
+        log(2, `Cannot apply date: calendar ${calendarId} not found`);
+        return false;
+      }
+      const yearZero = calendar.years?.yearZero ?? 0;
+      const displayYear = dateComponents.year + yearZero;
+      log(3, `Applying imported date: ${displayYear}/${dateComponents.month + 1}/${dateComponents.day}`);
+      await calendar.jumpToDate({
+        year: displayYear,
+        month: dateComponents.month,
+        day: dateComponents.day
+      });
+      return true;
+    } catch (error) {
+      log(2, `Failed to apply current date:`, error);
+      return false;
+    }
+  }
+
+  /**
    * Validate transformed data against CalendariaCalendar schema.
    * @param {object} data - Transformed calendar data
    * @returns {{valid: boolean, errors: string[]}} Validation result

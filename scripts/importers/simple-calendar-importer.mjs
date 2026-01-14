@@ -48,7 +48,68 @@ export default class SimpleCalendarImporter extends BaseImporter {
       }
     }
 
-    return { calendars, notes, exportVersion: 2 };
+    const worldTime = game.time.worldTime;
+    const currentDate = this.#worldTimeToDate(worldTime, calendars[0]);
+    return { calendars, notes, currentDate, exportVersion: 2 };
+  }
+
+  /**
+   * Extract current date from SC data for preservation after import.
+   * @param {object} data - Raw SC data
+   * @returns {{year: number, month: number, day: number}|null} Current date
+   */
+  extractCurrentDate(data) {
+    if (data.currentDate) return data.currentDate;
+    const calendars = data.calendars || data;
+    const calendar = Array.isArray(calendars) ? calendars[0] : calendars;
+    if (calendar?.currentDate) {
+      const cd = calendar.currentDate;
+      const secondsPerHour = (calendar.time?.minutesInHour ?? 60) * (calendar.time?.secondsInMinute ?? 60);
+      const hour = Math.floor((cd.seconds ?? 0) / secondsPerHour);
+      const minute = Math.floor(((cd.seconds ?? 0) % secondsPerHour) / (calendar.time?.secondsInMinute ?? 60));
+      return { year: cd.year, month: cd.month, day: (cd.day ?? 0) + 1, hour, minute };
+    }
+    return null;
+  }
+
+  /**
+   * Convert worldTime to date components using SC calendar data.
+   * @param {number} worldTime - Raw world time in seconds
+   * @param {object} calendar - SC calendar data
+   * @returns {{year: number, month: number, day: number, hour: number, minute: number}} Date components
+   */
+  #worldTimeToDate(worldTime, calendar) {
+    const hoursPerDay = calendar.time?.hoursInDay ?? 24;
+    const minutesPerHour = calendar.time?.minutesInHour ?? 60;
+    const secondsPerMinute = calendar.time?.secondsInMinute ?? 60;
+    const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
+    const months = calendar.months || [];
+    const regularMonths = months.filter((m) => !m.intercalary);
+    const daysPerYear = regularMonths.reduce((sum, m) => sum + (m.numberOfDays || 0), 0);
+    const totalDays = Math.floor(worldTime / secondsPerDay);
+    let year = Math.floor(totalDays / daysPerYear);
+    let dayOfYear = totalDays % daysPerYear;
+    if (totalDays < 0) {
+      year = Math.floor(totalDays / daysPerYear);
+      dayOfYear = ((totalDays % daysPerYear) + daysPerYear) % daysPerYear;
+    }
+    let month = 0;
+    let remainingDays = dayOfYear;
+    for (let i = 0; i < regularMonths.length; i++) {
+      const monthDays = regularMonths[i].numberOfDays || 30;
+      if (remainingDays < monthDays) {
+        month = i;
+        break;
+      }
+      remainingDays -= monthDays;
+      month = i + 1;
+    }
+
+    const timeOfDay = ((worldTime % secondsPerDay) + secondsPerDay) % secondsPerDay;
+    const secondsPerHour = minutesPerHour * secondsPerMinute;
+    const hour = Math.floor(timeOfDay / secondsPerHour);
+    const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
+    return { year, month, day: remainingDays + 1, hour, minute };
   }
 
   /**

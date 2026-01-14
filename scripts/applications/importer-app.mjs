@@ -142,12 +142,13 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       this.#previewData = importer.getPreviewData(this.#rawData, this.#transformedData);
       this.#suggestedId = this.#generateId(this.#transformedData.name);
-      const currentTime = this.#transformedData.time?.current;
-      if (currentTime) {
-        const month = (currentTime.month ?? 0) + 1;
-        const day = (currentTime.day ?? 0) + 1;
-        const year = currentTime.year ?? 1;
+      const currentDate = importer.extractCurrentDate(this.#rawData);
+      if (currentDate) {
+        const month = (currentDate.month ?? 0) + 1;
+        const day = currentDate.day ?? 1;
+        const year = currentDate.year ?? 1;
         this.#previewData.currentDate = `${month}/${day}/${year}`;
+        this.#transformedData._pendingCurrentDate = currentDate;
       } else {
         this.#previewData.currentDate = '—';
       }

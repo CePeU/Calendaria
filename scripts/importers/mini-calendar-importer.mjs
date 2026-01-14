@@ -41,7 +41,59 @@ export default class MiniCalendarImporter extends BaseImporter {
     const biome = game.settings.get('wgtgm-mini-calendar', 'biome') || 'temperate';
     const customBiomeConfig = game.settings.get('wgtgm-mini-calendar', 'customBiomeConfig') || {};
     const notes = await this.#extractJournalNotes();
-    return { calendar: calendarConfig, calendarSource, biome, customBiomeConfig, notes, exportVersion: 1 };
+    const worldTime = game.time.worldTime;
+    const currentDate = this.#worldTimeToDate(worldTime, calendarConfig);
+    return { calendar: calendarConfig, calendarSource, biome, customBiomeConfig, notes, currentDate, exportVersion: 1 };
+  }
+
+  /**
+   * Extract current date from MC data for preservation after import.
+   * @param {object} data - Raw MC data
+   * @returns {{year: number, month: number, day: number}|null} Current date
+   */
+  extractCurrentDate(data) {
+    return data.currentDate || null;
+  }
+
+  /**
+   * Convert worldTime to date components using MC calendar data.
+   * @param {number} worldTime - Raw world time in seconds
+   * @param {object} calendar - MC calendar data
+   * @returns {{year: number, month: number, day: number, hour: number, minute: number}} Date components
+   */
+  #worldTimeToDate(worldTime, calendar) {
+    const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
+    const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+    const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+    const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
+    const months = calendar.months?.values || [];
+    const regularMonths = months.filter((m) => !m.intercalary);
+    const daysPerYear = calendar.days?.daysPerYear ?? (regularMonths.reduce((sum, m) => sum + (m.days || 0), 0) || 365);
+    const totalDays = Math.floor(worldTime / secondsPerDay);
+    let year = Math.floor(totalDays / daysPerYear);
+    let dayOfYear = totalDays % daysPerYear;
+    if (totalDays < 0) {
+      year = Math.floor(totalDays / daysPerYear);
+      dayOfYear = ((totalDays % daysPerYear) + daysPerYear) % daysPerYear;
+    }
+
+    let month = 0;
+    let remainingDays = dayOfYear;
+    for (let i = 0; i < regularMonths.length; i++) {
+      const monthDays = regularMonths[i].days || 30;
+      if (remainingDays < monthDays) {
+        month = i;
+        break;
+      }
+      remainingDays -= monthDays;
+      month = i + 1;
+    }
+
+    const timeOfDay = ((worldTime % secondsPerDay) + secondsPerDay) % secondsPerDay;
+    const secondsPerHour = minutesPerHour * secondsPerMinute;
+    const hour = Math.floor(timeOfDay / secondsPerHour);
+    const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
+    return { year, month, day: remainingDays + 1, hour, minute };
   }
 
   /**

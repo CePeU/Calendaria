@@ -109,6 +109,17 @@ export default class FantasyCalendarImporter extends BaseImporter {
   }
 
   /**
+   * Extract current date from FC data for preservation after import.
+   * @param {object} data - Raw FC data
+   * @returns {{year: number, month: number, day: number}|null} Current date
+   */
+  extractCurrentDate(data) {
+    const dynamicData = data.dynamic_data;
+    if (!dynamicData || (dynamicData.year === undefined && dynamicData.year !== 0)) return null;
+    return { year: dynamicData.year, month: dynamicData.timespan ?? 0, day: dynamicData.day ?? 1, hour: dynamicData.hour ?? 0, minute: dynamicData.minute ?? 0 };
+  }
+
+  /**
    * Transform FC dynamic_data to current date.
    * @param {object} dynamicData - FC dynamic_data
    * @returns {object|null} - Current date object or null

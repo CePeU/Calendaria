@@ -540,7 +540,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const zones = WeatherManager.getCalendarZones() || [];
     const activeZone = WeatherManager.getActiveZone();
     context.hasZones = zones.length > 0;
-    context.zoneOptions = zones.map((z) => ({ value: z.id, label: z.name, selected: z.id === activeZone?.id }));
+    context.zoneOptions = zones.map((z) => ({ value: z.id, label: localize(z.name), selected: z.id === activeZone?.id }));
   }
 
   /**

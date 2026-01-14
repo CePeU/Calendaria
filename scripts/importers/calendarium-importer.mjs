@@ -342,6 +342,19 @@ export default class CalendariumImporter extends BaseImporter {
   }
 
   /**
+   * Extract current date from Calendarium data for preservation after import.
+   * @param {object} data - Raw Calendarium data
+   * @returns {{year: number, month: number, day: number}|null} Current date
+   */
+  extractCurrentDate(data) {
+    const normalizedData = CalendariumImporter.normalizeData(data);
+    const calendar = normalizedData.calendars?.[0];
+    const current = calendar?.current;
+    if (!current || (current.year === undefined && current.year !== 0)) return null;
+    return { year: current.year, month: current.month ?? 0, day: current.day ?? 1, hour: 0, minute: 0 };
+  }
+
+  /**
    * Transform current date.
    * @param {object} current - Calendarium current date
    * @returns {object|null} - Current date object or null

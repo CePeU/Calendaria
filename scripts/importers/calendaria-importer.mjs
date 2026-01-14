@@ -23,27 +23,29 @@ export default class CalendariaImporter extends BaseImporter {
   static fileExtensions = ['.json'];
 
   /**
+   * Extract current date from Calendaria data for preservation after import.
+   * @param {object} data - Raw Calendaria data
+   * @returns {{year: number, month: number, day: number}|null} Current date
+   */
+  extractCurrentDate(data) {
+    if (data.currentDate) return data.currentDate;
+    if (data.metadata?.currentDate) return data.metadata.currentDate;
+    return null;
+  }
+
+  /**
    * Transform Calendaria export data.
    * Validates structure and passes through with minimal changes.
    * @param {object} data - Raw Calendaria export data
    * @returns {Promise<object>} CalendariaCalendar-compatible data
    */
   async transform(data) {
-    if (!data.name || !data.months?.values) {
-      throw new Error('Invalid Calendaria export format');
-    }
-
+    if (!data.name || !data.months?.values) throw new Error('Invalid Calendaria export format');
     log(3, `Transforming Calendaria export: ${data.name}`);
-
-    // Clean metadata for re-import
     const metadata = { ...data.metadata };
     delete metadata.id;
     delete metadata.importedAt;
     metadata.importedFrom = 'calendaria';
-
-    return {
-      ...data,
-      metadata
-    };
+    return { ...data, metadata };
   }
 }

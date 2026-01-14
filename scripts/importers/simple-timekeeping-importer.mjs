@@ -98,7 +98,60 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     const events = await this.#loadEvents();
     const sceneDarkness = this.#loadSceneDarknessFlags();
     const weather = this.#loadWeatherState();
-    return { config, calendar: calendarData, moons, events, sceneDarkness, weather, isNativeFormat };
+    const worldTime = game.time.worldTime;
+    const currentDate = this.#worldTimeToDate(worldTime, calendarData, isNativeFormat);
+    return { config, calendar: calendarData, moons, events, sceneDarkness, weather, isNativeFormat, currentDate };
+  }
+
+  /**
+   * Convert worldTime to date components using STK calendar data.
+   * @param {number} worldTime - Raw world time in seconds
+   * @param {object} calendar - STK calendar data
+   * @param {boolean} isNativeFormat - Whether calendar is in native STK format
+   * @returns {{year: number, month: number, day: number, hour: number, minute: number}} Date components
+   */
+  #worldTimeToDate(worldTime, calendar, isNativeFormat) {
+    const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
+    const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+    const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+    const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
+    const months = isNativeFormat ? calendar.months?.values : calendar.months;
+    const daysPerYear = calendar.days?.daysPerYear ?? months?.reduce((sum, m) => sum + (m.days || 0), 0) ?? 365;
+    const totalDays = Math.floor(worldTime / secondsPerDay);
+    let year = Math.floor(totalDays / daysPerYear);
+    let dayOfYear = totalDays % daysPerYear;
+    if (totalDays < 0) {
+      year = Math.floor(totalDays / daysPerYear);
+      dayOfYear = ((totalDays % daysPerYear) + daysPerYear) % daysPerYear;
+    }
+
+    let month = 0;
+    let remainingDays = dayOfYear;
+    const regularMonths = (months || []).filter((m) => !m.intercalary);
+    for (let i = 0; i < regularMonths.length; i++) {
+      const monthDays = regularMonths[i].days || 30;
+      if (remainingDays < monthDays) {
+        month = i;
+        break;
+      }
+      remainingDays -= monthDays;
+      month = i + 1;
+    }
+
+    const timeOfDay = worldTime % secondsPerDay;
+    const secondsPerHour = minutesPerHour * secondsPerMinute;
+    const hour = Math.floor(timeOfDay / secondsPerHour);
+    const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
+    return { year, month, day: remainingDays + 1, hour, minute };
+  }
+
+  /**
+   * Extract current date from STK data for preservation after import.
+   * @param {object} data - Raw STK data
+   * @returns {{year: number, month: number, day: number}|null} Current date
+   */
+  extractCurrentDate(data) {
+    return data.currentDate || null;
   }
 
   /**

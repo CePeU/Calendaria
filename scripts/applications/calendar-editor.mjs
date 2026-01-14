@@ -153,6 +153,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   #pendingImporterId = null;
 
   /**
+   * Pending current date to apply after import
+   * @type {{year: number, month: number, day: number}|null}
+   */
+  #pendingCurrentDate = null;
+
+  /**
    * Create a new CalendarEditor.
    * @param {object} [options] - Application options
    * @param {string} [options.calendarId] - ID of calendar to edit (null for new)
@@ -249,9 +255,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       delete this.#calendarData.metadata.pendingNotes;
       delete this.#calendarData.metadata.importerId;
     }
+
+    if (this.#calendarData._pendingCurrentDate) {
+      this.#pendingCurrentDate = this.#calendarData._pendingCurrentDate;
+      delete this.#calendarData._pendingCurrentDate;
+    }
+
     preLocalizeCalendar(this.#calendarData);
     log(3, `Loaded initial data for calendar: ${this.#calendarData.name}`);
-    log(3, `pendingNotes (instance): ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}`);
+    log(3, `pendingNotes (instance): ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}, pendingCurrentDate: ${this.#pendingCurrentDate ? 'yes' : 'no'}`);
   }
 
   /** @override */
@@ -606,7 +618,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       activeZoneId = zones[0]?.id || null;
       if (activeZoneId) weather.activeZone = activeZoneId;
     }
-    context.zoneOptions = zones.map((z) => ({ value: z.id, label: z.name, selected: z.id === activeZoneId }));
+    context.zoneOptions = zones.map((z) => ({ value: z.id, label: localize(z.name), selected: z.id === activeZoneId }));
     if (context.zoneOptions.length === 0) context.zoneOptions = [{ value: '', label: 'CALENDARIA.Editor.Weather.Zone.NoZones', selected: true }];
     const activeZone = zones.find((z) => z.id === activeZoneId) || null;
     const savedPresets = activeZone?.presets || [];
@@ -2060,9 +2072,16 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             if (result.count > 0) ui.notifications.info(format('CALENDARIA.Editor.NotesImported', { count: result.count }));
             if (result.errors?.length > 0) log(1, 'Note import errors:', result.errors);
             this.#pendingNotes = null;
-            this.#pendingImporterId = null;
           }
         }
+
+        if (this.#pendingCurrentDate && this.#pendingImporterId && calendarId) {
+          const importer = createImporter(this.#pendingImporterId);
+          if (importer) await importer.applyCurrentDate(this.#pendingCurrentDate, calendarId);
+        }
+
+        this.#pendingCurrentDate = null;
+        this.#pendingImporterId = null;
 
         if (setActive && calendarId) {
           await CalendarManager.switchCalendar(calendarId);
@@ -2139,13 +2158,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     exportData.metadata.exportedFrom = 'calendaria';
     exportData.metadata.exportedAt = Date.now();
     exportData.metadata.version = game.modules.get('calendaria')?.version || '1.0.0';
-
+    const activeCalendar = CalendarManager.getActiveCalendar();
+    if (activeCalendar && this.#calendarId && CalendarRegistry.getActiveId() === this.#calendarId) exportData.currentDate = activeCalendar.currentDate;
     const filename = this.#calendarData.name
       .toLowerCase()
       .replace(/[^\da-z]+/g, '-')
       .replace(/^-|-$/g, '')
       .concat('.json');
-
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2153,7 +2172,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-
     ui.notifications.info(format('CALENDARIA.Editor.ExportSuccess', { name: this.#calendarData.name }));
   }
 
