@@ -51,7 +51,7 @@ Appears on hover over the calendar area (or always visible when sticky):
 - **Close** - Close the MiniCalendar
 - **Open Full Calendar** - Opens the full Calendar Application
 - **Today** - Return to current date view
-- **Set Current Date** - Set world time to selected date (GM only, appears when date selected)
+- **Set Current Date** - Set world time to selected date (GM only, appears when date selected). Shows confirmation dialog by default (can be disabled in settings).
 - **Add Note** - Create a new note on selected/current date
 - **Search Notes** - Open search panel
 - **View Notes** - View notes on selected date (appears when notes exist)

@@ -1,0 +1,138 @@
+# Stopwatch
+
+A versatile stopwatch application for tracking elapsed time in real-time or game-time modes.
+
+---
+
+## Opening the Stopwatch
+
+- Press **Alt+W** to toggle visibility
+- Click the stopwatch button on the TimeKeeper HUD
+
+---
+
+## Display Modes
+
+The Stopwatch supports two timing modes:
+
+| Mode | Description |
+|------|-------------|
+| **Real Time** | Tracks actual elapsed time regardless of game state |
+| **Game Time** | Tracks elapsed in-game time based on world time changes |
+
+Click the mode indicator to switch between modes.
+
+### Real Time Mode
+
+- Counts real seconds, minutes, and hours
+- Continues running even when the game is paused
+- Useful for tracking real-world session time or breaks
+
+### Game Time Mode
+
+- Tracks elapsed time based on Foundry's world time
+- Advances when game time advances (via time controls or real-time clock)
+- Pauses when game time is paused
+- Useful for tracking in-game durations (spell effects, travel time, etc.)
+
+---
+
+## Controls
+
+| Button | Action |
+|--------|--------|
+| **Start/Pause** | Toggle the stopwatch running state |
+| **Reset** | Clear elapsed time and lap history |
+| **Lap** | Record current elapsed time as a lap |
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| Alt+W | Toggle Stopwatch visibility |
+| (Configurable) | Start/Pause Stopwatch |
+| (Configurable) | Reset Stopwatch |
+
+Configure keybindings in **Settings > Configure Controls > Calendaria**.
+
+---
+
+## Lap Timing
+
+Click the **Lap** button to record the current elapsed time. Laps appear in a scrollable list below the main display.
+
+Each lap shows:
+
+- Lap number
+- Elapsed time at that lap
+- Time since previous lap (split time)
+
+Use laps to track intervals, phases, or checkpoints during timed activities.
+
+---
+
+## Display Format
+
+The elapsed time display format is configurable per mode in **Settings Panel > Formats tab**:
+
+- **Elapsed Time (Real Time)** — Format for real-time mode
+- **Elapsed Time (Game Time)** — Format for game-time mode
+
+### Format Tokens
+
+| Token | Description | Example |
+|-------|-------------|---------|
+| `HH` | Hours (2-digit) | 01 |
+| `mm` | Minutes (2-digit) | 05 |
+| `ss` | Seconds (2-digit) | 30 |
+| `SSS` | Milliseconds (3-digit) | 250 |
+
+**Example Formats:**
+
+- `HH:mm:ss` → 01:05:30
+- `mm:ss.SSS` → 05:30.250
+- `HH:mm:ss.SSS` → 01:05:30.250
+
+---
+
+## Auto-Start Game Time
+
+When enabled, the game-time stopwatch automatically starts when world time begins advancing. Configure in **Settings Panel > TimeKeeper tab > Auto-start Game Time**.
+
+This is useful for automatically tracking in-game duration when the real-time clock starts.
+
+---
+
+## Positioning
+
+### Dragging
+
+Drag the stopwatch by the title bar to reposition it.
+
+### Resizing
+
+Drag the edges or corners to resize the stopwatch window.
+
+### Sticky Zones
+
+The Stopwatch supports sticky zone snapping when dragged near predefined positions. See [CalendariaHUD > Sticky Zones](CalendariaHUD#sticky-zones) for zone locations.
+
+---
+
+## State Persistence
+
+The Stopwatch saves its state per-client:
+
+- Current elapsed time
+- Running/paused state
+- Current mode (real-time vs game-time)
+- Lap history
+- Window position and size
+
+State persists across page reloads within the same session.
+
+---
+
+## Settings
+
+See [Settings > TimeKeeper](Settings#timekeeper) for stopwatch-related settings and [Settings > Formats](Settings#formats-gm-only) for display format configuration.

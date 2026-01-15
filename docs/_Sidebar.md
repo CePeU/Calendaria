@@ -5,6 +5,7 @@
 - [Getting Started](Getting-Started)
 - [Calendar Editor](Calendar-Editor)
 - [Importing Calendars](Importing-Calendars)
+- [Permissions](Permissions)
 
 **Applications**
 
@@ -12,9 +13,11 @@
 - [CalendariaHUD](CalendariaHUD)
 - [MiniCalendar](MiniCalendar)
 - [TimeKeeper](TimeKeeper)
+- [Stopwatch](Stopwatch)
 
 **Features**
 
+- [Chat Commands](Chat-Commands)
 - [Eras and Cycles](Eras-and-Cycles)
 - [Moon Phases](Moon-Phases)
 - [Notes and Events](Notes-and-Events)
@@ -32,6 +35,7 @@
 - [API Reference](API-Reference)
 - [Hooks](Hooks)
 - [Macros](Macros)
+- [Widgets](Widgets)
 
 **Reference**
 

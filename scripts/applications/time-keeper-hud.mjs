@@ -198,6 +198,10 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /** @override */
+  async close(options = {}) {
+    return super.close({ animate: false, ...options });
+  }
+
   _onClose(options) {
     const pos = this.position;
     if (pos.top != null && pos.left != null) game.settings.set(MODULE.ID, SETTINGS.TIME_KEEPER_POSITION, { top: pos.top, left: pos.left, zoneId: this.#snappedZoneId });
@@ -365,19 +369,26 @@ export class TimeKeeperHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
-    const instance = this.instance ?? new TimeKeeperHUD();
+    const existing = foundry.applications.instances.get('time-keeper-hud');
+    if (existing) {
+      existing.render({ force: true });
+      return existing;
+    }
+    const instance = new TimeKeeperHUD();
     instance.render(true);
     return instance;
   }
 
   /** Hide the TimeKeeper HUD. */
   static hide() {
-    this.instance?.close();
+    const instance = foundry.applications.instances.get('time-keeper-hud');
+    if (instance) instance.close();
   }
 
   /** Toggle the TimeKeeper HUD visibility. */
   static toggle() {
-    if (this.instance?.rendered) this.hide();
+    const existing = foundry.applications.instances.get('time-keeper-hud');
+    if (existing?.rendered) this.hide();
     else this.show();
   }
 

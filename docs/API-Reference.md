@@ -301,9 +301,12 @@ const time = CALENDARIA.api.getTimeUntilTarget(12);
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `targetHour` | `number` | Target hour (0-24) |
+| `targetHour` | `number` | Target hour (0 to hoursPerDay) |
 
 **Returns:** `object|null` - Time remaining as `{ hours, minutes, seconds }`.
+
+> [!NOTE]
+> For calendars with non-standard time (e.g., 20 hours/day), the targetHour range is 0 to `hoursPerDay`.
 
 ---
 
@@ -457,6 +460,9 @@ const formatted = CALENDARIA.api.formatDate({ year: 1492, month: 5, day: 15 }, '
 
 **Returns:** `string` - Formatted date/time string.
 
+> [!NOTE]
+> Internal time components use 0-indexed `dayOfMonth` (0-30). The `formatDate()` function automatically converts to 1-indexed (1-31) for display when using `{D}` or `{DD}` tokens.
+
 ---
 
 ### timeSince(targetDate, currentDate)
@@ -563,6 +569,198 @@ const randomDate = CALENDARIA.api.chooseRandomDate(
 
 ---
 
+## Date Arithmetic
+
+### addDays(date, days)
+
+Add days to a date.
+
+```javascript
+const newDate = CALENDARIA.api.addDays({ year: 1492, month: 5, day: 15 }, 10);
+// Returns date 10 days later
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `date` | `object` | Date `{ year, month, day }` |
+| `days` | `number` | Days to add (negative to subtract) |
+
+**Returns:** `object` - New date components.
+
+---
+
+### addMonths(date, months)
+
+Add months to a date.
+
+```javascript
+const newDate = CALENDARIA.api.addMonths({ year: 1492, month: 5, day: 15 }, 3);
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `date` | `object` | Date `{ year, month, day }` |
+| `months` | `number` | Months to add (negative to subtract) |
+
+**Returns:** `object` - New date components.
+
+---
+
+### addYears(date, years)
+
+Add years to a date.
+
+```javascript
+const newDate = CALENDARIA.api.addYears({ year: 1492, month: 5, day: 15 }, 10);
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `date` | `object` | Date `{ year, month, day }` |
+| `years` | `number` | Years to add (negative to subtract) |
+
+**Returns:** `object` - New date components.
+
+---
+
+### daysBetween(startDate, endDate)
+
+Calculate the number of days between two dates.
+
+```javascript
+const days = CALENDARIA.api.daysBetween(
+  { year: 1492, month: 5, day: 1 },
+  { year: 1492, month: 5, day: 15 }
+);
+// Returns: 14
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `startDate` | `object` | Start date `{ year, month, day }` |
+| `endDate` | `object` | End date `{ year, month, day }` |
+
+**Returns:** `number` - Days between dates (positive if endDate is later).
+
+---
+
+### monthsBetween(startDate, endDate)
+
+Calculate the number of months between two dates.
+
+```javascript
+const months = CALENDARIA.api.monthsBetween(
+  { year: 1492, month: 0, day: 1 },
+  { year: 1492, month: 6, day: 1 }
+);
+// Returns: 6
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `startDate` | `object` | Start date `{ year, month, day }` |
+| `endDate` | `object` | End date `{ year, month, day }` |
+
+**Returns:** `number` - Months between dates.
+
+---
+
+### compareDates(date1, date2)
+
+Compare two dates including time components.
+
+```javascript
+const result = CALENDARIA.api.compareDates(
+  { year: 1492, month: 5, day: 15, hour: 10 },
+  { year: 1492, month: 5, day: 15, hour: 14 }
+);
+// Returns: -1 (date1 is earlier)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `date1` | `object` | First date |
+| `date2` | `object` | Second date |
+
+**Returns:** `number` - `-1` if date1 < date2, `0` if equal, `1` if date1 > date2.
+
+---
+
+### compareDays(date1, date2)
+
+Compare two dates ignoring time components.
+
+```javascript
+const result = CALENDARIA.api.compareDays(
+  { year: 1492, month: 5, day: 15 },
+  { year: 1492, month: 5, day: 20 }
+);
+// Returns: -1 (date1 is earlier)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `date1` | `object` | First date |
+| `date2` | `object` | Second date |
+
+**Returns:** `number` - `-1` if date1 < date2, `0` if same day, `1` if date1 > date2.
+
+---
+
+### isSameDay(date1, date2)
+
+Check if two dates are the same day.
+
+```javascript
+const same = CALENDARIA.api.isSameDay(
+  { year: 1492, month: 5, day: 15, hour: 10 },
+  { year: 1492, month: 5, day: 15, hour: 20 }
+);
+// Returns: true
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `date1` | `object` | First date |
+| `date2` | `object` | Second date |
+
+**Returns:** `boolean` - True if same calendar day.
+
+---
+
+### dayOfWeek(date)
+
+Get the weekday index for a date.
+
+```javascript
+const weekday = CALENDARIA.api.dayOfWeek({ year: 1492, month: 5, day: 15 });
+// Returns: 0-6 depending on calendar weekdays
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `date` | `object` | Date `{ year, month, day }` |
+
+**Returns:** `number` - Weekday index (0-based).
+
+---
+
+### isValidDate(date)
+
+Check if a date is valid for the active calendar.
+
+```javascript
+const valid = CALENDARIA.api.isValidDate({ year: 1492, month: 5, day: 31 });
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `date` | `object` | Date `{ year, month, day }` |
+
+**Returns:** `boolean` - True if date exists in the calendar.
+
+---
+
 ## Notes
 
 ### getAllNotes()
@@ -590,6 +788,27 @@ const note = CALENDARIA.api.getNote("abc123");
 | `pageId` | `string` | Journal entry page ID |
 
 **Returns:** `object|null` - Note stub or null.
+
+---
+
+### getNoteDocument(pageId)
+
+Get the full Foundry JournalEntryPage document for a note.
+
+```javascript
+const page = CALENDARIA.api.getNoteDocument("abc123");
+// Access full document properties
+console.log(page.text.content);
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `pageId` | `string` | Journal entry page ID |
+
+**Returns:** `JournalEntryPage|null` - Full Foundry document or null.
+
+> [!NOTE]
+> Use `getNote()` for calendar-specific data (stub). Use `getNoteDocument()` when you need the full Foundry document for content access or document methods.
 
 ---
 
@@ -1143,6 +1362,190 @@ const canManage = CALENDARIA.api.canManageNotes();
 ```
 
 **Returns:** `boolean`
+
+---
+
+## Permissions
+
+### hasPermission(permission)
+
+Check if current user has a specific permission.
+
+```javascript
+const canChange = CALENDARIA.api.hasPermission('changeDateTime');
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `permission` | `string` | Permission key |
+
+**Permission Keys:** `viewMiniCalendar`, `viewTimeKeeper`, `viewHUD`, `manageNotes`, `changeDateTime`, `changeWeather`, `changeCalendar`, `editCalendars`
+
+**Returns:** `boolean`
+
+---
+
+### canViewMiniCalendar()
+
+Check if current user can view the MiniCalendar.
+
+```javascript
+const canView = CALENDARIA.api.canViewMiniCalendar();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canViewTimeKeeper()
+
+Check if current user can view the TimeKeeper.
+
+```javascript
+const canView = CALENDARIA.api.canViewTimeKeeper();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canChangeDateTime()
+
+Check if current user can modify date/time.
+
+```javascript
+const canChange = CALENDARIA.api.canChangeDateTime();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canChangeWeather()
+
+Check if current user can change weather.
+
+```javascript
+const canChange = CALENDARIA.api.canChangeWeather();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canChangeCalendar()
+
+Check if current user can switch the active calendar.
+
+```javascript
+const canChange = CALENDARIA.api.canChangeCalendar();
+```
+
+**Returns:** `boolean`
+
+---
+
+### canEditCalendars()
+
+Check if current user can access the Calendar Editor.
+
+```javascript
+const canEdit = CALENDARIA.api.canEditCalendars();
+```
+
+**Returns:** `boolean`
+
+---
+
+## Widgets
+
+For external module integration. See [Widgets](Widgets) for full documentation.
+
+### widgetPoints
+
+Available widget insertion points.
+
+```javascript
+const points = CALENDARIA.api.widgetPoints;
+// { HUD_BUTTONS_LEFT, HUD_BUTTONS_RIGHT, HUD_INDICATORS, HUD_TRAY, MINICAL_SIDEBAR, FULLCAL_ACTIONS }
+```
+
+---
+
+### replaceableElements
+
+Built-in indicator elements that can be replaced by widgets.
+
+```javascript
+const elements = CALENDARIA.api.replaceableElements;
+// { WEATHER_INDICATOR, SEASON_INDICATOR, ERA_INDICATOR, CYCLE_INDICATOR }
+```
+
+---
+
+### registerWidget(moduleId, config)
+
+Register a custom widget.
+
+```javascript
+CALENDARIA.api.registerWidget('my-module', {
+  id: 'my-button',
+  type: 'button',
+  insertAt: 'hud.buttons.right',
+  icon: 'fas fa-star',
+  label: 'My Button',
+  onClick: () => console.log('Clicked!')
+});
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `moduleId` | `string` | Your module's ID |
+| `config` | `object` | Widget configuration |
+
+See [Widgets](Widgets#widget-configuration) for config options.
+
+---
+
+### getRegisteredWidgets(insertPoint)
+
+Get widgets registered at a specific point.
+
+```javascript
+const widgets = CALENDARIA.api.getRegisteredWidgets('hud.buttons.right');
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `insertPoint` | `string` | Widget point ID |
+
+**Returns:** `array` - Registered widget configs.
+
+---
+
+### getWidgetByReplacement(elementId)
+
+Get widget that replaces a built-in element.
+
+```javascript
+const widget = CALENDARIA.api.getWidgetByReplacement('weather-indicator');
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `elementId` | `string` | Replaceable element ID |
+
+**Returns:** `object|null` - Widget config or null.
+
+---
+
+### refreshWidgets()
+
+Force all widgets to re-render.
+
+```javascript
+CALENDARIA.api.refreshWidgets();
+```
 
 ---
 

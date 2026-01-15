@@ -5955,6 +5955,7 @@ span.calendaria-moon-icon {
   min-width: 0;
   position: relative;
   align-items: center;
+  justify-content: right;
   overflow: hidden;
   cursor: default;
 }

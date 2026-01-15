@@ -10,7 +10,12 @@ Darkness follows a smooth cosine curve throughout the day:
 - **Noon**: Minimum darkness (0.0)
 - **Dawn/Dusk**: Gradual transitions
 
-Darkness updates when the hour changes, with smooth animated transitions. Only the GM can update scene darkness.
+Darkness updates in two scenarios:
+
+1. **Time changes**: When the hour changes, darkness recalculates with smooth transitions
+2. **Scene activation**: When switching to a new scene, darkness is immediately synced to the current time
+
+Only the GM can update scene darkness.
 
 ---
 

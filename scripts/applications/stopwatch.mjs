@@ -119,6 +119,11 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /** @override */
+  async close(options = {}) {
+    return super.close({ animate: false, ...options });
+  }
+
+  /** @override */
   _onClose(options) {
     this.#saveState();
     this.#stopRealTimeInterval();
@@ -649,19 +654,26 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {Stopwatch} The instance
    */
   static show() {
-    const instance = this.instance ?? new Stopwatch();
+    const existing = foundry.applications.instances.get('calendaria-stopwatch');
+    if (existing) {
+      existing.render({ force: true });
+      return existing;
+    }
+    const instance = new Stopwatch();
     instance.render(true);
     return instance;
   }
 
   /** Hide the Stopwatch. */
   static hide() {
-    this.instance?.close();
+    const instance = foundry.applications.instances.get('calendaria-stopwatch');
+    if (instance) instance.close();
   }
 
   /** Toggle visibility. */
   static toggle() {
-    if (this.instance?.rendered) this.hide();
+    const existing = foundry.applications.instances.get('calendaria-stopwatch');
+    if (existing?.rendered) this.hide();
     else this.show();
   }
 

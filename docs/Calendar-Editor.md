@@ -153,6 +153,21 @@ Set how time works in your world, including daylight and date formatting.
 > [!WARNING]
 > Changing time settings affects how Foundry's world time is interpreted. Existing timestamps may display differently.
 
+### Non-Standard Time Units
+
+Calendaria fully supports calendars with non-standard time structures:
+
+- **Variable hours per day** — Calendars can have any number of hours (e.g., 20-hour days)
+- **Variable minutes per hour** — Calendars can have any number of minutes (e.g., 100 minutes/hour)
+- **Variable seconds per minute** — Calendars can have any number of seconds
+
+When using non-standard time:
+
+- AM/PM midday is calculated as `hoursPerDay / 2` instead of fixed 12
+- Time dial and hour markers automatically scale to the configured hours
+- All API time methods respect the calendar's time structure
+- Sunrise/sunset calculations adapt to the day length
+
 ### Daylight Configuration
 
 Control sunrise and sunset times throughout the year.
@@ -261,11 +276,19 @@ Define historical periods for your calendar.
 
 ### Era Template
 
-- **Template** — Custom format string for year display using placeholders:
-  - `[year]` — The year number
-  - `[abbreviation]` — Era abbreviation
-  - Example: `[year] [abbreviation]` → "1492 DR"
+- **Template** — Custom format string for year display using UTS#35 tokens:
+  - `YYYY` — Absolute display year (e.g., 1492)
+  - `YY` — 2-digit year (e.g., 92)
+  - `yy` — Year within current era
+  - `G` — Era abbreviation (e.g., DR)
+  - `GGGG` — Full era name (e.g., Dale Reckoning)
 - **Preview** — Live preview of the template output
+
+**Examples:**
+
+- `YYYY G` → "1492 DR"
+- `G yy` → "DR 5"
+- `Year yy of the GGGG` → "Year 5 of the Dale Reckoning"
 
 ### Era Controls
 
@@ -285,6 +308,8 @@ Create holidays and special days that appear on the calendar.
 | **Name** | Festival name (e.g., "Midwinter") |
 | **Month** | Which month the festival falls in |
 | **Day** | Day of the month |
+| **Duration** | Number of days the festival lasts (default: 1) |
+| **Leap Duration** | Duration on leap years (leave blank to use standard duration) |
 | **Leap Year Only** | Checkbox — festival only occurs in leap years |
 | **Counts for Weekday** | Checkbox — whether this day advances weekday counting (uncheck for intercalary days that exist "outside" normal weeks) |
 
@@ -443,6 +468,35 @@ Click the **Edit Zone** (pencil) button to configure zone-specific settings:
 - **Brightness Multiplier** — Scene darkness adjustment (0.5x to 1.5x, default 1.0x)
 - **Environment Lighting** — Optional hue and saturation overrides for base and dark lighting
 - **Temperatures** — Per-season temperature ranges (min/max) for this zone
+
+---
+
+## Exporting Calendars
+
+Click **Export** to download the current calendar as a JSON file.
+
+### Export Contents
+
+The exported file includes:
+
+- All calendar configuration (months, weekdays, seasons, moons, etc.)
+- Calendar metadata (name, system, description)
+- Export version and timestamp
+- Current date (when exporting the active calendar)
+
+### Use Cases
+
+- **Backup** — Save calendar configurations before making changes
+- **Migration** — Move calendars between worlds
+- **Sharing** — Share custom calendars with other GMs
+
+### Filename
+
+Exports use the format `{calendar-name}.json` with special characters sanitized.
+
+### Re-importing
+
+Exported calendars can be re-imported using the **Calendaria JSON** importer. See [Importing Calendars](Importing-Calendars).
 
 ---
 

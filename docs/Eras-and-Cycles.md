@@ -23,18 +23,19 @@ When displaying a year, Calendaria finds the matching era by checking which era 
 
 Custom templates use these placeholders:
 
-| Placeholder | Description |
-|-------------|-------------|
-| `[year]` | Absolute display year |
-| `[yearInEra]` | Year within the current era |
-| `[eraAbbr]` | Era abbreviation |
-| `[era]` | Full era name |
+| Token | Description |
+|-------|-------------|
+| `YYYY` | Absolute display year (e.g., 1492) |
+| `YY` | 2-digit year (e.g., 92) |
+| `yy` | Year within current era |
+| `G` | Era abbreviation (e.g., DR) |
+| `GGGG` | Full era name (e.g., Dale Reckoning) |
 
 Examples:
 
-- `[year] [eraAbbr]` produces "1492 DR"
-- `[eraAbbr] [yearInEra]` produces "DR 5"
-- `Year [yearInEra] of the [era]` produces "Year 5 of the Third Age"
+- `YYYY G` produces "1492 DR"
+- `G yy` produces "DR 5"
+- `Year yy of the GGGG` produces "Year 5 of the Dale Reckoning"
 
 When no template is set, the Format field controls output:
 

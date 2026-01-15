@@ -22,6 +22,42 @@ Button to launch the Calendar Editor for creating/modifying calendars.
 
 Button to open the calendar importer for Simple Calendar, Fantasy Calendar, and other formats.
 
+### Open/Close Buttons
+
+Context-specific buttons to open or close the HUD, MiniCalendar, and TimeKeeper applications.
+
+> [!NOTE]
+> Changes in the Calendar tab are automatically saved. An "Changes saved automatically" indicator confirms this.
+
+---
+
+## Permissions (GM Only)
+
+Configure which user roles can access Calendaria features.
+
+### Available Permissions
+
+| Permission | Description |
+|------------|-------------|
+| **View MiniCalendar** | Can see the MiniCalendar widget |
+| **View TimeKeeper** | Can see the TimeKeeper HUD |
+| **View CalendariaHUD** | Can see the main CalendariaHUD |
+| **Manage Notes** | Can create, edit, and delete calendar notes |
+| **Change Date/Time** | Can modify the world date and time |
+| **Change Weather** | Can set weather conditions |
+| **Change Calendar** | Can switch the active calendar |
+| **Edit Calendars** | Can access the Calendar Editor |
+
+### Configurable Roles
+
+- **Player** — Standard player role
+- **Trusted Player** — Trusted player role
+- **Assistant GM** — Assistant GM role
+
+GMs always have full access to all features.
+
+See [Permissions](Permissions) for detailed documentation.
+
 ---
 
 ## Notes (GM Only)
@@ -58,6 +94,9 @@ Configure how fast the in-game clock advances in real-time mode.
 - **Unit**: What time unit advances (second, round, minute, hour, day, week, month, season, year)
 - Example: "10 minutes per second" means 1 real second = 10 in-game minutes
 - Default: `1 second per second`
+
+> [!TIP]
+> Hover over the HUD and press the pause button to stop real-time clock advancement without disabling the feature.
 
 ### Sync with Game Pause
 
@@ -154,6 +193,19 @@ Configure date/time display formats for different UI locations. Each location su
 - **MiniCalendar Time**: Time display on MiniCalendar
 - **Full Calendar Header**: Header on the full calendar view
 - **Chat Timestamp**: In-game timestamps in chat
+- **Elapsed Time (Real Time)**: Stopwatch display in real-time mode
+- **Elapsed Time (Game Time)**: Stopwatch display in game-time mode
+
+### Stopwatch Format Tokens
+
+For Elapsed Time formats:
+
+| Token | Description | Example |
+|-------|-------------|---------|
+| `HH` | Hours (2-digit) | 01 |
+| `mm` | Minutes (2-digit) | 05 |
+| `ss` | Seconds (2-digit) | 30 |
+| `SSS` | Milliseconds (3-digit) | 250 |
 
 ### Format Presets
 
@@ -256,7 +308,10 @@ Configure date/time display formats for different UI locations. Each location su
 |-------|-------------|---------|
 | `[approxTime]` | Approximate time of day | Afternoon |
 | `[approxDate]` | Approximate date | Midsummer |
-| `[moon]` | Current moon phase | Full Moon |
+| `[moon]` | Current moon phase name | Full Moon |
+| `[moonIcon]` | Moon phase icon (rendered as image) | 🌕 |
+| `[moonIcon='name']` | Specific moon by name | Moon phase for named moon |
+| `[moonIcon=0]` | Specific moon by index | Moon phase for first moon |
 | `[ch]` | Current canonical hour | Vespers |
 | `[chAbbr]` | Abbreviated canonical hour | Ves |
 | `[cycle]` | Current cycle value | 3 |
@@ -265,6 +320,8 @@ Configure date/time display formats for different UI locations. Each location su
 | `[yearInEra]` | Year within current era | 5 |
 
 > [!NOTE]
+> The `[moonIcon]` token renders the actual moon phase image with color tinting matching the calendar configuration. Use `[moon]` for text-only phase names.
+>
 > On intercalary days, `MMMM`/`MMM` return the festival name; `D`/`DD`/`Do`/`M`/`MM`/`Mo` return empty strings.
 
 ---
@@ -365,6 +422,9 @@ Choose how the sun/moon are displayed:
 - `Slice`: Horizontal strip in the bar with sun/moon traveling left-to-right
 - Default: `dome`
 
+> [!NOTE]
+> Compact mode forces slice style. When switching back to fullsize mode, your saved dial style preference is automatically restored.
+
 ### Compact During Combat
 
 Automatically switch to slice style during combat to reduce screen space.
@@ -412,9 +472,14 @@ Allow HUD to snap to predefined positions when dragging:
 - `below-controls`: Below the scene controls
 - Default: `true`
 
+Position is preserved when switching between display modes (dome/slice/compact). Bottom-anchored zones (like above-hotbar) maintain position relative to the bar bottom across mode changes.
+
 ### Custom Time Jumps
 
 Configure custom time jump buttons per increment (e.g., skip 8 hours). Each increment can have its own jump values.
+
+> [!TIP]
+> Leave a field blank (empty) to hide that button. This applies to both increment and decrement buttons.
 
 ### Sticky Tray
 
@@ -436,11 +501,11 @@ Enable opacity fade when mouse leaves the HUD.
 
 - Default: `false`
 
-### Idle Opacity
+### Idle Opacity %
 
-Opacity level when HUD is faded (when Auto-Fade is enabled).
+Opacity level when HUD is faded (when Auto-Fade is enabled). Use the slider or enter a value directly in the number input.
 
-- Range: `0` to `100` (percentage)
+- Range: `0` to `100` %
 - Default: `40`
 
 ### Lock Position
@@ -466,6 +531,12 @@ Button to reset HUD to default position.
 ### Show on World Load
 
 Display the MiniCalendar when the world loads.
+
+- Default: `true`
+
+### Confirm Set Current Date (GM Only)
+
+Show a confirmation dialog before changing the world date via the "Set Current Date" button.
 
 - Default: `true`
 
@@ -536,6 +607,15 @@ Display the TimeKeeper HUD when the world loads.
 ### Custom Time Jumps
 
 Configure custom time jump buttons per increment. Each increment can have its own forward/reverse jump values.
+
+> [!TIP]
+> Leave a field blank (empty) to hide that button. This applies to both increment and decrement buttons.
+
+### Auto-start Game Time (Stopwatch)
+
+When enabled, the game-time stopwatch automatically starts when world time begins advancing.
+
+- Default: `false`
 
 ### Auto-Fade
 

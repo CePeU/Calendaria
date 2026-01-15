@@ -221,7 +221,6 @@ export const HOOKS = {
   SUNSET: 'calendaria.sunset',
   WEATHER_CHANGE: 'calendaria.weatherChange',
   WIDGET_REGISTERED: 'calendaria.widgetRegistered',
-  WIDGET_UNREGISTERED: 'calendaria.widgetUnregistered',
   WIDGETS_REFRESH: 'calendaria.widgetsRefresh',
   YEAR_CHANGE: 'calendaria.yearChange'
 };
@@ -262,7 +261,6 @@ export const WIDGET_POINTS = {
 /** @enum {string} Built-in elements that can be replaced by widgets */
 export const REPLACEABLE_ELEMENTS = {
   WEATHER_INDICATOR: 'weather-indicator',
-  WEATHER_PICKER: 'weather-picker',
   SEASON_INDICATOR: 'season-indicator',
   ERA_INDICATOR: 'era-indicator',
   CYCLE_INDICATOR: 'cycle-indicator'

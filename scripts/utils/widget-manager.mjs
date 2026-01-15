@@ -74,28 +74,6 @@ export function registerWidget(moduleId, config) {
 }
 
 /**
- * Unregister a widget.
- * @param {string} moduleId - Module ID
- * @param {string} widgetId - Widget ID
- * @returns {boolean} Success
- */
-export function unregisterWidget(moduleId, widgetId) {
-  const fullId = `${moduleId}.${widgetId}`;
-  const widget = widgets.get(fullId);
-  if (!widget) {
-    log(3, `Widget ${fullId} not found`);
-    return false;
-  }
-
-  if (widget.replaces) replacements.delete(widget.replaces);
-  widgets.delete(fullId);
-  log(3, `Widget unregistered: ${fullId}`);
-  Hooks.callAll(HOOKS.WIDGET_UNREGISTERED, fullId);
-  refreshWidgets();
-  return true;
-}
-
-/**
  * Get all registered widgets.
  * @param {string} [insertPoint] - Filter by insertion point
  * @returns {Array<object>} Widget configs

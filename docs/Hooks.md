@@ -535,3 +535,34 @@ Hooks.on("calendaria.displayFormatsChanged", (newFormats) => {
   console.log("Display formats updated");
 });
 ```
+
+---
+
+## Widget Hooks
+
+### calendaria.widgetRegistered
+
+Fired when a widget is registered via the Widget API.
+
+**Parameters:**
+
+- `fullId` (string) - Full widget ID (`moduleId.widgetId`)
+- `config` (object) - Widget configuration
+
+```javascript
+Hooks.on("calendaria.widgetRegistered", (fullId, config) => {
+  console.log(`Widget registered: ${fullId}`);
+});
+```
+
+### calendaria.widgetsRefresh
+
+Fired when widgets are refreshed (re-rendered).
+
+**Parameters:** None
+
+```javascript
+Hooks.on("calendaria.widgetsRefresh", () => {
+  console.log("Widgets refreshed");
+});
+```

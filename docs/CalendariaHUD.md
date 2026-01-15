@@ -55,13 +55,21 @@ When enabled, the HUD hides entirely during combat and automatically reopens whe
 The dome shows a dynamic sky that changes based on time of day:
 
 - Sky gradient interpolates between 15 keyframes throughout the day
-- Sun visible between hours 6-18; moon visible outside this range
-- Stars fade in/out during twilight (5:30-7:00 and 17:30-19:00)
-- Clouds visible during daylight with fade-in/out transitions (6:00-19:00)
+- Sun visible between sunrise and sunset; moon visible outside this range
+- Stars fade in/out during twilight periods
+- Clouds visible during daylight with fade-in/out transitions
 
 **GM Only**: Click the dome to open the Time Dial for quick time adjustments.
 
 **Players**: The dome is view-only and cannot be clicked.
+
+### Non-Standard Time Support
+
+The HUD fully supports calendars with non-standard time units:
+
+- Time dial and hour markers automatically scale to `hoursPerDay`
+- Sunrise/sunset positions calculated from calendar's daylight settings
+- All time displays respect `minutesPerHour` and `secondsPerMinute`
 
 ### Time Dial (GM Only)
 
@@ -152,6 +160,9 @@ The real-time clock syncs with game state:
 
 When sync is enabled and blocked (paused or in combat), manually starting the clock shows a warning notification.
 
+> [!TIP]
+> Hover over the HUD to reveal a pause button that stops the real-time clock without disabling the feature.
+
 Configure sync behavior in Settings > Time tab.
 
 ---
@@ -188,9 +199,9 @@ Drag the HUD near predefined zones for automatic snapping:
 
 When dragging into a zone, the HUD wobbles to indicate snapping will occur. Release to snap into position.
 
-Toggle sticky zones via Settings > HUD tab > Enable Sticky Zones.
+**Mode Switching**: Position is preserved when switching between display modes (dome/slice/compact).
 
-Debug visualization: `game.calendaria.showDebugZones()` or enable Dev Mode.
+Toggle sticky zones via Settings > HUD tab > Enable Sticky Zones.
 
 ### Dome Visibility (Full HUD)
 

@@ -1596,19 +1596,26 @@ export class MiniCalendar extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
-    const instance = this.instance ?? new MiniCalendar();
+    const existing = foundry.applications.instances.get('calendaria-mini-calendar');
+    if (existing) {
+      existing.render({ force: true });
+      return existing;
+    }
+    const instance = new MiniCalendar();
     instance.render(true);
     return instance;
   }
 
   /** Hide the MiniCalendar. */
   static hide() {
-    this.instance?.close();
+    const instance = foundry.applications.instances.get('calendaria-mini-calendar');
+    if (instance) instance.close();
   }
 
   /** Toggle the MiniCalendar visibility. */
   static toggle() {
-    if (this.instance?.rendered) this.hide();
+    const existing = foundry.applications.instances.get('calendaria-mini-calendar');
+    if (existing?.rendered) this.hide();
     else this.show();
   }
 

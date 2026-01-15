@@ -1046,16 +1046,6 @@ export const CalendariaAPI = {
   },
 
   /**
-   * Unregister a widget. If replacing a built-in element, the original is restored.
-   * @param {string} moduleId - Your module's ID
-   * @param {string} widgetId - The widget ID used during registration
-   * @returns {boolean} True if unregistered successfully
-   */
-  unregisterWidget(moduleId, widgetId) {
-    return WidgetManager.unregisterWidget(moduleId, widgetId);
-  },
-
-  /**
    * Get all registered widgets, optionally filtered by insertion point.
    * @param {string} [insertPoint] - Filter by insertion point
    * @returns {Array<object>} Array of widget configurations

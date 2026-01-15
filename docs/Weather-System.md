@@ -158,6 +158,10 @@ When both weather preset and climate zone define lighting values:
 2. Climate zone values used as fallback
 3. Global defaults if neither is configured
 
+### Color Reset Behavior
+
+When switching to a weather preset that does not define custom colors (hue/saturation), the environment lighting intensity is reset to 0. This removes any color tinting from previous weather conditions, ensuring predictable visual transitions.
+
 ### Darkness Penalty Values
 
 Each weather preset defines a `darknessPenalty` that increases scene darkness:
@@ -229,8 +233,13 @@ Weather inertia creates smoother, more realistic transitions by favoring the cur
 GMs can manually set weather by clicking the weather indicator on the CalendariaHUD or MiniCalendar. This opens the Weather Picker dialog with:
 
 - All weather presets grouped by category (Standard, Severe, Fantasy, Environmental, Custom)
-- Climate zone selector (if multiple zones configured)
+- Climate zone selector with "None" option (always visible)
 - Random generation button to roll new weather based on current zone/season probabilities
+- **Clear Weather** button to remove the current weather condition
+
+### Preset Filtering
+
+The Weather Picker only displays presets that are enabled in the current zone's configuration. Disabled presets are excluded from both the picker list and random generation.
 
 ---
 
