@@ -4,30 +4,22 @@
   "years"         : {"yearZero": 551, "firstWeekday": 0},
   "months"        : {
     "values": [
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Roelir",    "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.RoelirShort",    "ordinal":  1, "days": 32},
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Faniele",   "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.FanieleShort",   "ordinal":  2, "days": 32},
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Talienir",  "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.TalienirShort",  "ordinal":  3, "days": 32},
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Haelynir",  "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.HaelynirShort",  "ordinal":  4, "days": 33},
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Anarire",   "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.AnarireShort",   "ordinal":  5, "days": 32},
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Deismir",   "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.DeismirShort",   "ordinal":  6, "days": 32},
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Sehnir",    "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.SehnirShort",    "ordinal":  7, "days": 33},
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Roesone",   "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.RoesoneShort",   "ordinal":  8, "days": 32},
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Eriantir",  "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.EriantirShort",  "ordinal":  9, "days": 32},
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Cuiraecen", "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.CuiraecenShort", "ordinal": 10, "days": 33},
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Emmanir",   "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.EmmanirShort",   "ordinal": 11, "days": 32},
-      {"name": "CALENDARIA.Calendar.Cerilian.Month.Keltier",   "abbreviation": "CALENDARIA.Calendar.Cerilian.Month.KeltierShort",   "ordinal": 12, "days": 33}
+      {"name": "Roelir",    "abbreviation": "Roe", "ordinal":  1, "days": 32}, {"name": "Faniele",   "abbreviation": "Fan", "ordinal":  2, "days": 32}, {"name": "Talienir",  "abbreviation": "Tal", "ordinal":  3, "days": 32},
+      {"name": "Haelynir",  "abbreviation": "Hae", "ordinal":  4, "days": 33}, {"name": "Anarire",   "abbreviation": "Ana", "ordinal":  5, "days": 32}, {"name": "Deismir",   "abbreviation": "Dei", "ordinal":  6, "days": 32},
+      {"name": "Sehnir",    "abbreviation": "Seh", "ordinal":  7, "days": 33}, {"name": "Roesone",   "abbreviation": "Ros", "ordinal":  8, "days": 32}, {"name": "Eriantir",  "abbreviation": "Eri", "ordinal":  9, "days": 32},
+      {"name": "Cuiraecen", "abbreviation": "Cui", "ordinal": 10, "days": 33}, {"name": "Emmanir",   "abbreviation": "Emm", "ordinal": 11, "days": 32}, {"name": "Keltier",   "abbreviation": "Kel", "ordinal": 12, "days": 33}
     ]
   },
   "days"          : {
     "values"          : [
-      {"name": "CALENDARIA.Calendar.Cerilian.Day.Firstday",   "ordinal": 1                   },
-      {"name": "CALENDARIA.Calendar.Cerilian.Day.Seconday",   "ordinal": 2                   },
-      {"name": "CALENDARIA.Calendar.Cerilian.Day.Thirdday",   "ordinal": 3                   },
-      {"name": "CALENDARIA.Calendar.Cerilian.Day.Fourthday",  "ordinal": 4                   },
-      {"name": "CALENDARIA.Calendar.Cerilian.Day.Fifthday",   "ordinal": 5                   },
-      {"name": "CALENDARIA.Calendar.Cerilian.Day.Sixthday",   "ordinal": 6                   },
-      {"name": "CALENDARIA.Calendar.Cerilian.Day.Seventhday", "ordinal": 7                   },
-      {"name": "CALENDARIA.Calendar.Cerilian.Day.Eighthday",  "ordinal": 8, "isRestDay": true}
+      {"name": "Firstday",   "ordinal": 1, "abbreviation": "1st"                   },
+      {"name": "Seconday",   "ordinal": 2, "abbreviation": "2nd"                   },
+      {"name": "Thirdday",   "ordinal": 3, "abbreviation": "3rd"                   },
+      {"name": "Fourthday",  "ordinal": 4, "abbreviation": "4th"                   },
+      {"name": "Fifthday",   "ordinal": 5, "abbreviation": "5th"                   },
+      {"name": "Sixthday",   "ordinal": 6, "abbreviation": "6th"                   },
+      {"name": "Seventhday", "ordinal": 7, "abbreviation": "7th"                   },
+      {"name": "Eighthday",  "ordinal": 8, "abbreviation": "8th", "isRestDay": true}
     ],
     "daysPerYear"     : 388,
     "hoursPerDay"     : 24,
@@ -35,28 +27,28 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "CALENDARIA.Calendar.Cerilian.Festival.DayOfRebirth",        "month":  3, "day": 32, "countsForWeekday": false},
-    {"name": "CALENDARIA.Calendar.Cerilian.Festival.NightOfFire",         "month":  6, "day": 32, "countsForWeekday": false},
-    {"name": "CALENDARIA.Calendar.Cerilian.Festival.VenerationOfTheDead", "month":  9, "day": 32, "countsForWeekday": false},
-    {"name": "CALENDARIA.Calendar.Cerilian.Festival.NightOfSleeping",     "month": 12, "day": 33, "countsForWeekday": false},
-    {"name": "CALENDARIA.Calendar.Cerilian.Festival.HaelynsDay",          "month":  4, "day": 16                           },
-    {"name": "CALENDARIA.Calendar.Cerilian.Festival.EriksMoot",           "month":  5, "day":  1                           }
+    {"name": "Day of Rebirth",         "month":  3, "day": 32, "countsForWeekday": false},
+    {"name": "Night of Fire",          "month":  6, "day": 32, "countsForWeekday": false},
+    {"name": "Veneration of the Dead", "month":  9, "day": 32, "countsForWeekday": false},
+    {"name": "Night of Sleeping",      "month": 12, "day": 33, "countsForWeekday": false},
+    {"name": "Haelyn's Day",           "month":  4, "day": 16                           },
+    {"name": "Erik's Moot",            "month":  5, "day":  1                           }
   ],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 356, "dayEnd":  95},
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  96, "dayEnd": 192},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 193, "dayEnd": 290},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 291, "dayEnd": 355}
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 356, "dayEnd":  95, "abbreviation": "Win"},
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  96, "dayEnd": 192, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 193, "dayEnd": 290, "abbreviation": "Sum"},
+      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 291, "dayEnd": 355, "abbreviation": "Aut"}
     ]
   },
   "eras"          : [
-    {"name": "CALENDARIA.Era.MichaelaeReckoning", "abbreviation": "CALENDARIA.Era.MR", "startYear":    1, "endYear": null, "format": "suffix", "template": null},
-    {"name": "CALENDARIA.Era.HaelynsCount",       "abbreviation": "CALENDARIA.Era.HC", "startYear": -973, "endYear":    0, "format": "suffix", "template": null}
+    {"name": "Michaelae Reckoning", "abbreviation": "MR", "startYear":    1, "endYear": null, "format": "suffix", "template": null},
+    {"name": "Haelyn's Count",      "abbreviation": "HC", "startYear": -973, "endYear":    0, "format": "suffix", "template": null}
   ],
   "moons"         : [
     {
-      "name"         : "CALENDARIA.Moon.Cerilian.Moon",
+      "name"         : "The Moon",
       "cycleLength"  : 28,
       "color"        : "#E8E8E8",
       "phases"       : [

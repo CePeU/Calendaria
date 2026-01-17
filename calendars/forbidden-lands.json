@@ -4,23 +4,18 @@
   "years"         : {"yearZero": 1165, "firstWeekday": 0},
   "months"        : {
     "values": [
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Month.Winterwane",  "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.WinterwaneShort",  "ordinal": 1, "days": 45},
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Month.Springrise",  "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SpringriseShort",  "ordinal": 2, "days": 45},
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Month.Springwane",  "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SpringwaneShort",  "ordinal": 3, "days": 45},
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Month.Summermaze",  "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SummermazeShort",  "ordinal": 4, "days": 45},
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Month.Summerend",   "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.SummerendShort",   "ordinal": 5, "days": 45},
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Month.Harvestfall", "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.HarvestfallShort", "ordinal": 6, "days": 45},
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Month.Fallwane",    "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.FallwaneShort",    "ordinal": 7, "days": 45},
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Month.Winterdeep",  "abbreviation": "CALENDARIA.Calendar.ForbiddenLands.Month.WinterdeepShort",  "ordinal": 8, "days": 45}
+      {"name": "Winterwane",  "abbreviation": "WWn", "ordinal": 1, "days": 45}, {"name": "Springrise",  "abbreviation": "SpR", "ordinal": 2, "days": 45}, {"name": "Springwane",  "abbreviation": "SpW", "ordinal": 3, "days": 45},
+      {"name": "Summermaze",  "abbreviation": "SMz", "ordinal": 4, "days": 45}, {"name": "Summerend",   "abbreviation": "SEn", "ordinal": 5, "days": 45}, {"name": "Harvestfall", "abbreviation": "HvF", "ordinal": 6, "days": 45},
+      {"name": "Fallwane",    "abbreviation": "FlW", "ordinal": 7, "days": 45}, {"name": "Winterdeep",  "abbreviation": "WDp", "ordinal": 8, "days": 45}
     ]
   },
   "days"          : {
     "values"          : [
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Day.Sunday",    "ordinal": 1                   },
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Day.Moonday",   "ordinal": 2                   },
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Day.Bladeday",  "ordinal": 3                   },
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Day.Spiritday", "ordinal": 4                   },
-      {"name": "CALENDARIA.Calendar.ForbiddenLands.Day.Stillday",  "ordinal": 5, "isRestDay": true}
+      {"name": "Sunday",    "ordinal": 1, "abbreviation": "Sun"                   },
+      {"name": "Moonday",   "ordinal": 2, "abbreviation": "Moo"                   },
+      {"name": "Bladeday",  "ordinal": 3, "abbreviation": "Bla"                   },
+      {"name": "Spiritday", "ordinal": 4, "abbreviation": "Spi"                   },
+      {"name": "Stillday",  "ordinal": 5, "abbreviation": "Sti", "isRestDay": true}
     ],
     "daysPerYear"     : 360,
     "hoursPerDay"     : 24,
@@ -28,25 +23,22 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "CALENDARIA.Calendar.ForbiddenLands.Festival.AwakeningDay",  "month": 2, "day":  1},
-    {"name": "CALENDARIA.Calendar.ForbiddenLands.Festival.Springrise",    "month": 2, "day": 23},
-    {"name": "CALENDARIA.Calendar.ForbiddenLands.Festival.MidsummerBlot", "month": 4, "day": 23},
-    {"name": "CALENDARIA.Calendar.ForbiddenLands.Festival.HarvestFeast",  "month": 6, "day": 23},
-    {"name": "CALENDARIA.Calendar.ForbiddenLands.Festival.WinterNight",   "month": 8, "day": 23}
+    {"name": "Awakening Day",       "month": 2, "day":  1}, {"name": "Springrise Festival", "month": 2, "day": 23}, {"name": "Midsummer Blot",      "month": 4, "day": 23}, {"name": "Harvest Feast",       "month": 6, "day": 23},
+    {"name": "Winter Night",        "month": 8, "day": 23}
   ],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart":   0, "dayEnd":  44},
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  45, "dayEnd": 134},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 135, "dayEnd": 224},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 225, "dayEnd": 314},
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 315, "dayEnd": 359}
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart":   0, "dayEnd":  44, "abbreviation": "Win"},
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  45, "dayEnd": 134, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 135, "dayEnd": 224, "abbreviation": "Sum"},
+      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 225, "dayEnd": 314, "abbreviation": "Aut"},
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 315, "dayEnd": 359, "abbreviation": "Win"}
     ]
   },
-  "eras"          : [ {"name": "CALENDARIA.Era.AlderlandReckoning", "abbreviation": "CALENDARIA.Era.AS", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
+  "eras"          : [ {"name": "Alderland Reckoning", "abbreviation": "AS", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
   "moons"         : [
     {
-      "name"         : "CALENDARIA.Moon.ForbiddenLands.Moon",
+      "name"         : "The Moon",
       "cycleLength"  : 30,
       "color"        : "#E8E8E8",
       "phases"       : [

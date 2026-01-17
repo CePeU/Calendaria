@@ -4,33 +4,29 @@
   "years"         : {"yearZero": 576, "firstWeekday": 2},
   "months"        : {
     "values": [
-      {"name": "CALENDARIA.Calendar.Greyhawk.Festival.Needfest", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Festival.NeedfestShort", "ordinal":  1, "days":  6, "type": "intercalary"},
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Fireseek",    "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.FireseekShort",    "ordinal":  1, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Readying",    "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.ReadyingShort",    "ordinal":  2, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Coldeven",    "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.ColdevenShort",    "ordinal":  3, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Festival.Growfest", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Festival.GrowfestShort", "ordinal":  4, "days":  6, "type": "intercalary"},
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Planting",    "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.PlantingShort",    "ordinal":  4, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Flocktime",   "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.FlocktimeShort",   "ordinal":  5, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Wealsun",     "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.WealsunShort",     "ordinal":  6, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Festival.Richfest", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Festival.RichfestShort", "ordinal":  7, "days":  6, "type": "intercalary"},
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Reaping",     "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.ReapingShort",     "ordinal":  7, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Goodmonth",   "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.GoodmonthShort",   "ordinal":  8, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Harvester",   "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.HarvesterShort",   "ordinal":  9, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Festival.Brewfest", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Festival.BrewfestShort", "ordinal": 10, "days":  6, "type": "intercalary"},
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Patchwall",   "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.PatchwallShort",   "ordinal": 10, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Readyreat",   "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.ReadyreatShort",   "ordinal": 11, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Month.Sunsebb",     "abbreviation": "CALENDARIA.Calendar.Greyhawk.Month.SubsebbShort",     "ordinal": 12, "days": 28                       }
+      {"name": "Needfest",   "abbreviation": "Need",   "ordinal":  1, "days":  6, "type": "intercalary"},
+      {"name": "Fireseek",   "abbreviation": "Fire",   "ordinal":  1, "days": 28                       },
+      {"name": "Readying",   "abbreviation": "Ready",  "ordinal":  2, "days": 28                       },
+      {"name": "Coldeven",   "abbreviation": "Cold",   "ordinal":  3, "days": 28                       },
+      {"name": "Growfest",   "abbreviation": "Grow",   "ordinal":  4, "days":  6, "type": "intercalary"},
+      {"name": "Planting",   "abbreviation": "Plant",  "ordinal":  4, "days": 28                       },
+      {"name": "Flocktime",  "abbreviation": "Flock",  "ordinal":  5, "days": 28                       },
+      {"name": "Wealsun",    "abbreviation": "Weal",   "ordinal":  6, "days": 28                       },
+      {"name": "Richfest",   "abbreviation": "Rich",   "ordinal":  7, "days":  6, "type": "intercalary"},
+      {"name": "Reaping",    "abbreviation": "Reap",   "ordinal":  7, "days": 28                       },
+      {"name": "Goodmonth",  "abbreviation": "Good",   "ordinal":  8, "days": 28                       },
+      {"name": "Harvester",  "abbreviation": "Harv",   "ordinal":  9, "days": 28                       },
+      {"name": "Brewfest",   "abbreviation": "Brew",   "ordinal": 10, "days":  6, "type": "intercalary"},
+      {"name": "Patchwall",  "abbreviation": "Patch",  "ordinal": 10, "days": 28                       },
+      {"name": "Ready'reat", "abbreviation": "R'reat", "ordinal": 11, "days": 28                       },
+      {"name": "Sunsebb",    "abbreviation": "Sun",    "ordinal": 12, "days": 28                       }
     ]
   },
   "days"          : {
     "values"          : [
-      {"name": "CALENDARIA.Calendar.Greyhawk.Day.Starday",  "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.StardayShort",  "ordinal": 1                   },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Day.Sunday",   "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.SundayShort",   "ordinal": 2                   },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Day.Moonday",  "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.MoondayShort",  "ordinal": 3                   },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Day.Godsday",  "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.GodsdayShort",  "ordinal": 4, "isRestDay": true},
-      {"name": "CALENDARIA.Calendar.Greyhawk.Day.Waterday", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.WaterdayShort", "ordinal": 5                   },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Day.Earthday", "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.EarthdayShort", "ordinal": 6                   },
-      {"name": "CALENDARIA.Calendar.Greyhawk.Day.Freeday",  "abbreviation": "CALENDARIA.Calendar.Greyhawk.Day.FreedayShort",  "ordinal": 7, "isRestDay": true}
+      {"name": "Starday",  "abbreviation": "St", "ordinal": 1                   }, {"name": "Sunday",   "abbreviation": "Su", "ordinal": 2                   }, {"name": "Moonday",  "abbreviation": "Mo", "ordinal": 3                   },
+      {"name": "Godsday",  "abbreviation": "Go", "ordinal": 4, "isRestDay": true}, {"name": "Waterday", "abbreviation": "Wa", "ordinal": 5                   }, {"name": "Earthday", "abbreviation": "Ea", "ordinal": 6                   },
+      {"name": "Freeday",  "abbreviation": "Fr", "ordinal": 7, "isRestDay": true}
     ],
     "daysPerYear"     : 360,
     "hoursPerDay"     : 24,
@@ -40,16 +36,16 @@
   "festivals"     : [],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Spring",                 "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  48, "dayEnd": 137},
-      {"name": "CALENDARIA.Season.Summer",                 "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 138, "dayEnd": 227},
-      {"name": "CALENDARIA.Calendar.Greyhawk.Season.Fall", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 228, "dayEnd": 317},
-      {"name": "CALENDARIA.Season.Winter",                 "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 318, "dayEnd":  47}
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  48, "dayEnd": 137, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 138, "dayEnd": 227, "abbreviation": "Sum"},
+      {"name": "Fall",                     "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 228, "dayEnd": 317, "abbreviation": "Fal"},
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 318, "dayEnd":  47, "abbreviation": "Win"}
     ]
   },
-  "eras"          : [ {"name": "CALENDARIA.Era.CommonYear", "abbreviation": "CALENDARIA.Era.CY", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
+  "eras"          : [ {"name": "Common Year", "abbreviation": "CY", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
   "moons"         : [
     {
-      "name"         : "CALENDARIA.Moon.Greyhawk.Luna",
+      "name"         : "Luna",
       "cycleLength"  : 28,
       "color"        : "#E8E8E8",
       "phases"       : [
@@ -65,7 +61,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 4}
     },
     {
-      "name"         : "CALENDARIA.Moon.Greyhawk.Celene",
+      "name"         : "Celene",
       "cycleLength"  : 91,
       "color"        : "#87CEEB",
       "phases"       : [

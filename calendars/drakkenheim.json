@@ -4,29 +4,21 @@
   "years"         : {"yearZero": 1126, "firstWeekday": 0},
   "months"        : {
     "values": [
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Threshold",   "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.ThresholdShort",   "ordinal":  1, "days": 30},
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Thawing",     "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.ThawingShort",     "ordinal":  2, "days": 30},
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Springtide",  "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.SpringtideShort",  "ordinal":  3, "days": 31},
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Hearthstone", "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.HearthstoneShort", "ordinal":  4, "days": 30},
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Sowing",      "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.SowingShort",      "ordinal":  5, "days": 31},
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Highsummer",  "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.HighsummerShort",  "ordinal":  6, "days": 30},
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Midyear",     "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.MidyearShort",     "ordinal":  7, "days": 31},
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Sunbreak",    "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.SunbreakShort",    "ordinal":  8, "days": 30},
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Autumntide",  "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.AutumntideShort",  "ordinal":  9, "days": 31},
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Reaping",     "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.ReapingShort",     "ordinal": 10, "days": 30},
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Rimewind",    "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.RimewindShort",    "ordinal": 11, "days": 30},
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Month.Midwinter",   "abbreviation": "CALENDARIA.Calendar.Drakkenheim.Month.MidwinterShort",   "ordinal": 12, "days": 31}
+      {"name": "Threshold",   "abbreviation": "Thr", "ordinal":  1, "days": 30}, {"name": "Thawing",     "abbreviation": "Thw", "ordinal":  2, "days": 30}, {"name": "Springtide",  "abbreviation": "Spt", "ordinal":  3, "days": 31},
+      {"name": "Hearthstone", "abbreviation": "Hrt", "ordinal":  4, "days": 30}, {"name": "Sowing",      "abbreviation": "Sow", "ordinal":  5, "days": 31}, {"name": "Highsummer",  "abbreviation": "Hgs", "ordinal":  6, "days": 30},
+      {"name": "Midyear",     "abbreviation": "Mdy", "ordinal":  7, "days": 31}, {"name": "Sunbreak",    "abbreviation": "Snb", "ordinal":  8, "days": 30}, {"name": "Autumntide",  "abbreviation": "Aut", "ordinal":  9, "days": 31},
+      {"name": "Reaping",     "abbreviation": "Rep", "ordinal": 10, "days": 30}, {"name": "Rimewind",    "abbreviation": "Rim", "ordinal": 11, "days": 30}, {"name": "Midwinter",   "abbreviation": "Mdw", "ordinal": 12, "days": 31}
     ]
   },
   "days"          : {
     "values"          : [
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Day.Moonday",   "ordinal": 1                   },
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Day.Tidesday",  "ordinal": 2                   },
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Day.Windsday",  "ordinal": 3                   },
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Day.Earthsday", "ordinal": 4                   },
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Day.Fireday",   "ordinal": 5                   },
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Day.Starsday",  "ordinal": 6                   },
-      {"name": "CALENDARIA.Calendar.Drakkenheim.Day.Sunday",    "ordinal": 7, "isRestDay": true}
+      {"name": "Moonday",   "ordinal": 1, "abbreviation": "Moo"                   },
+      {"name": "Tidesday",  "ordinal": 2, "abbreviation": "Tid"                   },
+      {"name": "Windsday",  "ordinal": 3, "abbreviation": "Win"                   },
+      {"name": "Earthsday", "ordinal": 4, "abbreviation": "Ear"                   },
+      {"name": "Fireday",   "ordinal": 5, "abbreviation": "Fir"                   },
+      {"name": "Starsday",  "ordinal": 6, "abbreviation": "Sta"                   },
+      {"name": "Sunday",    "ordinal": 7, "abbreviation": "Sun", "isRestDay": true}
     ],
     "daysPerYear"     : 365,
     "hoursPerDay"     : 24,
@@ -34,23 +26,21 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "CALENDARIA.Calendar.Drakkenheim.Festival.TarnasWakeStart", "month":  1, "day":  1, "duration": 7},
-    {"name": "CALENDARIA.Calendar.Drakkenheim.Festival.Angelmeet",       "month":  7, "day":  1},
-    {"name": "CALENDARIA.Calendar.Drakkenheim.Festival.AllHallowsEve",   "month": 10, "day": 30},
-    {"name": "CALENDARIA.Calendar.Drakkenheim.Festival.TarnasWakeEnd",   "month": 12, "day": 25, "duration": 7}
+    {"name": "Tarna's Wake",     "month":  1, "day":  1, "duration": 7}, {"name": "Angelmeet",        "month":  7, "day":  1               }, {"name": "All Hallow's Eve", "month": 10, "day": 30               },
+    {"name": "Tarna's Wake",     "month": 12, "day": 25, "duration": 7}
   ],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 355, "dayEnd":  78},
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  79, "dayEnd": 171},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 172, "dayEnd": 264},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 265, "dayEnd": 354}
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 355, "dayEnd":  78, "abbreviation": "Win"},
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  79, "dayEnd": 171, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 172, "dayEnd": 264, "abbreviation": "Sum"},
+      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 265, "dayEnd": 354, "abbreviation": "Aut"}
     ]
   },
-  "eras"          : [ {"name": "CALENDARIA.Era.SacredFlame", "abbreviation": "CALENDARIA.Era.SF", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
+  "eras"          : [ {"name": "Sacred Flame", "abbreviation": "SF", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
   "moons"         : [
     {
-      "name"         : "CALENDARIA.Moon.Drakkenheim.Luna",
+      "name"         : "Luna",
       "cycleLength"  : 29,
       "color"        : "#C0C0C0",
       "phases"       : [

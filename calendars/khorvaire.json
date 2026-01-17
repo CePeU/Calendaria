@@ -4,29 +4,16 @@
   "years"         : {"yearZero": 998, "firstWeekday": 0},
   "months"        : {
     "values": [
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Zarantyr",  "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.ZarantyrShort",  "ordinal":  1, "days": 28},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Olarune",   "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.OlaruneShort",   "ordinal":  2, "days": 28},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Therendor", "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.TherendorShort", "ordinal":  3, "days": 28},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Eyre",      "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.EyreShort",      "ordinal":  4, "days": 28},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Dravago",   "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.DravagoShort",   "ordinal":  5, "days": 28},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Nymm",      "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.NymmShort",      "ordinal":  6, "days": 28},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Lharvion",  "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.LharvionShort",  "ordinal":  7, "days": 28},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Barrakas",  "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.BarrakasShort",  "ordinal":  8, "days": 28},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Rhaan",     "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.RhaanShort",     "ordinal":  9, "days": 28},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Sypheros",  "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.SypherosShort",  "ordinal": 10, "days": 28},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Aryth",     "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.ArythShort",     "ordinal": 11, "days": 28},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Month.Vult",      "abbreviation": "CALENDARIA.Calendar.Khorvaire.Month.VultShort",      "ordinal": 12, "days": 28}
+      {"name": "Zarantyr",  "abbreviation": "Zar", "ordinal":  1, "days": 28}, {"name": "Olarune",   "abbreviation": "Ola", "ordinal":  2, "days": 28}, {"name": "Therendor", "abbreviation": "The", "ordinal":  3, "days": 28},
+      {"name": "Eyre",      "abbreviation": "Eyr", "ordinal":  4, "days": 28}, {"name": "Dravago",   "abbreviation": "Dra", "ordinal":  5, "days": 28}, {"name": "Nymm",      "abbreviation": "Nym", "ordinal":  6, "days": 28},
+      {"name": "Lharvion",  "abbreviation": "Lha", "ordinal":  7, "days": 28}, {"name": "Barrakas",  "abbreviation": "Bar", "ordinal":  8, "days": 28}, {"name": "Rhaan",     "abbreviation": "Rha", "ordinal":  9, "days": 28},
+      {"name": "Sypheros",  "abbreviation": "Syp", "ordinal": 10, "days": 28}, {"name": "Aryth",     "abbreviation": "Ary", "ordinal": 11, "days": 28}, {"name": "Vult",      "abbreviation": "Vul", "ordinal": 12, "days": 28}
     ]
   },
   "days"          : {
     "values"          : [
-      {"name": "CALENDARIA.Calendar.Khorvaire.Day.Sul", "abbreviation": "CALENDARIA.Calendar.Khorvaire.Day.SulShort", "ordinal": 1},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Day.Mol", "abbreviation": "CALENDARIA.Calendar.Khorvaire.Day.MolShort", "ordinal": 2},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Day.Zol", "abbreviation": "CALENDARIA.Calendar.Khorvaire.Day.ZolShort", "ordinal": 3},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Day.Wir", "abbreviation": "CALENDARIA.Calendar.Khorvaire.Day.WirShort", "ordinal": 4},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Day.Zor", "abbreviation": "CALENDARIA.Calendar.Khorvaire.Day.ZorShort", "ordinal": 5},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Day.Far", "abbreviation": "CALENDARIA.Calendar.Khorvaire.Day.FarShort", "ordinal": 6},
-      {"name": "CALENDARIA.Calendar.Khorvaire.Day.Sar", "abbreviation": "CALENDARIA.Calendar.Khorvaire.Day.SarShort", "ordinal": 7}
+      {"name": "Sul", "abbreviation": "Sul", "ordinal": 1}, {"name": "Mol", "abbreviation": "Mol", "ordinal": 2}, {"name": "Zol", "abbreviation": "Zol", "ordinal": 3}, {"name": "Wir", "abbreviation": "Wir", "ordinal": 4},
+      {"name": "Zor", "abbreviation": "Zor", "ordinal": 5}, {"name": "Far", "abbreviation": "Far", "ordinal": 6}, {"name": "Sar", "abbreviation": "Sar", "ordinal": 7}
     ],
     "daysPerYear"     : 336,
     "hoursPerDay"     : 24,
@@ -36,16 +23,16 @@
   "festivals"     : [],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  56, "dayEnd": 139},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 140, "dayEnd": 223},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 224, "dayEnd": 307},
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 308, "dayEnd":  55}
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  56, "dayEnd": 139, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 140, "dayEnd": 223, "abbreviation": "Sum"},
+      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 224, "dayEnd": 307, "abbreviation": "Aut"},
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 308, "dayEnd":  55, "abbreviation": "Win"}
     ]
   },
-  "eras"          : [ {"name": "CALENDARIA.Era.YearOfTheKingdom", "abbreviation": "CALENDARIA.Era.YK", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
+  "eras"          : [ {"name": "Year of the Kingdom", "abbreviation": "YK", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
   "moons"         : [
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Zarantyr",
+      "name"         : "Zarantyr",
       "cycleLength"  : 28,
       "color"        : "#E8E8E8",
       "phases"       : [
@@ -61,7 +48,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 0}
     },
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Olarune",
+      "name"         : "Olarune",
       "cycleLength"  : 35,
       "color"        : "#FFD700",
       "phases"       : [
@@ -77,7 +64,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 0}
     },
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Therendor",
+      "name"         : "Therendor",
       "cycleLength"  : 42,
       "color"        : "#90EE90",
       "phases"       : [
@@ -93,7 +80,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 0}
     },
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Eyre",
+      "name"         : "Eyre",
       "cycleLength"  : 49,
       "color"        : "#FFA500",
       "phases"       : [
@@ -109,7 +96,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 0}
     },
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Dravago",
+      "name"         : "Dravago",
       "cycleLength"  : 56,
       "color"        : "#87CEEB",
       "phases"       : [
@@ -125,7 +112,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 0}
     },
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Nymm",
+      "name"         : "Nymm",
       "cycleLength"  : 63,
       "color"        : "#DDA0DD",
       "phases"       : [
@@ -141,7 +128,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 0}
     },
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Lharvion",
+      "name"         : "Lharvion",
       "cycleLength"  : 70,
       "color"        : "#FF6347",
       "phases"       : [
@@ -157,7 +144,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 0}
     },
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Barrakas",
+      "name"         : "Barrakas",
       "cycleLength"  : 77,
       "color"        : "#CD853F",
       "phases"       : [
@@ -173,7 +160,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 0}
     },
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Rhaan",
+      "name"         : "Rhaan",
       "cycleLength"  : 84,
       "color"        : "#8B4513",
       "phases"       : [
@@ -189,7 +176,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 0}
     },
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Sypheros",
+      "name"         : "Sypheros",
       "cycleLength"  : 91,
       "color"        : "#696969",
       "phases"       : [
@@ -205,7 +192,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 0}
     },
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Aryth",
+      "name"         : "Aryth",
       "cycleLength"  : 98,
       "color"        : "#2F4F4F",
       "phases"       : [
@@ -221,7 +208,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 0}
     },
     {
-      "name"         : "CALENDARIA.Moon.Khorvaire.Vult",
+      "name"         : "Vult",
       "cycleLength"  : 105,
       "color"        : "#4B0082",
       "phases"       : [

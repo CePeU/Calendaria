@@ -4,29 +4,17 @@
   "years"         : {"yearZero": 998, "firstWeekday": 0},
   "months"        : {
     "values": [
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Zarantyr",  "abbreviation": "CALENDARIA.Calendar.Galifar.Month.ZarantyrShort",  "ordinal":  1, "days": 28},
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Olarune",   "abbreviation": "CALENDARIA.Calendar.Galifar.Month.OlaruneShort",   "ordinal":  2, "days": 28},
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Therendor", "abbreviation": "CALENDARIA.Calendar.Galifar.Month.TherendorShort", "ordinal":  3, "days": 28},
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Eyre",      "abbreviation": "CALENDARIA.Calendar.Galifar.Month.EyreShort",      "ordinal":  4, "days": 28},
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Dravago",   "abbreviation": "CALENDARIA.Calendar.Galifar.Month.DravagoShort",   "ordinal":  5, "days": 28},
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Nymm",      "abbreviation": "CALENDARIA.Calendar.Galifar.Month.NymmShort",      "ordinal":  6, "days": 28},
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Lharvion",  "abbreviation": "CALENDARIA.Calendar.Galifar.Month.LharvionShort",  "ordinal":  7, "days": 28},
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Barrakas",  "abbreviation": "CALENDARIA.Calendar.Galifar.Month.BarrakasShort",  "ordinal":  8, "days": 28},
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Rhaan",     "abbreviation": "CALENDARIA.Calendar.Galifar.Month.RhaanShort",     "ordinal":  9, "days": 28},
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Sypheros",  "abbreviation": "CALENDARIA.Calendar.Galifar.Month.SypherosShort",  "ordinal": 10, "days": 28},
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Aryth",     "abbreviation": "CALENDARIA.Calendar.Galifar.Month.ArythShort",     "ordinal": 11, "days": 28},
-      {"name": "CALENDARIA.Calendar.Galifar.Month.Vult",      "abbreviation": "CALENDARIA.Calendar.Galifar.Month.VultShort",      "ordinal": 12, "days": 28}
+      {"name": "Zarantyr",  "abbreviation": "Zar", "ordinal":  1, "days": 28}, {"name": "Olarune",   "abbreviation": "Ola", "ordinal":  2, "days": 28}, {"name": "Therendor", "abbreviation": "The", "ordinal":  3, "days": 28},
+      {"name": "Eyre",      "abbreviation": "Eyr", "ordinal":  4, "days": 28}, {"name": "Dravago",   "abbreviation": "Dra", "ordinal":  5, "days": 28}, {"name": "Nymm",      "abbreviation": "Nym", "ordinal":  6, "days": 28},
+      {"name": "Lharvion",  "abbreviation": "Lha", "ordinal":  7, "days": 28}, {"name": "Barrakas",  "abbreviation": "Bar", "ordinal":  8, "days": 28}, {"name": "Rhaan",     "abbreviation": "Rha", "ordinal":  9, "days": 28},
+      {"name": "Sypheros",  "abbreviation": "Syp", "ordinal": 10, "days": 28}, {"name": "Aryth",     "abbreviation": "Ary", "ordinal": 11, "days": 28}, {"name": "Vult",      "abbreviation": "Vul", "ordinal": 12, "days": 28}
     ]
   },
   "days"          : {
     "values"          : [
-      {"name": "CALENDARIA.Calendar.Galifar.Day.Sul", "ordinal": 1                   },
-      {"name": "CALENDARIA.Calendar.Galifar.Day.Mol", "ordinal": 2                   },
-      {"name": "CALENDARIA.Calendar.Galifar.Day.Zol", "ordinal": 3                   },
-      {"name": "CALENDARIA.Calendar.Galifar.Day.Wir", "ordinal": 4                   },
-      {"name": "CALENDARIA.Calendar.Galifar.Day.Zor", "ordinal": 5                   },
-      {"name": "CALENDARIA.Calendar.Galifar.Day.Far", "ordinal": 6                   },
-      {"name": "CALENDARIA.Calendar.Galifar.Day.Sar", "ordinal": 7, "isRestDay": true}
+      {"name": "Sul", "ordinal": 1, "abbreviation": "Sul"                   }, {"name": "Mol", "ordinal": 2, "abbreviation": "Mol"                   }, {"name": "Zol", "ordinal": 3, "abbreviation": "Zol"                   },
+      {"name": "Wir", "ordinal": 4, "abbreviation": "Wir"                   }, {"name": "Zor", "ordinal": 5, "abbreviation": "Zor"                   }, {"name": "Far", "ordinal": 6, "abbreviation": "Far"                   },
+      {"name": "Sar", "ordinal": 7, "abbreviation": "Sar", "isRestDay": true}
     ],
     "daysPerYear"     : 336,
     "hoursPerDay"     : 24,
@@ -34,31 +22,22 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.WinterSolstice", "month":  1, "day": 14},
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.Brightblade",    "month":  4, "day":  9},
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.Aureonscrown",   "month":  5, "day": 26},
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.SunsBlessing",   "month":  6, "day": 15},
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.BakersNight",    "month":  6, "day":  6},
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.FoundersDay",    "month":  7, "day": 28},
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.FeastOfTheMoon", "month":  8, "day": 25},
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.BoldreisHearth", "month":  9, "day":  9},
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.ThroneholdDay",  "month":  9, "day": 11},
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.LongShadows",    "month": 10, "day": 26},
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.ThroneDay",      "month": 11, "day": 28},
-    {"name": "CALENDARIA.Calendar.Galifar.Festival.ForgeFire",      "month": 12, "day": 14}
+    {"name": "Winter Solstice",   "month":  1, "day": 14}, {"name": "Brightblade",       "month":  4, "day":  9}, {"name": "Aureon's Crown",    "month":  5, "day": 26}, {"name": "Sun's Blessing",    "month":  6, "day": 15},
+    {"name": "Baker's Night",     "month":  6, "day":  6}, {"name": "Founder's Day",     "month":  7, "day": 28}, {"name": "Feast of the Moon", "month":  8, "day": 25}, {"name": "Boldrei's Hearth",  "month":  9, "day":  9},
+    {"name": "Thronehold Day",    "month":  9, "day": 11}, {"name": "Long Shadows",      "month": 10, "day": 26}, {"name": "Throne Day",        "month": 11, "day": 28}, {"name": "Forge Fire",        "month": 12, "day": 14}
   ],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 309, "dayEnd":  55},
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  56, "dayEnd": 139},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 140, "dayEnd": 223},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 224, "dayEnd": 308}
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 309, "dayEnd":  55, "abbreviation": "Win"},
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  56, "dayEnd": 139, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 140, "dayEnd": 223, "abbreviation": "Sum"},
+      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 224, "dayEnd": 308, "abbreviation": "Aut"}
     ]
   },
-  "eras"          : [ {"name": "CALENDARIA.Era.YearOfTheKingdom", "abbreviation": "CALENDARIA.Era.YK", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
+  "eras"          : [ {"name": "Year of the Kingdom", "abbreviation": "YK", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
   "moons"         : [
     {
-      "name"         : "CALENDARIA.Moon.Galifar.Zarantyr",
+      "name"         : "Zarantyr",
       "cycleLength"  : 28,
       "color"        : "#ADD8E6",
       "phases"       : [
@@ -74,7 +53,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"          : "CALENDARIA.Moon.Galifar.Olarune",
+      "name"          : "Olarune",
       "cycleLength"   : 28,
       "color"         : "#87CEEB",
       "cycleDayAdjust": 2,
@@ -91,7 +70,7 @@
       "referenceDate" : {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"          : "CALENDARIA.Moon.Galifar.Therendor",
+      "name"          : "Therendor",
       "cycleLength"   : 28,
       "color"         : "#90EE90",
       "cycleDayAdjust": 4,
@@ -108,7 +87,7 @@
       "referenceDate" : {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"          : "CALENDARIA.Moon.Galifar.Eyre",
+      "name"          : "Eyre",
       "cycleLength"   : 28,
       "color"         : "#FFD700",
       "cycleDayAdjust": 6,
@@ -125,7 +104,7 @@
       "referenceDate" : {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"          : "CALENDARIA.Moon.Galifar.Dravago",
+      "name"          : "Dravago",
       "cycleLength"   : 28,
       "color"         : "#FFA500",
       "cycleDayAdjust": 8,
@@ -142,7 +121,7 @@
       "referenceDate" : {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"          : "CALENDARIA.Moon.Galifar.Nymm",
+      "name"          : "Nymm",
       "cycleLength"   : 28,
       "color"         : "#FF6347",
       "cycleDayAdjust": 10,
@@ -159,7 +138,7 @@
       "referenceDate" : {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"          : "CALENDARIA.Moon.Galifar.Lharvion",
+      "name"          : "Lharvion",
       "cycleLength"   : 28,
       "color"         : "#DC143C",
       "cycleDayAdjust": 12,
@@ -176,7 +155,7 @@
       "referenceDate" : {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"          : "CALENDARIA.Moon.Galifar.Barrakas",
+      "name"          : "Barrakas",
       "cycleLength"   : 28,
       "color"         : "#8B0000",
       "cycleDayAdjust": 14,
@@ -193,7 +172,7 @@
       "referenceDate" : {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"          : "CALENDARIA.Moon.Galifar.Rhaan",
+      "name"          : "Rhaan",
       "cycleLength"   : 28,
       "color"         : "#DAA520",
       "cycleDayAdjust": 16,
@@ -210,7 +189,7 @@
       "referenceDate" : {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"          : "CALENDARIA.Moon.Galifar.Sypheros",
+      "name"          : "Sypheros",
       "cycleLength"   : 28,
       "color"         : "#696969",
       "cycleDayAdjust": 18,
@@ -227,7 +206,7 @@
       "referenceDate" : {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"          : "CALENDARIA.Moon.Galifar.Aryth",
+      "name"          : "Aryth",
       "cycleLength"   : 28,
       "color"         : "#2F4F4F",
       "cycleDayAdjust": 20,
@@ -244,7 +223,7 @@
       "referenceDate" : {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"          : "CALENDARIA.Moon.Galifar.Vult",
+      "name"          : "Vult",
       "cycleLength"   : 28,
       "color"         : "#191970",
       "cycleDayAdjust": 22,

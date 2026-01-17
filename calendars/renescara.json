@@ -4,27 +4,26 @@
   "years"         : {"yearZero": 0, "firstWeekday": 0, "leapYear": null},
   "months"        : {
     "values": [
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Thawmoon",       "abbreviation": "CALENDARIA.Calendar.Renescara.Month.ThawmoonShort",       "ordinal":  1, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Seedmoon",       "abbreviation": "CALENDARIA.Calendar.Renescara.Month.SeedmoonShort",       "ordinal":  2, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Blossmoon",      "abbreviation": "CALENDARIA.Calendar.Renescara.Month.BlossmoonShort",      "ordinal":  3, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Greenmoon",      "abbreviation": "CALENDARIA.Calendar.Renescara.Month.GreenmoonShort",      "ordinal":  4, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Summertide",     "abbreviation": "CALENDARIA.Calendar.Renescara.Month.SummertideShort",     "ordinal":  5, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Goldmoon",       "abbreviation": "CALENDARIA.Calendar.Renescara.Month.GoldmoonShort",       "ordinal":  6, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Harvestmoon",    "abbreviation": "CALENDARIA.Calendar.Renescara.Month.HarvestmoonShort",    "ordinal":  7, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Ambermoon",      "abbreviation": "CALENDARIA.Calendar.Renescara.Month.AmbermoonShort",      "ordinal":  8, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Fadingmoon",     "abbreviation": "CALENDARIA.Calendar.Renescara.Month.FadingmoonShort",     "ordinal":  9, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Frostmoon",      "abbreviation": "CALENDARIA.Calendar.Renescara.Month.FrostmoonShort",      "ordinal": 10, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Winterdeep",     "abbreviation": "CALENDARIA.Calendar.Renescara.Month.WinterdeepShort",     "ordinal": 11, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Ironmoon",       "abbreviation": "CALENDARIA.Calendar.Renescara.Month.IronmoonShort",       "ordinal": 12, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.Shadowmoon",     "abbreviation": "CALENDARIA.Calendar.Renescara.Month.ShadowmoonShort",     "ordinal": 13, "days": 28                       },
-      {"name": "CALENDARIA.Calendar.Renescara.Month.DayOfThreshold", "abbreviation": "CALENDARIA.Calendar.Renescara.Month.DayOfThresholdShort", "ordinal": 14, "days":  1, "type": "intercalary"}
+      {"name": "Thawmoon",         "abbreviation": "Thaw",      "ordinal":  1, "days": 28                       },
+      {"name": "Seedmoon",         "abbreviation": "Seed",      "ordinal":  2, "days": 28                       },
+      {"name": "Blossmoon",        "abbreviation": "Bloss",     "ordinal":  3, "days": 28                       },
+      {"name": "Greenmoon",        "abbreviation": "Green",     "ordinal":  4, "days": 28                       },
+      {"name": "Summertide",       "abbreviation": "Summer",    "ordinal":  5, "days": 28                       },
+      {"name": "Goldmoon",         "abbreviation": "Gold",      "ordinal":  6, "days": 28                       },
+      {"name": "Harvestmoon",      "abbreviation": "Harvest",   "ordinal":  7, "days": 28                       },
+      {"name": "Ambermoon",        "abbreviation": "Amber",     "ordinal":  8, "days": 28                       },
+      {"name": "Fadingmoon",       "abbreviation": "Fading",    "ordinal":  9, "days": 28                       },
+      {"name": "Frostmoon",        "abbreviation": "Frost",     "ordinal": 10, "days": 28                       },
+      {"name": "Winterdeep",       "abbreviation": "Winter",    "ordinal": 11, "days": 28                       },
+      {"name": "Ironmoon",         "abbreviation": "Iron",      "ordinal": 12, "days": 28                       },
+      {"name": "Shadowmoon",       "abbreviation": "Shadow",    "ordinal": 13, "days": 28                       },
+      {"name": "Day of Threshold", "abbreviation": "Threshold", "ordinal": 14, "days":  1, "type": "intercalary"}
     ]
   },
   "days"          : {
     "values"          : [
-      {"name": "CALENDARIA.Calendar.Renescara.Day.Solday",   "ordinal": 1}, {"name": "CALENDARIA.Calendar.Renescara.Day.Ferriday", "ordinal": 2}, {"name": "CALENDARIA.Calendar.Renescara.Day.Verday",   "ordinal": 3},
-      {"name": "CALENDARIA.Calendar.Renescara.Day.Midweek",  "ordinal": 4}, {"name": "CALENDARIA.Calendar.Renescara.Day.Mercday",  "ordinal": 5}, {"name": "CALENDARIA.Calendar.Renescara.Day.Shadeday", "ordinal": 6},
-      {"name": "CALENDARIA.Calendar.Renescara.Day.Tideday",  "ordinal": 7}
+      {"name": "Solday",   "ordinal": 1, "abbreviation": "Sol"}, {"name": "Ferriday", "ordinal": 2, "abbreviation": "Fer"}, {"name": "Verday",   "ordinal": 3, "abbreviation": "Ver"},
+      {"name": "Midweek",  "ordinal": 4, "abbreviation": "Mid"}, {"name": "Mercday",  "ordinal": 5, "abbreviation": "Mer"}, {"name": "Shadeday", "ordinal": 6, "abbreviation": "Sha"}, {"name": "Tideday",  "ordinal": 7, "abbreviation": "Tid"}
     ],
     "daysPerYear"     : 365,
     "hoursPerDay"     : 24,
@@ -32,164 +31,43 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.FirstlightFestival", "month":  1, "day": 15},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.Sowtide",            "month":  2, "day":  7},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.Firstbloom",         "month":  3, "day": 21},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.Greenfire",          "month":  4, "day": 14},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.SolsticeCrown",      "month":  5, "day": 14},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.FirstReaping",       "month":  6, "day":  8},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.TheGathering",       "month":  7, "day": 15},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.TheTurning",         "month":  8, "day": 21},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.Lastlight",          "month":  9, "day":  7},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.FirstfrostFair",     "month": 10, "day": 14},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.TheLongNight",       "month": 11, "day":  1},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.IronFeast",          "month": 12, "day": 28},
-    {"name": "CALENDARIA.Calendar.Renescara.Festival.TheVeilwalk",        "month": 13, "day": 14}
+    {"name": "Firstlight Festival", "month":  1, "day": 15}, {"name": "Sowtide",             "month":  2, "day":  7}, {"name": "Firstbloom",          "month":  3, "day": 21}, {"name": "Greenfire",           "month":  4, "day": 14},
+    {"name": "Solstice Crown",      "month":  5, "day": 14}, {"name": "First Reaping",       "month":  6, "day":  8}, {"name": "The Gathering",       "month":  7, "day": 15}, {"name": "The Turning",         "month":  8, "day": 21},
+    {"name": "Lastlight",           "month":  9, "day":  7}, {"name": "Firstfrost Fair",     "month": 10, "day": 14}, {"name": "The Long Night",      "month": 11, "day":  1}, {"name": "Iron Feast",          "month": 12, "day": 28},
+    {"name": "The Veilwalk",        "month": 13, "day": 14}
   ],
   "moons"         : [
     {
-      "name"         : "CALENDARIA.Calendar.Renescara.Moon.Aela.Name",
+      "name"         : "Aela",
       "cycleLength"  : 28,
       "color"        : "#C0C0C0",
       "hidden"       : false,
       "phases"       : [
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.DarkSister.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.DarkSister.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.DarkSister.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/01_newmoon.svg",
-          "start" : 0,
-          "end"   : 0.125
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Growing.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Growing.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Growing.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
-          "start" : 0.125,
-          "end"   : 0.25
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Growing.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Growing.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Growing.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
-          "start" : 0.25,
-          "end"   : 0.375
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Growing.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Growing.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Growing.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
-          "start" : 0.375,
-          "end"   : 0.5
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.SilverCrown.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.SilverCrown.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.SilverCrown.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
-          "start" : 0.5,
-          "end"   : 0.625
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Fading.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Fading.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Fading.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
-          "start" : 0.625,
-          "end"   : 0.75
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Fading.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Fading.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Fading.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
-          "start" : 0.75,
-          "end"   : 0.875
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Fading.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Fading.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Aela.Phase.Fading.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
-          "start" : 0.875,
-          "end"   : 1
-        }
+        {"name": "The Dark Sister",  "rising": "Rising Dark Sister",  "fading": "Fading Dark Sister",  "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
+        {"name": "The Growing",      "rising": "Early Growing",       "fading": "Late Growing",        "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        {"name": "The Growing",      "rising": "Early Growing",       "fading": "Late Growing",        "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
+        {"name": "The Growing",      "rising": "Early Growing",       "fading": "Late Growing",        "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
+        {"name": "The Silver Crown", "rising": "Rising Silver Crown", "fading": "Fading Silver Crown", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
+        {"name": "The Fading",       "rising": "Early Fading",        "fading": "Late Fading",         "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
+        {"name": "The Fading",       "rising": "Early Fading",        "fading": "Late Fading",         "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
+        {"name": "The Fading",       "rising": "Early Fading",        "fading": "Late Fading",         "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
       ],
       "referenceDate": {"year": 3247, "month": 0, "day": 1}
     },
     {
-      "name"         : "CALENDARIA.Calendar.Renescara.Moon.Ruan.Name",
+      "name"         : "Ruan",
       "cycleLength"  : 73,
       "color"        : "#B44622",
       "hidden"       : false,
       "phases"       : [
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.HiddenEye.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.HiddenEye.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.HiddenEye.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/01_newmoon.svg",
-          "start" : 0,
-          "end"   : 0.125
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Awakening.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Awakening.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Awakening.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
-          "start" : 0.125,
-          "end"   : 0.25
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Awakening.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Awakening.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Awakening.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
-          "start" : 0.25,
-          "end"   : 0.375
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Awakening.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Awakening.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Awakening.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
-          "start" : 0.375,
-          "end"   : 0.5
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.BloodMoon.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.BloodMoon.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.BloodMoon.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
-          "start" : 0.5,
-          "end"   : 0.625
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Closing.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Closing.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Closing.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
-          "start" : 0.625,
-          "end"   : 0.75
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Closing.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Closing.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Closing.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
-          "start" : 0.75,
-          "end"   : 0.875
-        },
-        {
-          "name"  : "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Closing.Name",
-          "rising": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Closing.Rising",
-          "fading": "CALENDARIA.Calendar.Renescara.Moon.Ruan.Phase.Closing.Fading",
-          "icon"  : "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
-          "start" : 0.875,
-          "end"   : 1
-        }
+        {"name": "The Hidden Eye", "rising": "Rising Hidden Eye", "fading": "Fading Hidden Eye", "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",        "start": 0    , "end": 0.125},
+        {"name": "The Awakening",  "rising": "Early Awakening",   "fading": "Late Awakening",    "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg", "start": 0.125, "end": 0.25 },
+        {"name": "The Awakening",  "rising": "Early Awakening",   "fading": "Late Awakening",    "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",   "start": 0.25 , "end": 0.375},
+        {"name": "The Awakening",  "rising": "Early Awakening",   "fading": "Late Awakening",    "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",  "start": 0.375, "end": 0.5  },
+        {"name": "The Blood Moon", "rising": "Rising Blood Moon", "fading": "Fading Blood Moon", "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",       "start": 0.5  , "end": 0.625},
+        {"name": "The Closing",    "rising": "Early Closing",     "fading": "Late Closing",      "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",  "start": 0.625, "end": 0.75 },
+        {"name": "The Closing",    "rising": "Early Closing",     "fading": "Late Closing",      "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",    "start": 0.75 , "end": 0.875},
+        {"name": "The Closing",    "rising": "Early Closing",     "fading": "Late Closing",      "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg", "start": 0.875, "end": 1    }
       ],
       "referenceDate": {"year": 3247, "month": 0, "day": 19}
     }
@@ -197,113 +75,104 @@
   "seasons"       : {
     "values": [
       {
-        "name"    : "CALENDARIA.Calendar.Renescara.Season.Spring",
-        "icon"    : "fas fa-seedling",
-        "color"   : "#90ee90",
-        "dayStart": 0,
-        "dayEnd"  : 83,
-        "climate" : {
+        "name"        : "Spring",
+        "icon"        : "fas fa-seedling",
+        "color"       : "#90ee90",
+        "dayStart"    : 0,
+        "dayEnd"      : 83,
+        "climate"     : {
           "temperatures": {"min": 5, "max": 18},
           "presets"     : [
             {"id": "clear",         "chance": 20}, {"id": "partly-cloudy", "chance": 25}, {"id": "cloudy",        "chance": 15}, {"id": "rain",          "chance": 20}, {"id": "drizzle",       "chance": 10},
             {"id": "fog",           "chance":  5}, {"id": "thunderstorm",  "chance":  5}
           ]
-        }
+        },
+        "abbreviation": "Spr"
       },
       {
-        "name"    : "CALENDARIA.Calendar.Renescara.Season.Summer",
-        "icon"    : "fas fa-sun",
-        "color"   : "#ffd700",
-        "dayStart": 84,
-        "dayEnd"  : 167,
-        "climate" : {
+        "name"        : "Summer",
+        "icon"        : "fas fa-sun",
+        "color"       : "#ffd700",
+        "dayStart"    : 84,
+        "dayEnd"      : 167,
+        "climate"     : {
           "temperatures": {"min": 18, "max": 32},
           "presets"     : [
             {"id": "clear",         "chance": 35}, {"id": "partly-cloudy", "chance": 25}, {"id": "cloudy",        "chance": 10}, {"id": "rain",          "chance": 10}, {"id": "thunderstorm",  "chance": 10},
             {"id": "windy",         "chance":  5}, {"id": "sunshower",     "chance":  5}
           ]
-        }
+        },
+        "abbreviation": "Sum"
       },
       {
-        "name"    : "CALENDARIA.Calendar.Renescara.Season.Autumn",
-        "icon"    : "fas fa-leaf",
-        "color"   : "#d2691e",
-        "dayStart": 168,
-        "dayEnd"  : 251,
-        "climate" : {
+        "name"        : "Autumn",
+        "icon"        : "fas fa-leaf",
+        "color"       : "#d2691e",
+        "dayStart"    : 168,
+        "dayEnd"      : 251,
+        "climate"     : {
           "temperatures": {"min": 5, "max": 20},
           "presets"     : [
             {"id": "clear",         "chance": 15}, {"id": "partly-cloudy", "chance": 20}, {"id": "cloudy",        "chance": 20}, {"id": "overcast",      "chance": 15}, {"id": "rain",          "chance": 15},
             {"id": "fog",           "chance": 10}, {"id": "windy",         "chance":  5}
           ]
-        }
+        },
+        "abbreviation": "Aut"
       },
       {
-        "name"    : "CALENDARIA.Calendar.Renescara.Season.Winter",
-        "icon"    : "fas fa-snowflake",
-        "color"   : "#87ceeb",
-        "dayStart": 252,
-        "dayEnd"  : 364,
-        "climate" : {
+        "name"        : "Winter",
+        "icon"        : "fas fa-snowflake",
+        "color"       : "#87ceeb",
+        "dayStart"    : 252,
+        "dayEnd"      : 364,
+        "climate"     : {
           "temperatures": {"min": -10, "max": 5},
           "presets"     : [
             {"id": "clear",         "chance": 15}, {"id": "partly-cloudy", "chance": 15}, {"id": "cloudy",        "chance": 15}, {"id": "overcast",      "chance": 20}, {"id": "snow",          "chance": 20},
             {"id": "blizzard",      "chance":  5}, {"id": "fog",           "chance":  5}, {"id": "windy",         "chance":  5}
           ]
-        }
+        },
+        "abbreviation": "Win"
       }
     ]
   },
   "daylight"      : {"enabled": true, "shortestDay": 8, "longestDay": 16, "winterSolstice": 281, "summerSolstice": 126},
   "eras"          : [
-    {"name": "CALENDARIA.Calendar.Renescara.Era.FirstAge.Name",      "abbreviation": "CALENDARIA.Calendar.Renescara.Era.FirstAge.Abbr",      "startYear": -2000, "endYear": -500, "template": "Year [yearInEra] of the GGGG"},
-    {"name": "CALENDARIA.Calendar.Renescara.Era.DarkCenturies.Name", "abbreviation": "CALENDARIA.Calendar.Renescara.Era.DarkCenturies.Abbr", "startYear":  -500, "endYear":    0, "template": "Year [yearInEra] of the GGGG"},
-    {"name": "CALENDARIA.Calendar.Renescara.Era.SecondAge.Name",     "abbreviation": "CALENDARIA.Calendar.Renescara.Era.SecondAge.Abbr",     "startYear":     1, "endYear": null, "template": "Year [year] of the GGGG"     }
+    {"name": "First Age",      "abbreviation": "FA", "startYear": -2000, "endYear": -500, "template": "Year [yearInEra] of the GGGG"},
+    {"name": "Dark Centuries", "abbreviation": "DC", "startYear":  -500, "endYear":    0, "template": "Year [yearInEra] of the GGGG"},
+    {"name": "Second Age",     "abbreviation": "SA", "startYear":     1, "endYear": null, "template": "Year [year] of the GGGG"     }
   ],
   "canonicalHours": [
-    {"name": "CALENDARIA.Calendar.Renescara.CanonicalHour.DawnWatch.Name",     "abbreviation": "CALENDARIA.Calendar.Renescara.CanonicalHour.DawnWatch.Abbr",     "startHour":  5, "endHour":  9},
-    {"name": "CALENDARIA.Calendar.Renescara.CanonicalHour.IronHours.Name",     "abbreviation": "CALENDARIA.Calendar.Renescara.CanonicalHour.IronHours.Abbr",     "startHour":  9, "endHour": 13},
-    {"name": "CALENDARIA.Calendar.Renescara.CanonicalHour.GreenHours.Name",    "abbreviation": "CALENDARIA.Calendar.Renescara.CanonicalHour.GreenHours.Abbr",    "startHour": 13, "endHour": 17},
-    {"name": "CALENDARIA.Calendar.Renescara.CanonicalHour.MerchantsBell.Name", "abbreviation": "CALENDARIA.Calendar.Renescara.CanonicalHour.MerchantsBell.Abbr", "startHour": 17, "endHour": 21},
-    {"name": "CALENDARIA.Calendar.Renescara.CanonicalHour.ShadeHours.Name",    "abbreviation": "CALENDARIA.Calendar.Renescara.CanonicalHour.ShadeHours.Abbr",    "startHour": 21, "endHour":  1},
-    {"name": "CALENDARIA.Calendar.Renescara.CanonicalHour.MoonWatch.Name",     "abbreviation": "CALENDARIA.Calendar.Renescara.CanonicalHour.MoonWatch.Abbr",     "startHour":  1, "endHour":  5}
+    {"name": "Dawn Watch",      "abbreviation": "Dawn",  "startHour":  5, "endHour":  9},
+    {"name": "Iron Hours",      "abbreviation": "Iron",  "startHour":  9, "endHour": 13},
+    {"name": "Green Hours",     "abbreviation": "Green", "startHour": 13, "endHour": 17},
+    {"name": "Merchant's Bell", "abbreviation": "Bell",  "startHour": 17, "endHour": 21},
+    {"name": "Shade Hours",     "abbreviation": "Shade", "startHour": 21, "endHour":  1},
+    {"name": "Moon Watch",      "abbreviation": "Moon",  "startHour":  1, "endHour":  5}
   ],
-  "amPmNotation"  : {
-    "am"    : "CALENDARIA.Calendar.Renescara.Time.Sunward.Name",
-    "pm"    : "CALENDARIA.Calendar.Renescara.Time.Moonward.Name",
-    "amAbbr": "CALENDARIA.Calendar.Renescara.Time.Sunward.Abbr",
-    "pmAbbr": "CALENDARIA.Calendar.Renescara.Time.Moonward.Abbr"
-  },
+  "amPmNotation"  : {"am": "Sunward", "pm": "Moonward", "amAbbr": "SW", "pmAbbr": "MW"},
   "cycles"        : [
     {
-      "name"   : "CALENDARIA.Calendar.Renescara.Cycle.FiveWanderers",
+      "name"   : "The Five Wanderers",
       "length" : 5,
       "offset" : 0,
       "basedOn": "year",
-      "entries": [
-        {"name": "CALENDARIA.Calendar.Renescara.Cycle.Ferrus"    }, {"name": "CALENDARIA.Calendar.Renescara.Cycle.Verdantis" }, {"name": "CALENDARIA.Calendar.Renescara.Cycle.Crystallus"},
-        {"name": "CALENDARIA.Calendar.Renescara.Cycle.Umbralis"  }, {"name": "CALENDARIA.Calendar.Renescara.Cycle.Temporis"  }
-      ]
+      "entries": [ {"name": "Ferrus"}, {"name": "Verdantis"}, {"name": "Crystallus"}, {"name": "Umbralis"}, {"name": "Temporis"} ]
     }
   ],
   "cycleFormat"   : "Year of [1]",
   "weeks"         : {
     "enabled": true,
     "type"   : "month-based",
-    "names"  : [
-      {"name": "CALENDARIA.Calendar.Renescara.Week.Rising.Name",   "abbreviation": "CALENDARIA.Calendar.Renescara.Week.Rising.Abbr"  },
-      {"name": "CALENDARIA.Calendar.Renescara.Week.Fullness.Name", "abbreviation": "CALENDARIA.Calendar.Renescara.Week.Fullness.Abbr"},
-      {"name": "CALENDARIA.Calendar.Renescara.Week.Turning.Name",  "abbreviation": "CALENDARIA.Calendar.Renescara.Week.Turning.Abbr" },
-      {"name": "CALENDARIA.Calendar.Renescara.Week.Fading.Name",   "abbreviation": "CALENDARIA.Calendar.Renescara.Week.Fading.Abbr"  }
-    ]
+    "names"  : [ {"name": "Week of Rising", "abbreviation": "Rising"}, {"name": "Week of Fullness", "abbreviation": "Fullness"}, {"name": "Week of Turning", "abbreviation": "Turning"}, {"name": "Week of Fading", "abbreviation": "Fading"} ]
   },
   "dateFormats"   : {"short": "D MMM", "long": "D MMMM, YYYY", "full": "MMMM D, YYYY ([ch])", "time": "HH:mm", "time12": "h:mm a"},
   "weather"       : {
     "zones": [
       {
         "id"             : "valdris",
-        "name"           : "CALENDARIA.Calendar.Renescara.Weather.Zone.Valdris.Name",
-        "description"    : "CALENDARIA.Calendar.Renescara.Weather.Zone.Valdris.Description",
+        "name"           : "Kingdom of Valdris",
+        "description"    : "Northern mountains and iron-rich ranges with harsh winters and extreme temperature swings.",
         "temperatures"   : { "_default": {"min": -10, "max": 15} },
         "presets"        : [
           {"id": "clear",         "enabled": true, "chance": 5}, {"id": "partly-cloudy", "enabled": true, "chance": 4}, {"id": "cloudy",        "enabled": true, "chance": 3}, {"id": "overcast",      "enabled": true, "chance": 3},
@@ -332,8 +201,8 @@
       },
       {
         "id"             : "lys",
-        "name"           : "CALENDARIA.Calendar.Renescara.Weather.Zone.Lys.Name",
-        "description"    : "CALENDARIA.Calendar.Renescara.Weather.Zone.Lys.Description",
+        "name"           : "Merchant Confederacy of Lys",
+        "description"    : "Coastal trading empire with temperate, mild weather year-round.",
         "temperatures"   : { "_default": {"min": 8, "max": 25} },
         "presets"        : [
           {"id": "clear",         "enabled": true, "chance": 6}, {"id": "partly-cloudy", "enabled": true, "chance": 5}, {"id": "cloudy",        "enabled": true, "chance": 3}, {"id": "rain",          "enabled": true, "chance": 4},
@@ -362,8 +231,8 @@
       },
       {
         "id"             : "sanctus",
-        "name"           : "CALENDARIA.Calendar.Renescara.Weather.Zone.Sanctus.Name",
-        "description"    : "CALENDARIA.Calendar.Renescara.Weather.Zone.Sanctus.Description",
+        "name"           : "Theocracy of Sanctus Lumen",
+        "description"    : "Mountain highlands with fortress-monasteries enduring harsh, arctic conditions.",
         "temperatures"   : { "_default": {"min": -20, "max": 5} },
         "presets"        : [
           {"id": "clear",         "enabled": true, "chance": 4}, {"id": "partly-cloudy", "enabled": true, "chance": 3}, {"id": "cloudy",        "enabled": true, "chance": 3}, {"id": "overcast",      "enabled": true, "chance": 4},
@@ -392,8 +261,8 @@
       },
       {
         "id"             : "thornwood",
-        "name"           : "CALENDARIA.Calendar.Renescara.Weather.Zone.Thornwood.Name",
-        "description"    : "CALENDARIA.Calendar.Renescara.Weather.Zone.Thornwood.Description",
+        "name"           : "Thornwood Marches",
+        "description"    : "Ancient primeval forest where Gyre influence is strongest near the crash site.",
         "temperatures"   : { "_default": {"min": 0, "max": 20} },
         "presets"        : [
           {"id": "clear",         "enabled": true, "chance": 4}, {"id": "partly-cloudy", "enabled": true, "chance": 4}, {"id": "cloudy",        "enabled": true, "chance": 3}, {"id": "overcast",      "enabled": true, "chance": 3},

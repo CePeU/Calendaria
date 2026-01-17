@@ -35,10 +35,10 @@
   },
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  79, "dayEnd": 171},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 172, "dayEnd": 265},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 266, "dayEnd": 354},
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 355, "dayEnd":  78}
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  79, "dayEnd": 171, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 172, "dayEnd": 265, "abbreviation": "Sum"},
+      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 266, "dayEnd": 354, "abbreviation": "Aut"},
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 355, "dayEnd":  78, "abbreviation": "Win"}
     ]
   },
   "eras"          : [ {"name": "CALENDARIA.Era.CommonEra", "abbreviation": "CALENDARIA.Era.CE", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],

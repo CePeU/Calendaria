@@ -4,29 +4,29 @@
   "years"         : {"yearZero": 351, "firstWeekday": 0},
   "months"        : {
     "values": [
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.WinterNight",    "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.WinterNightShort",    "ordinal":  1, "days": 28},
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.WinterDeep",     "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.WinterDeepShort",     "ordinal":  2, "days": 28},
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.SpringDawning",  "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SpringDawningShort",  "ordinal":  3, "days": 28},
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.SpringRain",     "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SpringRainShort",     "ordinal":  4, "days": 28},
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.SpringBlossom",  "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SpringBlossomShort",  "ordinal":  5, "days": 28},
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.SummerHome",     "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SummerHomeShort",     "ordinal":  6, "days": 28},
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.SummerRun",      "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SummerRunShort",      "ordinal":  7, "days": 28},
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.SummerEnd",      "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.SummerEndShort",      "ordinal":  8, "days": 28},
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.AutumnHarvest",  "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.AutumnHarvestShort",  "ordinal":  9, "days": 28},
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.AutumnTwilight", "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.AutumnTwilightShort", "ordinal": 10, "days": 28},
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.AutumnDark",     "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.AutumnDarkShort",     "ordinal": 11, "days": 28},
-      {"name": "CALENDARIA.Calendar.KrynnElven.Month.WinterCome",     "abbreviation": "CALENDARIA.Calendar.KrynnElven.Month.WinterComeShort",     "ordinal": 12, "days": 28}
+      {"name": "Winter Night",    "abbreviation": "WtN", "ordinal":  1, "days": 28},
+      {"name": "Winter Deep",     "abbreviation": "WtD", "ordinal":  2, "days": 28},
+      {"name": "Spring Dawning",  "abbreviation": "SpD", "ordinal":  3, "days": 28},
+      {"name": "Spring Rain",     "abbreviation": "SpR", "ordinal":  4, "days": 28},
+      {"name": "Spring Blossom",  "abbreviation": "SpB", "ordinal":  5, "days": 28},
+      {"name": "Summer Home",     "abbreviation": "SmH", "ordinal":  6, "days": 28},
+      {"name": "Summer Run",      "abbreviation": "SmR", "ordinal":  7, "days": 28},
+      {"name": "Summer End",      "abbreviation": "SmE", "ordinal":  8, "days": 28},
+      {"name": "Autumn Harvest",  "abbreviation": "AuH", "ordinal":  9, "days": 28},
+      {"name": "Autumn Twilight", "abbreviation": "AuT", "ordinal": 10, "days": 28},
+      {"name": "Autumn Dark",     "abbreviation": "AuD", "ordinal": 11, "days": 28},
+      {"name": "Winter Come",     "abbreviation": "WtC", "ordinal": 12, "days": 28}
     ]
   },
   "days"          : {
     "values"          : [
-      {"name": "CALENDARIA.Calendar.Krynn.Day.Gateway",   "ordinal": 1                   },
-      {"name": "CALENDARIA.Calendar.Krynn.Day.BrightEye", "ordinal": 2                   },
-      {"name": "CALENDARIA.Calendar.Krynn.Day.NightsEye", "ordinal": 3                   },
-      {"name": "CALENDARIA.Calendar.Krynn.Day.DeadEye",   "ordinal": 4                   },
-      {"name": "CALENDARIA.Calendar.Krynn.Day.Winged",    "ordinal": 5                   },
-      {"name": "CALENDARIA.Calendar.Krynn.Day.Flowered",  "ordinal": 6                   },
-      {"name": "CALENDARIA.Calendar.Krynn.Day.World",     "ordinal": 7, "isRestDay": true}
+      {"name": "Gateway",     "ordinal": 1, "abbreviation": "Gat"                   },
+      {"name": "Bright Eye",  "ordinal": 2, "abbreviation": "BrE"                   },
+      {"name": "Night's Eye", "ordinal": 3, "abbreviation": "NiE"                   },
+      {"name": "Dead Eye",    "ordinal": 4, "abbreviation": "DeE"                   },
+      {"name": "Winged",      "ordinal": 5, "abbreviation": "Win"                   },
+      {"name": "Flowered",    "ordinal": 6, "abbreviation": "Flo"                   },
+      {"name": "World",       "ordinal": 7, "abbreviation": "Wor", "isRestDay": true}
     ],
     "daysPerYear"     : 336,
     "hoursPerDay"     : 24,
@@ -34,27 +34,24 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "CALENDARIA.Calendar.Krynn.Festival.Yule",          "month":  1, "day": 14},
-    {"name": "CALENDARIA.Calendar.Krynn.Festival.SpringDawning", "month":  3, "day":  1},
-    {"name": "CALENDARIA.Calendar.Krynn.Festival.Midyear",       "month":  6, "day": 14},
-    {"name": "CALENDARIA.Calendar.Krynn.Festival.Harvest",       "month":  9, "day": 14},
-    {"name": "CALENDARIA.Calendar.Krynn.Festival.NightOfTheEye", "month": 11, "day": 21}
+    {"name": "Yule",                    "month":  1, "day": 14}, {"name": "Spring Dawning Festival", "month":  3, "day":  1}, {"name": "Midyear",                 "month":  6, "day": 14},
+    {"name": "Harvest Festival",        "month":  9, "day": 14}, {"name": "Night of the Eye",        "month": 11, "day": 21}
   ],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 309, "dayEnd":  55},
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  56, "dayEnd": 139},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 140, "dayEnd": 223},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 224, "dayEnd": 308}
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 309, "dayEnd":  55, "abbreviation": "Win"},
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  56, "dayEnd": 139, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 140, "dayEnd": 223, "abbreviation": "Sum"},
+      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 224, "dayEnd": 308, "abbreviation": "Aut"}
     ]
   },
   "eras"          : [
-    {"name": "CALENDARIA.Era.AltCataclius", "abbreviation": "CALENDARIA.Era.AC", "startYear":     1, "endYear": null, "format": "suffix", "template": null},
-    {"name": "CALENDARIA.Era.PreCataclius", "abbreviation": "CALENDARIA.Era.PC", "startYear": -9999, "endYear":    0, "format": "suffix", "template": null}
+    {"name": "Alt-Cataclius", "abbreviation": "AC", "startYear":     1, "endYear": null, "format": "suffix", "template": null},
+    {"name": "Pre-Cataclius", "abbreviation": "PC", "startYear": -9999, "endYear":    0, "format": "suffix", "template": null}
   ],
   "moons"         : [
     {
-      "name"         : "CALENDARIA.Moon.Krynn.Solinari",
+      "name"         : "Solinari",
       "cycleLength"  : 36,
       "color"        : "#FFFFFF",
       "phases"       : [
@@ -70,7 +67,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"         : "CALENDARIA.Moon.Krynn.Lunitari",
+      "name"         : "Lunitari",
       "cycleLength"  : 28,
       "color"        : "#FF4444",
       "phases"       : [
@@ -86,7 +83,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"         : "CALENDARIA.Moon.Krynn.Nuitari",
+      "name"         : "Nuitari",
       "cycleLength"  : 8,
       "color"        : "#1a1a1a",
       "hidden"       : true,

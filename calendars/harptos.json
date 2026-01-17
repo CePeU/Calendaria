@@ -4,26 +4,26 @@
   "years"         : { "yearZero": 1501, "firstWeekday": 0, "leapYear": {"leapStart": 0, "leapInterval": 4} },
   "months"        : {
     "values": [
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Hammer",    "abbreviation": "CALENDARIA.Calendar.Harptos.Month.HammerShort",    "ordinal":  1, "days": 31                },
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Alturiak",  "abbreviation": "CALENDARIA.Calendar.Harptos.Month.AlturiakShort",  "ordinal":  2, "days": 30                },
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Ches",      "abbreviation": "CALENDARIA.Calendar.Harptos.Month.ChesShort",      "ordinal":  3, "days": 30                },
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Tarsakh",   "abbreviation": "CALENDARIA.Calendar.Harptos.Month.TarsakhShort",   "ordinal":  4, "days": 31                },
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Mirtul",    "abbreviation": "CALENDARIA.Calendar.Harptos.Month.MirtulShort",    "ordinal":  5, "days": 30                },
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Kythorn",   "abbreviation": "CALENDARIA.Calendar.Harptos.Month.KythornShort",   "ordinal":  6, "days": 30                },
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Flamerule", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.FlameruleShort", "ordinal":  7, "days": 31, "leapDays": 32},
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Eleasis",   "abbreviation": "CALENDARIA.Calendar.Harptos.Month.EleasisShort",   "ordinal":  8, "days": 30                },
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Eleint",    "abbreviation": "CALENDARIA.Calendar.Harptos.Month.EleintShort",    "ordinal":  9, "days": 31                },
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Marpenoth", "abbreviation": "CALENDARIA.Calendar.Harptos.Month.MarpenothShort", "ordinal": 10, "days": 30                },
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Uktar",     "abbreviation": "CALENDARIA.Calendar.Harptos.Month.UktarShort",     "ordinal": 11, "days": 31                },
-      {"name": "CALENDARIA.Calendar.Harptos.Month.Nightal",   "abbreviation": "CALENDARIA.Calendar.Harptos.Month.NightalShort",   "ordinal": 12, "days": 30                }
+      {"name": "Hammer",    "abbreviation": "Ham",  "ordinal":  1, "days": 31                },
+      {"name": "Alturiak",  "abbreviation": "Alt",  "ordinal":  2, "days": 30                },
+      {"name": "Ches",      "abbreviation": "Ches", "ordinal":  3, "days": 30                },
+      {"name": "Tarsakh",   "abbreviation": "Tar",  "ordinal":  4, "days": 31                },
+      {"name": "Mirtul",    "abbreviation": "Mirt", "ordinal":  5, "days": 30                },
+      {"name": "Kythorn",   "abbreviation": "Kyth", "ordinal":  6, "days": 30                },
+      {"name": "Flamerule", "abbreviation": "Flam", "ordinal":  7, "days": 31, "leapDays": 32},
+      {"name": "Eleasis",   "abbreviation": "Ele",  "ordinal":  8, "days": 30                },
+      {"name": "Eleint",    "abbreviation": "Elei", "ordinal":  9, "days": 31                },
+      {"name": "Marpenoth", "abbreviation": "Marp", "ordinal": 10, "days": 30                },
+      {"name": "Uktar",     "abbreviation": "Ukt",  "ordinal": 11, "days": 31                },
+      {"name": "Nightal",   "abbreviation": "Nigh", "ordinal": 12, "days": 30                }
     ]
   },
   "days"          : {
     "values"          : [
-      {"name": "CALENDARIA.Calendar.Harptos.Day.One",   "ordinal":  1}, {"name": "CALENDARIA.Calendar.Harptos.Day.Two",   "ordinal":  2}, {"name": "CALENDARIA.Calendar.Harptos.Day.Three", "ordinal":  3},
-      {"name": "CALENDARIA.Calendar.Harptos.Day.Four",  "ordinal":  4}, {"name": "CALENDARIA.Calendar.Harptos.Day.Five",  "ordinal":  5}, {"name": "CALENDARIA.Calendar.Harptos.Day.Six",   "ordinal":  6},
-      {"name": "CALENDARIA.Calendar.Harptos.Day.Seven", "ordinal":  7}, {"name": "CALENDARIA.Calendar.Harptos.Day.Eight", "ordinal":  8}, {"name": "CALENDARIA.Calendar.Harptos.Day.Nine",  "ordinal":  9},
-      {"name": "CALENDARIA.Calendar.Harptos.Day.Ten",   "ordinal": 10}
+      {"name": "Onesday",   "ordinal":  1, "abbreviation": "1" }, {"name": "Twosday",   "ordinal":  2, "abbreviation": "2" }, {"name": "Threesday", "ordinal":  3, "abbreviation": "3" },
+      {"name": "Foursday",  "ordinal":  4, "abbreviation": "4" }, {"name": "Fivesday",  "ordinal":  5, "abbreviation": "5" }, {"name": "Sixday",    "ordinal":  6, "abbreviation": "6" },
+      {"name": "Sevensday", "ordinal":  7, "abbreviation": "7" }, {"name": "Eightsday", "ordinal":  8, "abbreviation": "8" }, {"name": "Ninesday",  "ordinal":  9, "abbreviation": "9" },
+      {"name": "Tensday",   "ordinal": 10, "abbreviation": "10"}
     ],
     "daysPerYear"     : 365,
     "hoursPerDay"     : 24,
@@ -31,25 +31,25 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "CALENDARIA.Calendar.Harptos.Festival.Midwinter",      "month":  1, "day": 31, "countsForWeekday": false                      },
-    {"name": "CALENDARIA.Calendar.Harptos.Festival.Greengrass",     "month":  4, "day": 31, "countsForWeekday": false                      },
-    {"name": "CALENDARIA.Calendar.Harptos.Festival.Midsummer",      "month":  7, "day": 31, "countsForWeekday": false                      },
-    {"name": "CALENDARIA.Calendar.Harptos.Festival.Shieldmeet",     "month":  7, "day": 32, "countsForWeekday": false, "leapYearOnly": true},
-    {"name": "CALENDARIA.Calendar.Harptos.Festival.Highharvestide", "month":  9, "day": 31, "countsForWeekday": false                      },
-    {"name": "CALENDARIA.Calendar.Harptos.Festival.FeastOfTheMoon", "month": 11, "day": 31, "countsForWeekday": false                      }
+    {"name": "Midwinter",         "month":  1, "day": 31, "countsForWeekday": false                      },
+    {"name": "Greengrass",        "month":  4, "day": 31, "countsForWeekday": false                      },
+    {"name": "Midsummer",         "month":  7, "day": 31, "countsForWeekday": false                      },
+    {"name": "Shieldmeet",        "month":  7, "day": 32, "countsForWeekday": false, "leapYearOnly": true},
+    {"name": "Highharvestide",    "month":  9, "day": 31, "countsForWeekday": false                      },
+    {"name": "Feast of the Moon", "month": 11, "day": 31, "countsForWeekday": false                      }
   ],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Spring",                "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  79, "dayEnd": 171},
-      {"name": "CALENDARIA.Season.Summer",                "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 172, "dayEnd": 263},
-      {"name": "CALENDARIA.Calendar.Harptos.Season.Fall", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 264, "dayEnd": 353},
-      {"name": "CALENDARIA.Season.Winter",                "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 354, "dayEnd":  78}
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  79, "dayEnd": 171, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 172, "dayEnd": 263, "abbreviation": "Sum"},
+      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 264, "dayEnd": 353, "abbreviation": "Aut"},
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 354, "dayEnd":  78, "abbreviation": "Win"}
     ]
   },
-  "eras"          : [ {"name": "CALENDARIA.Era.DaleReckoning", "abbreviation": "CALENDARIA.Era.DR", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
+  "eras"          : [ {"name": "Dale Reckoning", "abbreviation": "DR", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
   "moons"         : [
     {
-      "name"         : "CALENDARIA.Moon.Harptos.Selune",
+      "name"         : "Selûne",
       "cycleLength"  : 30.4375,
       "color"        : "#C0C0C0",
       "phases"       : [

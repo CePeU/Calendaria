@@ -4,28 +4,17 @@
   "years"         : {"yearZero": 836, "firstWeekday": 0},
   "months"        : {
     "values": [
-      {"name": "CALENDARIA.Calendar.Exandrian.Month.Horisal",    "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.HorisalShort",    "ordinal":  1, "days": 29},
-      {"name": "CALENDARIA.Calendar.Exandrian.Month.Misuthar",   "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.MisutharShort",   "ordinal":  2, "days": 30},
-      {"name": "CALENDARIA.Calendar.Exandrian.Month.Dualahei",   "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.DualaheiShort",   "ordinal":  3, "days": 30},
-      {"name": "CALENDARIA.Calendar.Exandrian.Month.Thunsheer",  "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.ThunsheerShort",  "ordinal":  4, "days": 31},
-      {"name": "CALENDARIA.Calendar.Exandrian.Month.Unndilar",   "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.UnndillarShort",  "ordinal":  5, "days": 28},
-      {"name": "CALENDARIA.Calendar.Exandrian.Month.Brussendar", "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.BrussendarShort", "ordinal":  6, "days": 31},
-      {"name": "CALENDARIA.Calendar.Exandrian.Month.Sydenstar",  "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.SydenstarShort",  "ordinal":  7, "days": 32},
-      {"name": "CALENDARIA.Calendar.Exandrian.Month.Fessuran",   "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.FessuranShort",   "ordinal":  8, "days": 29},
-      {"name": "CALENDARIA.Calendar.Exandrian.Month.Quenthel",   "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.QuenthelShort",   "ordinal":  9, "days": 27},
-      {"name": "CALENDARIA.Calendar.Exandrian.Month.Cuersaar",   "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.CuersaarShort",   "ordinal": 10, "days": 29},
-      {"name": "CALENDARIA.Calendar.Exandrian.Month.Duscar",     "abbreviation": "CALENDARIA.Calendar.Exandrian.Month.DuscarShort",     "ordinal": 11, "days": 32}
+      {"name": "Horisal",     "abbreviation": "Hor", "ordinal":  1, "days": 29}, {"name": "Misuthar",    "abbreviation": "Mis", "ordinal":  2, "days": 30}, {"name": "Dualahei",    "abbreviation": "Dua", "ordinal":  3, "days": 30},
+      {"name": "Thunsheer",   "abbreviation": "Thu", "ordinal":  4, "days": 31}, {"name": "Unndilar",    "abbreviation": "Unn", "ordinal":  5, "days": 28}, {"name": "Brussendar",  "abbreviation": "Bru", "ordinal":  6, "days": 31},
+      {"name": "Sydenstar",   "abbreviation": "Syd", "ordinal":  7, "days": 32}, {"name": "Fessuran",    "abbreviation": "Fes", "ordinal":  8, "days": 29}, {"name": "Quen'pillar", "abbreviation": "Que", "ordinal":  9, "days": 27},
+      {"name": "Cuersaar",    "abbreviation": "Cue", "ordinal": 10, "days": 29}, {"name": "Duscar",      "abbreviation": "Dus", "ordinal": 11, "days": 32}
     ]
   },
   "days"          : {
     "values"          : [
-      {"name": "CALENDARIA.Calendar.Exandrian.Day.Miresen",  "ordinal": 1                   },
-      {"name": "CALENDARIA.Calendar.Exandrian.Day.Grissen",  "ordinal": 2                   },
-      {"name": "CALENDARIA.Calendar.Exandrian.Day.Whelsen",  "ordinal": 3                   },
-      {"name": "CALENDARIA.Calendar.Exandrian.Day.Conthsen", "ordinal": 4                   },
-      {"name": "CALENDARIA.Calendar.Exandrian.Day.Folsen",   "ordinal": 5                   },
-      {"name": "CALENDARIA.Calendar.Exandrian.Day.Yulisen",  "ordinal": 6                   },
-      {"name": "CALENDARIA.Calendar.Exandrian.Day.Dapsen",   "ordinal": 7, "isRestDay": true}
+      {"name": "Miresen",  "ordinal": 1, "abbreviation": "Mir"                   }, {"name": "Grissen",  "ordinal": 2, "abbreviation": "Gri"                   }, {"name": "Whelsen",  "ordinal": 3, "abbreviation": "Whe"                   },
+      {"name": "Conthsen", "ordinal": 4, "abbreviation": "Con"                   }, {"name": "Folsen",   "ordinal": 5, "abbreviation": "Fol"                   }, {"name": "Yulisen",  "ordinal": 6, "abbreviation": "Yul"                   },
+      {"name": "Dapsen",   "ordinal": 7, "abbreviation": "Dap", "isRestDay": true}
     ],
     "daysPerYear"     : 328,
     "hoursPerDay"     : 24,
@@ -33,35 +22,23 @@
     "secondsPerMinute": 60
   },
   "festivals"     : [
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.NewDawn",          "month":  1, "day":  1},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.Hillsgold",        "month":  2, "day": 27},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.DayOfChallenging", "month":  3, "day":  7},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.Renewal",          "month":  3, "day": 26},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.WildsMouth",       "month":  4, "day": 20},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.Zenith",           "month":  6, "day": 26},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.Midsummer",        "month":  7, "day": 20},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.Elvendawn",        "month":  8, "day":  3},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.Highsummer",       "month":  8, "day":  7},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.HarvestClose",     "month":  9, "day":  3},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.HarvestsRise",     "month": 10, "day": 11},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.Zan",              "month": 10, "day": 26},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.Barren",           "month": 11, "day":  2},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.EmbertideStart",   "month": 11, "day":  5},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.EmbertideEnd",     "month": 11, "day":  8},
-    {"name": "CALENDARIA.Calendar.Exandrian.Festival.WintersClose",     "month": 11, "day": 20}
+    {"name": "New Dawn",           "month":  1, "day":  1}, {"name": "Hillsgold",          "month":  2, "day": 27}, {"name": "Day of Challenging", "month":  3, "day":  7}, {"name": "Day of Renewal",     "month":  3, "day": 26},
+    {"name": "Wild's Mouth",       "month":  4, "day": 20}, {"name": "Zenith",             "month":  6, "day": 26}, {"name": "Midsummer",          "month":  7, "day": 20}, {"name": "Elvendawn",          "month":  8, "day":  3},
+    {"name": "Highsummer",         "month":  8, "day":  7}, {"name": "Harvest's Close",    "month":  9, "day":  3}, {"name": "Harvest's Rise",     "month": 10, "day": 11}, {"name": "Zan's Cup",          "month": 10, "day": 26},
+    {"name": "The Barren Eve",     "month": 11, "day":  2}, {"name": "Embertide (Start)",  "month": 11, "day":  5}, {"name": "Embertide (End)",    "month": 11, "day":  8}, {"name": "Winter's Close",     "month": 11, "day": 20}
   ],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 296, "dayEnd":  58},
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  59, "dayEnd": 148},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 149, "dayEnd": 237},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 238, "dayEnd": 295}
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 296, "dayEnd":  58, "abbreviation": "Win"},
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  59, "dayEnd": 148, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 149, "dayEnd": 237, "abbreviation": "Sum"},
+      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 238, "dayEnd": 295, "abbreviation": "Aut"}
     ]
   },
-  "eras"          : [ {"name": "CALENDARIA.Era.PostDivergence", "abbreviation": "CALENDARIA.Era.PD", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
+  "eras"          : [ {"name": "Post-Divergence", "abbreviation": "PD", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
   "moons"         : [
     {
-      "name"         : "CALENDARIA.Moon.Exandrian.Catha",
+      "name"         : "Catha",
       "cycleLength"  : 33,
       "color"        : "#E8E8E8",
       "phases"       : [
@@ -77,7 +54,7 @@
       "referenceDate": {"year": 0, "month": 0, "day": 1}
     },
     {
-      "name"         : "CALENDARIA.Moon.Exandrian.Ruidus",
+      "name"         : "Ruidus",
       "cycleLength"  : 328,
       "color"        : "#8B0000",
       "phases"       : [
