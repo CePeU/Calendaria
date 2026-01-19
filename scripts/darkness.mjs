@@ -68,12 +68,15 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
   const sceneBrightnessMult = sceneFlag ?? defaultMult;
   const activeZone = WeatherManager.getActiveZone?.();
   const climateBrightnessMult = activeZone?.brightnessMultiplier ?? 1.0;
-  const currentWeather = WeatherManager.getCurrentWeather?.();
-  const weatherDarknessPenalty = currentWeather?.darknessPenalty ?? 0;
   const brightness = 1 - baseDarkness;
   const adjustedBrightness = brightness * sceneBrightnessMult * climateBrightnessMult;
   let adjustedDarkness = 1 - adjustedBrightness;
-  adjustedDarkness += weatherDarknessPenalty;
+  const weatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
+  if (weatherSync) {
+    const currentWeather = WeatherManager.getCurrentWeather?.();
+    const weatherDarknessPenalty = currentWeather?.darknessPenalty ?? 0;
+    adjustedDarkness += weatherDarknessPenalty;
+  }
   return Math.max(0, Math.min(1, adjustedDarkness));
 }
 

@@ -257,12 +257,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareTimeContext(context) {
     context.darknessSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC);
+    context.darknessWeatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
     context.ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
     context.advanceTimeOnRest = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
     context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
     context.roundTimeDisabled = CONFIG.time.roundTime === 0;
-
-    // Real-time clock speed settings
     context.timeSpeedMultiplier = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_MULTIPLIER);
     const currentIncrement = game.settings.get(MODULE.ID, SETTINGS.TIME_SPEED_INCREMENT);
     const incrementLabels = {
@@ -750,7 +749,14 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('miniCalendarIdleOpacity' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CALENDAR_IDLE_OPACITY, Number(data.miniCalendarIdleOpacity));
     if ('miniCalendarControlsDelay' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CALENDAR_CONTROLS_DELAY, Number(data.miniCalendarControlsDelay));
     if ('miniCalendarConfirmSetDate' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CALENDAR_CONFIRM_SET_DATE, data.miniCalendarConfirmSetDate);
-    if ('darknessSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC, data.darknessSync);
+    if ('darknessSync' in data) {
+      await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_SYNC, data.darknessSync);
+      if (data.darknessSync && game.pf2e?.worldClock) {
+        const pf2eWorldClock = game.settings.get('pf2e', 'worldClock');
+        if (pf2eWorldClock?.syncDarkness) await game.settings.set('pf2e', 'worldClock', { ...pf2eWorldClock, syncDarkness: false });
+      }
+    }
+    if ('darknessWeatherSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC, data.darknessWeatherSync);
     if ('ambienceSync' in data) await game.settings.set(MODULE.ID, SETTINGS.AMBIENCE_SYNC, data.ambienceSync);
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
     if ('syncClockPause' in data) await game.settings.set(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);

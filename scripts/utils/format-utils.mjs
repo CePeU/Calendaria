@@ -358,13 +358,18 @@ export function formatApproximateDate(calendar, components) {
     dayOfYear += monthsValues[i]?.days ?? 0;
   }
 
-  // Get season bounds - use calendar method if available
+  // Get season bounds - check month-based first (most specific), then periodic, then day-of-year
   let seasonStart = 0;
   let seasonEnd = 365;
   const seasonsArray = calendar?.seasons?.values || [];
   const seasonIdx = seasonsArray.indexOf(season);
 
-  if (seasonIdx >= 0 && calendar?._calculatePeriodicSeasonBounds) {
+  if (season.monthStart != null && season.monthEnd != null) {
+    seasonStart = (season.dayStart ?? 1) - 1;
+    for (let i = 0; i < season.monthStart - 1; i++) seasonStart += monthsValues[i]?.days ?? 0;
+    seasonEnd = (season.dayEnd ?? monthsValues[season.monthEnd - 1]?.days ?? 30) - 1;
+    for (let i = 0; i < season.monthEnd - 1; i++) seasonEnd += monthsValues[i]?.days ?? 0;
+  } else if (seasonIdx >= 0 && calendar?.seasons?.type === 'periodic' && calendar?._calculatePeriodicSeasonBounds) {
     const bounds = calendar._calculatePeriodicSeasonBounds(seasonIdx);
     seasonStart = bounds.dayStart;
     seasonEnd = bounds.dayEnd;

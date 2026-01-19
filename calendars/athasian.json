@@ -38,9 +38,9 @@
   "festivals"     : [ {"name": "Festival of Zenalia", "month": 5, "day": 1}, {"name": "Festival of Dessalia", "month": 10, "day": 1}, {"name": "Festival of Assalia", "month": 15, "day": 1} ],
   "seasons"       : {
     "values": [
-      {"name": "High Sun",       "icon": "fas fa-fire",      "color": "#ff0000", "dayStart":   0, "dayEnd": 124, "abbreviation": "HSu"},
-      {"name": "Sun Descending", "icon": "fas fa-cloud-sun", "color": "#ff6600", "dayStart": 125, "dayEnd": 249, "abbreviation": "SDe"},
-      {"name": "Sun Ascending",  "icon": "fas fa-sun",       "color": "#ffcc00", "dayStart": 250, "dayEnd": 374, "abbreviation": "SAs"}
+      {"name": "High Sun",       "icon": "fas fa-fire",      "color": "#ff0000", "seasonalType": "summer", "dayStart":   0, "dayEnd": 124, "abbreviation": "HSu"},
+      {"name": "Sun Descending", "icon": "fas fa-cloud-sun", "color": "#ff6600", "seasonalType": "autumn", "dayStart": 125, "dayEnd": 249, "abbreviation": "SDe"},
+      {"name": "Sun Ascending",  "icon": "fas fa-sun",       "color": "#ffcc00", "seasonalType": "spring", "dayStart": 250, "dayEnd": 374, "abbreviation": "SAs"}
     ]
   },
   "eras"          : [ {"name": "Free Year", "abbreviation": "FY", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],

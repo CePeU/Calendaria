@@ -2392,6 +2392,10 @@ span.calendaria-moon-icon {
         flex: 0 0 40px;
       }
 
+      .col-seasonal-type {
+        flex: 0 0 80px;
+      }
+
       .col-duration {
         flex: 0 0 60px;
       }
@@ -2407,19 +2411,23 @@ span.calendaria-moon-icon {
       margin-top: 0.25rem;
 
       .col-start-month {
-        flex: 0 0 30%;
+        flex: 1 1 25%;
       }
 
       .col-start-day {
-        flex: 0 0 15%;
+        flex: 0 0 50px;
       }
 
       .col-end-month {
-        flex: 0 0 30%;
+        flex: 1 1 25%;
       }
 
       .col-end-day {
-        flex: 0 0 15%;
+        flex: 0 0 50px;
+      }
+
+      .col-seasonal-type {
+        flex: 0 0 80px;
       }
 
       .col-controls {

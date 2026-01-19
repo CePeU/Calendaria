@@ -31,6 +31,14 @@
       </div>
 
       <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.DarknessWeatherSync.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" name="darknessWeatherSync" {{#if darknessWeatherSync}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.DarknessWeatherSync.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
         <label>{{localize "CALENDARIA.Settings.AmbienceSync.Name"}}</label>
         <div class="form-fields">
           <input type="checkbox" name="ambienceSync" {{#if ambienceSync}}checked{{/if}}>

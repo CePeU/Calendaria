@@ -182,6 +182,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
             abbreviation: new StringField({ required: false }),
             icon: new StringField({ required: false, initial: '' }),
             color: new StringField({ required: false, initial: '' }),
+            seasonalType: new StringField({ required: false, nullable: true, choices: ['spring', 'summer', 'autumn', 'winter'] }),
             dayStart: new NumberField({ required: false, integer: true, min: 0, nullable: true }),
             dayEnd: new NumberField({ required: false, integer: true, min: 0, nullable: true }),
             monthStart: new NumberField({ required: false, integer: true, min: 1, nullable: true }),
@@ -584,7 +585,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     return (
       this.festivals?.find((f) => {
         if (f.leapYearOnly && !isLeap) return false;
-        const duration = (isLeap && f.leapDuration != null) ? f.leapDuration : (f.duration ?? 1);
+        const duration = isLeap && f.leapDuration != null ? f.leapDuration : (f.duration ?? 1);
         if (f.dayOfYear != null) {
           return currentDayOfYear >= f.dayOfYear && currentDayOfYear < f.dayOfYear + duration;
         }
@@ -647,7 +648,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     for (const festival of this.festivals) {
       if (festival.countsForWeekday !== false) continue;
       if (festival.leapYearOnly && !isLeap) continue;
-      const duration = (isLeap && festival.leapDuration != null) ? festival.leapDuration : (festival.duration ?? 1);
+      const duration = isLeap && festival.leapDuration != null ? festival.leapDuration : (festival.duration ?? 1);
       let festivalStart;
       if (festival.dayOfYear != null) {
         festivalStart = festival.dayOfYear;
@@ -679,7 +680,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /**
    * Count total festival days that don't count for weekday calculation in a full year.
    * Only counts non-leap-year festivals (those that occur every year).
-   * @param {boolean} [isLeap=false] - Whether to calculate for a leap year.
+   * @param {boolean} [isLeap] - Whether to calculate for a leap year.
    * @returns {number} Number of non-counting festival days per year.
    */
   countNonWeekdayFestivalsInYear(isLeap = false) {
@@ -688,7 +689,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     for (const festival of this.festivals) {
       if (festival.countsForWeekday !== false) continue;
       if (festival.leapYearOnly && !isLeap) continue;
-      const duration = (isLeap && festival.leapDuration != null) ? festival.leapDuration : (festival.duration ?? 1);
+      const duration = isLeap && festival.leapDuration != null ? festival.leapDuration : (festival.duration ?? 1);
       count += duration;
     }
     return count;
@@ -836,12 +837,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         const start = phase.start ?? 0;
         const end = phase.end ?? 1;
         // Handle wrap-around (e.g., start=0.9, end=0.1)
-        const inRange = end > start ? (normalizedPosition >= start && normalizedPosition < end) : (normalizedPosition >= start || normalizedPosition < end);
+        const inRange = end > start ? normalizedPosition >= start && normalizedPosition < end : normalizedPosition >= start || normalizedPosition < end;
         if (inRange) {
           phaseArrayIndex = i;
-          const phaseLength = end > start ? end - start : (1 - start) + end;
+          const phaseLength = end > start ? end - start : 1 - start + end;
           phaseDuration = Math.max(1, Math.round(phaseLength * moon.cycleLength));
-          const posInPhase = end > start ? normalizedPosition - start : (normalizedPosition >= start ? normalizedPosition - start : normalizedPosition + (1 - start));
+          const posInPhase = end > start ? normalizedPosition - start : normalizedPosition >= start ? normalizedPosition - start : normalizedPosition + (1 - start);
           dayWithinPhase = Math.floor(posInPhase * moon.cycleLength);
           break;
         }

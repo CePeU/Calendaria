@@ -155,6 +155,15 @@ export function registerSettings() {
     type: new BooleanField({ initial: true })
   });
 
+  /** Allow weather to affect scene darkness (via darknessPenalty) */
+  game.settings.register(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC, {
+    name: 'CALENDARIA.Settings.DarknessWeatherSync.Name',
+    hint: 'CALENDARIA.Settings.DarknessWeatherSync.Hint',
+    scope: 'world',
+    config: false,
+    type: new BooleanField({ initial: true })
+  });
+
   /** Sync scene ambience (hue/saturation) with weather and climate */
   game.settings.register(MODULE.ID, SETTINGS.AMBIENCE_SYNC, {
     name: 'CALENDARIA.Settings.AmbienceSync.Name',

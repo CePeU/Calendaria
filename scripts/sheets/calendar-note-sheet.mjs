@@ -430,7 +430,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.conditions = rawConditions.map((cond, idx) => ({ ...cond, index: idx, description: this.#getConditionDescription(cond, calendar) }));
     const currentReminderType = this.document.system.reminderType || 'toast';
     context.reminderTypeOptions = [
-      { value: 'none', label: localize('CALENDARIA.Note.ReminderTypeNone'), selected: currentReminderType === 'none' },
+      { value: 'none', label: localize('CALENDARIA.Common.None'), selected: currentReminderType === 'none' },
       { value: 'toast', label: localize('CALENDARIA.Note.ReminderTypeToast'), selected: currentReminderType === 'toast' },
       { value: 'chat', label: localize('CALENDARIA.Note.ReminderTypeChat'), selected: currentReminderType === 'chat' },
       { value: 'dialog', label: localize('CALENDARIA.Note.ReminderTypeDialog'), selected: currentReminderType === 'dialog' }

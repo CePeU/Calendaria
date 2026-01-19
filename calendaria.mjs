@@ -86,6 +86,14 @@ Hooks.once('ready', async () => {
       await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, true);
     }
   }
+  // Disable PF2e world clock darkness sync if Calendaria darkness sync is enabled
+  if (game.pf2e?.worldClock && game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC)) {
+    const pf2eWorldClock = game.settings.get('pf2e', 'worldClock');
+    if (pf2eWorldClock?.syncDarkness) {
+      await game.settings.set('pf2e', 'worldClock', { ...pf2eWorldClock, syncDarkness: false });
+      ui.notifications.warn('CALENDARIA.Notification.PF2eDarknessSyncDisabled', { localize: true });
+    }
+  }
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) CalendariaHUD.show();
   if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) StickyZones.showDebugZones();
   Hooks.on('renderSceneControls', () => StickyZones.updateZonePositions('below-controls'));

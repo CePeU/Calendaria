@@ -29,10 +29,10 @@
   ],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 296, "dayEnd":  58, "abbreviation": "Win"},
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  59, "dayEnd": 148, "abbreviation": "Spr"},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 149, "dayEnd": 237, "abbreviation": "Sum"},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 238, "dayEnd": 295, "abbreviation": "Aut"}
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 296, "dayEnd":  58, "abbreviation": "Win"},
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  59, "dayEnd": 148, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 149, "dayEnd": 237, "abbreviation": "Sum"},
+      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 238, "dayEnd": 295, "abbreviation": "Aut"}
     ]
   },
   "eras"          : [ {"name": "Post-Divergence", "abbreviation": "PD", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],

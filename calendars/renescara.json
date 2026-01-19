@@ -78,6 +78,7 @@
         "name"        : "Spring",
         "icon"        : "fas fa-seedling",
         "color"       : "#90ee90",
+        "seasonalType": "spring",
         "dayStart"    : 0,
         "dayEnd"      : 83,
         "climate"     : {
@@ -93,6 +94,7 @@
         "name"        : "Summer",
         "icon"        : "fas fa-sun",
         "color"       : "#ffd700",
+        "seasonalType": "summer",
         "dayStart"    : 84,
         "dayEnd"      : 167,
         "climate"     : {
@@ -108,6 +110,7 @@
         "name"        : "Autumn",
         "icon"        : "fas fa-leaf",
         "color"       : "#d2691e",
+        "seasonalType": "autumn",
         "dayStart"    : 168,
         "dayEnd"      : 251,
         "climate"     : {
@@ -123,6 +126,7 @@
         "name"        : "Winter",
         "icon"        : "fas fa-snowflake",
         "color"       : "#87ceeb",
+        "seasonalType": "winter",
         "dayStart"    : 252,
         "dayEnd"      : 364,
         "climate"     : {
@@ -140,7 +144,7 @@
   "eras"          : [
     {"name": "First Age",      "abbreviation": "FA", "startYear": -2000, "endYear": -500, "template": "Year [yearInEra] of the GGGG"},
     {"name": "Dark Centuries", "abbreviation": "DC", "startYear":  -500, "endYear":    0, "template": "Year [yearInEra] of the GGGG"},
-    {"name": "Second Age",     "abbreviation": "SA", "startYear":     1, "endYear": null, "template": "Year [year] of the GGGG"}
+    {"name": "Second Age",     "abbreviation": "SA", "startYear":     1, "endYear": null, "template": "Year [year] of the GGGG"     }
   ],
   "canonicalHours": [
     {"name": "Dawn Watch",      "abbreviation": "Dawn",  "startHour":  5, "endHour":  9},

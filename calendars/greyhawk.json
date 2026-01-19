@@ -36,10 +36,10 @@
   "festivals"     : [],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  48, "dayEnd": 137, "abbreviation": "Spr"},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 138, "dayEnd": 227, "abbreviation": "Sum"},
-      {"name": "Fall",                     "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 228, "dayEnd": 317, "abbreviation": "Fal"},
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 318, "dayEnd":  47, "abbreviation": "Win"}
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  48, "dayEnd": 137, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 138, "dayEnd": 227, "abbreviation": "Sum"},
+      {"name": "Fall",                     "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 228, "dayEnd": 317, "abbreviation": "Fal"},
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 318, "dayEnd":  47, "abbreviation": "Win"}
     ]
   },
   "eras"          : [ {"name": "Common Year", "abbreviation": "CY", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],

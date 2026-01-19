@@ -653,14 +653,16 @@ export const CalendariaAPI = {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return 0;
     const yearZero = calendar.years?.yearZero ?? 0;
-    return calendar.componentsToTime({
-      year: date.year - yearZero,
-      month: date.month,
-      dayOfMonth: date.day ?? date.dayOfMonth ?? 0,
-      hour: date.hour ?? 0,
-      minute: date.minute ?? 0,
-      second: date.second ?? 0
-    });
+    const year = date.year - yearZero;
+    const month = date.month ?? 0;
+    const dayOfMonth = date.day ?? date.dayOfMonth ?? 0;
+    let day = dayOfMonth;
+    const months = calendar.months?.values ?? [];
+    for (let i = 0; i < month; i++) {
+      const isLeap = calendar.isLeapYear?.(year);
+      day += isLeap && months[i]?.leapDays ? months[i].leapDays : (months[i]?.days ?? 0);
+    }
+    return calendar.componentsToTime({ year, month, day, dayOfMonth, hour: date.hour ?? 0, minute: date.minute ?? 0, second: date.second ?? 0 });
   },
 
   /**

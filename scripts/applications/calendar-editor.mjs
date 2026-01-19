@@ -363,6 +363,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.seasonOffset = this.#calendarData.seasons.offset ?? 0;
     context.seasonTypeOptions = seasonTypeOptions.map((opt) => ({ ...opt, selected: opt.value === context.seasonType }));
     context.isPeriodic = context.seasonType === 'periodic';
+    const seasonalTypeOptions = [
+      { value: '', label: 'CALENDARIA.Common.None' },
+      { value: 'spring', label: 'CALENDARIA.Season.Spring' },
+      { value: 'summer', label: 'CALENDARIA.Season.Summer' },
+      { value: 'autumn', label: 'CALENDARIA.Season.Autumn' },
+      { value: 'winter', label: 'CALENDARIA.Season.Winter' }
+    ];
     context.seasonsWithNav = this.#calendarData.seasons.values.map((season, idx) => {
       let startMonth, startDay, endMonth, endDay;
       if (season.monthStart != null) {
@@ -393,7 +400,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         displayEndMonth: endMonth,
         displayEndDay: endDay,
         startMonthOptions: context.monthOptions.map((opt) => ({ ...opt, selected: opt.value === startMonth })),
-        endMonthOptions: context.monthOptions.map((opt) => ({ ...opt, selected: opt.value === endMonth }))
+        endMonthOptions: context.monthOptions.map((opt) => ({ ...opt, selected: opt.value === endMonth })),
+        seasonalTypeOptions: seasonalTypeOptions.map((opt) => ({ ...opt, selected: opt.value === (season.seasonalType ?? '') }))
       };
     });
 
@@ -860,11 +868,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const existingClimates = this.#calendarData.seasons.values.map((s) => s.climate);
     this.#calendarData.seasons.values.length = 0;
     for (const idx of sortedIndices) {
+      const seasonalType = data[`seasons.${idx}.seasonalType`];
       const season = {
         name: data[`seasons.${idx}.name`] || '',
         abbreviation: data[`seasons.${idx}.abbreviation`] || '',
         icon: data[`seasons.${idx}.icon`] || '',
         color: data[`seasons.${idx}.color`] || '',
+        seasonalType: seasonalType || null,
         ordinal: this.#calendarData.seasons.values.length + 1,
         climate: existingClimates[idx] ?? null
       };

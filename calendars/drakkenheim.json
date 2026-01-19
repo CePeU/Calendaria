@@ -31,10 +31,10 @@
   ],
   "seasons"       : {
     "values": [
-      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "dayStart": 355, "dayEnd":  78, "abbreviation": "Win"},
-      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "dayStart":  79, "dayEnd": 171, "abbreviation": "Spr"},
-      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "dayStart": 172, "dayEnd": 264, "abbreviation": "Sum"},
-      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "dayStart": 265, "dayEnd": 354, "abbreviation": "Aut"}
+      {"name": "CALENDARIA.Season.Winter", "icon": "fas fa-snowflake", "color": "#87ceeb", "seasonalType": "winter", "dayStart": 355, "dayEnd":  78, "abbreviation": "Win"},
+      {"name": "CALENDARIA.Season.Spring", "icon": "fas fa-seedling",  "color": "#90ee90", "seasonalType": "spring", "dayStart":  79, "dayEnd": 171, "abbreviation": "Spr"},
+      {"name": "CALENDARIA.Season.Summer", "icon": "fas fa-sun",       "color": "#ffd700", "seasonalType": "summer", "dayStart": 172, "dayEnd": 264, "abbreviation": "Sum"},
+      {"name": "CALENDARIA.Season.Autumn", "icon": "fas fa-leaf",      "color": "#d2691e", "seasonalType": "autumn", "dayStart": 265, "dayEnd": 354, "abbreviation": "Aut"}
     ]
   },
   "eras"          : [ {"name": "Sacred Flame", "abbreviation": "SF", "startYear": 1, "endYear": null, "format": "suffix", "template": null} ],
