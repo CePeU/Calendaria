@@ -5854,7 +5854,6 @@ span.calendaria-moon-icon {
 /* Main Bar                                 */
 /* ======================================== */
 .calendaria-hud-bar {
-  gap: 0.625rem;
   grid-template-columns: 1fr auto 1fr;
   display: inline-grid;
   z-index: 10;
@@ -6008,10 +6007,12 @@ span.calendaria-moon-icon {
 
 .calendaria-hud-section.left {
   justify-content: flex-start;
+  padding-right: 0.3125rem;
 }
 
 .calendaria-hud-section.right {
   justify-content: flex-end;
+  padding-left: 0.3125rem;
 }
 
 /* ======================================== */
@@ -6205,6 +6206,7 @@ span.calendaria-moon-icon {
   position: relative;
   justify-content: center;
   align-items: center;
+  padding: 0 0.3125rem;
 }
 
 .calendaria-hud-time {
@@ -6214,6 +6216,7 @@ span.calendaria-moon-icon {
   font-family: Consolas, Monaco, monospace;
   text-align: center;
   letter-spacing: 0.0313rem;
+  white-space: nowrap;
 }
 
 .calendaria-hud-play-btn {
@@ -6282,7 +6285,7 @@ span.calendaria-moon-icon {
 .calendaria-hud-indicators .season-indicator,
 .calendaria-hud-indicators .era-indicator,
 .calendaria-hud-indicators .cycle-indicator {
-  font-size: var(--font-size-12, 0.75rem);
+  font-size: clamp(var(--font-size-10, 0.625rem), calc(var(--font-size-12, 0.75rem) * var(--hud-width-scale, 1)), var(--font-size-12, 0.75rem));
   cursor: default;
 }
 
@@ -6693,9 +6696,11 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-hud-slice {
+  display: grid;
   position: relative;
-  width: 7.5rem;
-  height: 1.5rem;
+  align-items: center;
+  min-width: 7.5rem;
+  min-height: 1.5rem;
   border: 0.0625rem solid rgb(0 0 0 / 30%);
   border-radius: 0.25rem;
   overflow: hidden;
@@ -6749,10 +6754,9 @@ span.calendaria-moon-icon {
 }
 
 .calendaria-slice-time-overlay {
-  inset: 0;
   display: flex;
   z-index: 2;
-  position: absolute;
+  position: relative;
   justify-content: center;
   align-items: center;
   pointer-events: none;
@@ -6762,7 +6766,7 @@ span.calendaria-moon-icon {
   padding: 0 0.25rem;
   color: rgb(255 255 255);
   font-weight: 600;
-  font-size: var(--font-size-12, 0.75rem);
+  font-size: clamp(var(--font-size-10, 0.625rem), calc(var(--font-size-12, 0.75rem) * var(--hud-width-scale, 1)), var(--font-size-12, 0.75rem));
   text-shadow:
     0 0 0.125rem rgb(0 0 0),
     0 0 0.25rem rgb(0 0 0),
@@ -6813,8 +6817,8 @@ span.calendaria-moon-icon {
 
 /* Compact slice adjustments */
 .calendaria-hud.compact .calendaria-hud-slice {
-  width: 6.25rem;
-  height: 1.25rem;
+  min-width: 6.25rem;
+  min-height: 1.25rem;
 }
 
 .calendaria-hud.compact .calendaria-slice-sun {

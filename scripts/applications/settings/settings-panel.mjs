@@ -1083,7 +1083,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ];
 
     // Locations that support "Off" option
-    const supportsOff = ['timekeeperDate'];
+    const supportsOff = ['hudDate', 'timekeeperDate'];
 
     // Stopwatch preset configurations
     const stopwatchRealtimePresets = [
