@@ -1172,6 +1172,8 @@
   "CALENDARIA.Scene.DarknessSync.Choices.Enabled": "Enabled",
   "CALENDARIA.Scene.DarknessSync.Hint": "Allow Calendaria to override the global setting to sync this scene's darkness level with the position of the sun.",
   "CALENDARIA.Scene.DarknessSync.Name": "Sync Darkness with Time",
+  "CALENDARIA.Scene.HudHideForPlayers.Hint": "Automatically hide the Calendaria HUD for players when this scene becomes active.",
+  "CALENDARIA.Scene.HudHideForPlayers.Name": "Hide HUD for Players",
   "CALENDARIA.SceneControl.OpenCalendar": "Calendaria",
   "CALENDARIA.Search.GMOnly": "GM Only",
   "CALENDARIA.Search.NoResults": "No results found",

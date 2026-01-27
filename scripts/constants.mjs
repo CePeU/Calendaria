@@ -130,8 +130,9 @@ export const DISPLAY_LOCATIONS = {
 
 /** @enum {string} Scene flags for scene-specific configuration */
 export const SCENE_FLAGS = {
+  BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier',
   DARKNESS_SYNC: 'darknessSync',
-  BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier'
+  HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers'
 };
 
 /** Template file paths for UI components */
