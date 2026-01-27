@@ -243,9 +243,8 @@ function getTotalDaysSinceEpoch(date) {
   if (!calendar) return 0;
   const yearZero = calendar.years?.yearZero ?? 0;
   const internalYear = date.year - yearZero;
-  let dayOfYear = date.day - 1;
-  for (let m = 0; m < date.month; m++) dayOfYear += calendar.getDaysInMonth(m, internalYear);
-  const components = { year: internalYear, day: dayOfYear, hour: 0, minute: 0, second: 0 };
+  const dayOfMonth = date.day - 1;
+  const components = { year: internalYear, month: date.month, dayOfMonth, hour: 0, minute: 0, second: 0 };
   const time = calendar.componentsToTime(components);
   const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
   const minutesPerHour = calendar.days?.minutesPerHour ?? 60;

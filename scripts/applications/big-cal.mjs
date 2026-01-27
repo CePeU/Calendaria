@@ -392,9 +392,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth: day - 1 });
       let moonPhases = null;
       if (showMoons) {
-        let dayOfYear = day - 1;
-        for (let idx = 0; idx < month; idx++) dayOfYear += calendar.getDaysInMonth(idx, internalYear);
-        const dayComponents = { year: internalYear, month, day: dayOfYear, hour: 12, minute: 0, second: 0 };
+        const dayComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
         const dayWorldTime = calendar.componentsToTime(dayComponents);
         moonPhases = calendar.moons
           .map((moon, index) => {
@@ -561,7 +559,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const isIntercalary = festivalDay?.countsForWeekday === false;
         let moonPhases = null;
         if (showMoons) {
-          const dayComponents = { year: dayInternalYear, month: 0, day: dayNum - 1, hour: 12, minute: 0, second: 0 };
+          const dayComponents = { year: dayInternalYear, month: 0, dayOfMonth: dayNum - 1, hour: 12, minute: 0, second: 0 };
           const dayWorldTime = calendar.componentsToTime(dayComponents);
           moonPhases = calendar.moons
             .map((moon, index) => {

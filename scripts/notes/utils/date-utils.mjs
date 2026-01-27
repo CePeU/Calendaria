@@ -63,12 +63,10 @@ export function daysBetween(startDate, endDate) {
     const yearZero = calendar.years?.yearZero ?? 0;
     const startInternalYear = startDate.year - yearZero;
     const endInternalYear = endDate.year - yearZero;
-    let startDayOfYear = (startDate.day ?? 1) - 1;
-    for (let i = 0; i < startDate.month; i++) startDayOfYear += calendar.getDaysInMonth(i, startInternalYear);
-    let endDayOfYear = (endDate.day ?? 1) - 1;
-    for (let i = 0; i < endDate.month; i++) endDayOfYear += calendar.getDaysInMonth(i, endInternalYear);
-    const startComponents = { year: startInternalYear, day: startDayOfYear, hour: 0, minute: 0, second: 0 };
-    const endComponents = { year: endInternalYear, day: endDayOfYear, hour: 0, minute: 0, second: 0 };
+    const startDayOfMonth = (startDate.day ?? 1) - 1;
+    const endDayOfMonth = (endDate.day ?? 1) - 1;
+    const startComponents = { year: startInternalYear, month: startDate.month, dayOfMonth: startDayOfMonth, hour: 0, minute: 0, second: 0 };
+    const endComponents = { year: endInternalYear, month: endDate.month, dayOfMonth: endDayOfMonth, hour: 0, minute: 0, second: 0 };
     const startTime = calendar.componentsToTime(startComponents);
     const endTime = calendar.componentsToTime(endComponents);
     const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
@@ -159,9 +157,8 @@ export function addDays(date, days) {
   try {
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalYear = date.year - yearZero;
-    let dayOfYear = date.day - 1;
-    for (let i = 0; i < date.month; i++) dayOfYear += calendar.getDaysInMonth(i, internalYear);
-    const components = { year: internalYear, day: dayOfYear, hour: date.hour ?? 0, minute: date.minute ?? 0, second: 0 };
+    const dayOfMonth = (date.day ?? 1) - 1;
+    const components = { year: internalYear, month: date.month, dayOfMonth, hour: date.hour ?? 0, minute: date.minute ?? 0, second: 0 };
     const time = calendar.componentsToTime(components);
     const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
     const minutesPerHour = calendar.days?.minutesPerHour ?? 60;

@@ -613,16 +613,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const components = { ...game.time.components };
     year ??= components.year + this.years.yearZero;
     month ??= components.month;
-    day ??= components.dayOfMonth;
+    day ??= components.dayOfMonth + 1; // Default to current day (1-indexed)
     components.year = year - this.years.yearZero;
-    const { leapYear } = this._decomposeTimeYears(this.componentsToTime(components));
-    let dayOfYear = day - 1;
-    for (let idx = 0; idx < month; idx++) {
-      const m = this.months.values[idx];
-      dayOfYear += leapYear ? (m.leapDays ?? m.days) : m.days;
-    }
-    components.day = dayOfYear;
     components.month = month;
+    components.dayOfMonth = day - 1; // Convert 1-indexed to 0-indexed
     await game.time.set(components);
   }
 
@@ -1003,10 +997,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const year = Number(components.year) || 0;
     const month = Number(components.month) || 0;
     const dayOfMonth = components.dayOfMonth ?? (Number(components.day) || 1) - 1;
-    let dayOfYear = dayOfMonth;
-    const monthDays = this.months?.values || [];
-    for (let i = 0; i < month && i < monthDays.length; i++) dayOfYear += monthDays[i]?.days || 30;
-    const normalized = { year, day: dayOfYear, hour: Number(components.hour) || 0, minute: Number(components.minute) || 0, second: Number(components.second) || 0 };
+    const normalized = { year, month, dayOfMonth, hour: Number(components.hour) || 0, minute: Number(components.minute) || 0, second: Number(components.second) || 0 };
     const worldTime = this.componentsToTime(normalized);
     const secondsPerDay = (this.days?.hoursPerDay || 24) * (this.days?.minutesPerHour || 60) * (this.days?.secondsPerMinute || 60);
     return Math.floor(worldTime / secondsPerDay);
@@ -1410,7 +1401,9 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {string} Formatted date string.
    */
   static formatMonthDay(calendar, components, _options = {}) {
-    const festivalDay = calendar.findFestivalDay?.(components);
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const internalYear = components.year - yearZero;
+    const festivalDay = calendar.findFestivalDay?.({ ...components, year: internalYear, dayOfMonth: components.dayOfMonth - 1 });
     if (festivalDay) return localize(festivalDay.name);
     const context = CalendariaCalendar.dateFormattingParts(calendar, components);
     return format('CALENDARIA.Formatters.DayMonth', { day: context.d, month: context.B });
@@ -1424,7 +1417,9 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {string} Formatted date string.
    */
   static formatMonthDayYear(calendar, components, _options = {}) {
-    const festivalDay = calendar.findFestivalDay?.(components);
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const internalYear = components.year - yearZero;
+    const festivalDay = calendar.findFestivalDay?.({ ...components, year: internalYear, dayOfMonth: components.dayOfMonth - 1 });
     if (festivalDay) {
       const context = CalendariaCalendar.dateFormattingParts(calendar, components);
       return format('CALENDARIA.Formatters.FestivalDayYear', { day: localize(festivalDay.name), yyyy: context.y });
