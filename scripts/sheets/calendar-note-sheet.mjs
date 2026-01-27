@@ -296,10 +296,12 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         phases: moon.phases?.map((phase) => ({ name: localize(phase.name), start: phase.start, end: phase.end })) || []
       })) || [];
     context.hasMoons = context.moons.length > 0;
+    const modifierLabels = { any: null, rising: localize('CALENDARIA.Note.MoonModifier.Rising'), true: localize('CALENDARIA.Note.MoonModifier.True'), fading: localize('CALENDARIA.Note.MoonModifier.Fading') };
     context.moonConditions = (this.document.system.moonConditions || []).map((cond, index) => {
       const moon = context.moons[cond.moonIndex];
       const matchingPhase = moon?.phases?.find((p) => Math.abs(p.start - cond.phaseStart) < 0.01 && Math.abs(p.end - cond.phaseEnd) < 0.01);
-      return { index, moonIndex: cond.moonIndex, moonName: moon?.name, phaseStart: cond.phaseStart, phaseEnd: cond.phaseEnd, phaseName: matchingPhase?.name };
+      const modifier = cond.modifier || 'any';
+      return { index, moonIndex: cond.moonIndex, moonName: moon?.name, phaseStart: cond.phaseStart, phaseEnd: cond.phaseEnd, phaseName: matchingPhase?.name, modifier, modifierLabel: modifierLabels[modifier] };
     });
     context.showMoonConditions = this.document.system.repeat === 'moon' || this.document.system.moonConditions?.length > 0;
     context.showRandomConfig = this.document.system.repeat === 'random';
@@ -914,15 +916,17 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const form = target.closest('form');
     const moonSelect = form?.querySelector('select[name="newMoonCondition.moonIndex"]');
     const phaseSelect = form?.querySelector('select[name="newMoonCondition.phase"]');
+    const modifierSelect = form?.querySelector('select[name="newMoonCondition.modifier"]');
     if (!moonSelect || !phaseSelect) return;
     const moonIndex = parseInt(moonSelect.value);
     const phaseValue = phaseSelect.value;
+    const modifier = modifierSelect?.value || 'any';
     if (isNaN(moonIndex) || !phaseValue) return;
     const [phaseStart, phaseEnd] = phaseValue.split('-').map(Number);
     const currentConditions = foundry.utils.deepClone(this.document.system.moonConditions || []);
-    const isDuplicate = currentConditions.some((c) => c.moonIndex === moonIndex && c.phaseStart === phaseStart && c.phaseEnd === phaseEnd);
+    const isDuplicate = currentConditions.some((c) => c.moonIndex === moonIndex && c.phaseStart === phaseStart && c.phaseEnd === phaseEnd && c.modifier === modifier);
     if (isDuplicate) return;
-    currentConditions.push({ moonIndex, phaseStart, phaseEnd });
+    currentConditions.push({ moonIndex, phaseStart, phaseEnd, modifier });
     await this.document.update({ 'system.moonConditions': currentConditions });
   }
 
