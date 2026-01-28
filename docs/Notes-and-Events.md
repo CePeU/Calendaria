@@ -49,21 +49,21 @@ await CALENDARIA.api.createNote({
 
 ### Recurrence Fields
 
-| Field            | Type   | Description                                                    |
-| ---------------- | ------ | -------------------------------------------------------------- |
-| `repeat`         | String | Recurrence pattern                                             |
-| `repeatInterval` | Number | Interval for repeating (e.g., every N days/weeks)              |
-| `repeatEndDate`  | Object | Stop repeating after this date `{year, month, day}`            |
-| `maxOccurrences` | Number | Limit total recurrences (0 = unlimited)                        |
-| `weekday`        | Number | Target weekday for `weekOfMonth` pattern (0-indexed)           |
-| `weekNumber`     | Number | Week ordinal for `weekOfMonth` (1-5, or -1 to -5 for last)     |
-| `moonConditions` | Array  | Moon phase conditions `[{moonIndex, phaseStart, phaseEnd}]`    |
-| `randomConfig`   | Object | Random event config `{seed, probability, checkInterval}`       |
-| `linkedEvent`    | Object | Linked event config `{noteId, offset}`                         |
-| `rangePattern`   | Object | Range pattern `{year, month, day}` with values or `[min, max]` |
-| `seasonalConfig` | Object | Seasonal config `{seasonIndex, trigger}`                       |
-| `computedConfig` | Object | Computed event chain `{chain, yearOverrides}`                  |
-| `conditions`     | Array  | Advanced conditions `[{field, op, value, value2?, offset?}]`   |
+| Field            | Type   | Description                                                           |
+| ---------------- | ------ | --------------------------------------------------------------------- |
+| `repeat`         | String | Recurrence pattern                                                    |
+| `repeatInterval` | Number | Interval for repeating (e.g., every N days/weeks)                     |
+| `repeatEndDate`  | Object | Stop repeating after this date `{year, month, day}`                   |
+| `maxOccurrences` | Number | Limit total recurrences (0 = unlimited)                               |
+| `weekday`        | Number | Target weekday for `weekOfMonth` pattern (0-indexed)                  |
+| `weekNumber`     | Number | Week ordinal for `weekOfMonth` (1-5, or -1 to -5 for last)            |
+| `moonConditions` | Array  | Moon phase conditions `[{moonIndex, phaseStart, phaseEnd, modifier}]` |
+| `randomConfig`   | Object | Random event config `{seed, probability, checkInterval}`              |
+| `linkedEvent`    | Object | Linked event config `{noteId, offset}`                                |
+| `rangePattern`   | Object | Range pattern `{year, month, day}` with values or `[min, max]`        |
+| `seasonalConfig` | Object | Seasonal config `{seasonIndex, trigger}`                              |
+| `computedConfig` | Object | Computed event chain `{chain, yearOverrides}`                         |
+| `conditions`     | Array  | Advanced conditions `[{field, op, value, value2?, offset?}]`          |
 
 ### Display Fields
 
@@ -165,9 +165,14 @@ Events triggered by moon phases:
 
 1. Set Repeat to **moon**
 2. Add moon conditions by selecting a moon and phase
-3. Multiple conditions can be added (any match triggers)
+3. Optionally select a modifier to target a specific portion of the phase:
+   - **Any**: Triggers during any part of the phase (default)
+   - **Rising**: First third of the phase
+   - **True**: Middle third of the phase
+   - **Fading**: Last third of the phase
+4. Multiple conditions can be added (any match triggers)
 
-Moon conditions specify a phase range (0-1 position in cycle).
+Moon conditions specify a phase range (0-1 position in cycle). The modifier label is shown in parentheses after the phase name (e.g., "Full Moon (Rising)").
 
 ### Random Events
 
@@ -319,6 +324,9 @@ Select a macro to execute when the event triggers. The macro runs when the event
 ## Player Permissions
 
 Players can create, edit, and delete their own notes. Ownership is determined by standard Foundry document permissions.
+
+> [!NOTE]
+> Players with the "Manage Notes" Calendaria permission but without Foundry's core `JOURNAL_CREATE` permission can still create notes. The request is relayed via socket to a connected GM who creates the note on their behalf.
 
 ### What Players Can Do
 

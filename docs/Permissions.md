@@ -77,7 +77,12 @@ When a user lacks permission for an action, the corresponding UI controls are hi
 
 ### Socket Relay
 
-For non-GM users with appropriate permissions, actions that modify world state (like changing time) are relayed through a socket system to the GM for execution. This ensures proper authority while allowing delegated control.
+For non-GM users with appropriate permissions, actions that modify world state are relayed through a socket system to the GM for execution. This ensures proper authority while allowing delegated control.
+
+Socket relay is used for:
+
+- **Time changes**: Non-GM users with "Change Date/Time" permission
+- **Note creation**: Users with "Manage Notes" permission but without Foundry's core `JOURNAL_CREATE` permission
 
 ---
 
@@ -103,6 +108,7 @@ The permission UI provides cascade-up behavior for easier configuration:
 - Users can always view non-GM-only notes
 - With this permission, users can create new notes
 - Users can only edit/delete notes they own (GM can edit all)
+- If the user lacks Foundry's core `JOURNAL_CREATE` permission, note creation is relayed to a connected GM via socket
 
 ### Change Date/Time
 
