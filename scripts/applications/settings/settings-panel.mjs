@@ -15,6 +15,7 @@ import { log } from '../../utils/logger.mjs';
 import { canChangeActiveCalendar, canViewMiniCal, canViewTimeKeeper } from '../../utils/permissions.mjs';
 import { exportSettings, importSettings } from '../../utils/settings-io.mjs';
 import { COLOR_CATEGORIES, COLOR_DEFINITIONS, COMPONENT_CATEGORIES, DEFAULT_COLORS, applyCustomColors, applyPreset } from '../../utils/theme-utils.mjs';
+import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from '../../weather/climate-data.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { BigCal } from '../big-cal.mjs';
 import { CalendarEditor } from '../calendar-editor.mjs';
@@ -1251,7 +1252,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'celsius', label: localize('CALENDARIA.Settings.TemperatureUnit.Celsius'), selected: tempUnit === 'celsius' },
       { value: 'fahrenheit', label: localize('CALENDARIA.Settings.TemperatureUnit.Fahrenheit'), selected: tempUnit === 'fahrenheit' }
     ];
-    context.customWeatherPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    context.temperatureUnitSymbol = tempUnit === 'fahrenheit' ? '°F' : '°C';
+    const rawPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    context.customWeatherPresets = rawPresets.map((p) => ({
+      ...p,
+      tempMin: toDisplayUnit(p.tempMin),
+      tempMax: toDisplayUnit(p.tempMax)
+    }));
     const zones = WeatherManager.getCalendarZones() || [];
     const activeZone = WeatherManager.getActiveZone();
     context.hasZones = zones.length > 0;
@@ -2175,6 +2182,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const data = preset || { label: '', icon: 'fa-cloud', color: '#888888', tempMin: 10, tempMax: 25, darknessPenalty: 0, environmentBase: null, environmentDark: null };
     const envBase = data.environmentBase ?? {};
     const envDark = data.environmentDark ?? {};
+    const unitSymbol = getTemperatureUnit() === 'fahrenheit' ? '°F' : '°C';
+    const displayMin = toDisplayUnit(data.tempMin);
+    const displayMax = toDisplayUnit(data.tempMax);
 
     const content = `
       <form class="weather-preset-dialog">
@@ -2194,10 +2204,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         <div class="form-group">
           <label>${localize('CALENDARIA.SettingsPanel.WeatherPresets.TempRange')}</label>
           <div class="form-fields">
-            <input type="number" name="tempMin" value="${data.tempMin}" placeholder="0">
+            <input type="number" name="tempMin" value="${displayMin}" placeholder="0">
             <span>–</span>
-            <input type="number" name="tempMax" value="${data.tempMax}" placeholder="25">
-            <span>°C</span>
+            <input type="number" name="tempMax" value="${displayMax}" placeholder="25">
+            <span>${unitSymbol}</span>
           </div>
         </div>
         <div class="form-group">
@@ -2254,8 +2264,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
             label: form.elements.label.value.trim(),
             icon: form.elements.icon.value.trim() || 'fa-cloud',
             color: form.elements.color.value || '#888888',
-            tempMin: Number(form.elements.tempMin.value) || 10,
-            tempMax: Number(form.elements.tempMax.value) || 25,
+            tempMin: fromDisplayUnit(Number(form.elements.tempMin.value) || 10),
+            tempMax: fromDisplayUnit(Number(form.elements.tempMax.value) || 25),
             darknessPenalty: Number(form.elements.darknessPenalty.value) || 0,
             environmentBase: baseHue !== null || baseSat !== null ? { hue: baseHue, saturation: baseSat } : null,
             environmentDark: darkHue !== null || darkSat !== null ? { hue: darkHue, saturation: darkSat } : null
