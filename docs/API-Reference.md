@@ -1350,9 +1350,9 @@ const results = await CALENDARIA.api.diagnoseWeather();
 const results = await CALENDARIA.api.diagnoseWeather(false);
 ```
 
-| Parameter    | Type      | Description                               |
-| ------------ | --------- | ----------------------------------------- |
-| `showDialog` | `boolean` | Show results in a dialog (default: true)  |
+| Parameter    | Type      | Description                              |
+| ------------ | --------- | ---------------------------------------- |
+| `showDialog` | `boolean` | Show results in a dialog (default: true) |
 
 **Returns:** `Promise<object>` - Diagnostic results with settingsData and activeCalendar info.
 
@@ -1369,8 +1369,8 @@ const isBundled = CALENDARIA.api.isBundledCalendar('custom-mycal');
 // Returns: false
 ```
 
-| Parameter    | Type     | Description         |
-| ------------ | -------- | ------------------- |
+| Parameter    | Type     | Description          |
+| ------------ | -------- | -------------------- |
 | `calendarId` | `string` | Calendar ID to check |
 
 **Returns:** `boolean` - True if bundled calendar.

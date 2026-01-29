@@ -179,7 +179,8 @@ Configure sync behavior in Settings > Time tab.
 
 Both HUD modes include a search panel:
 
-- Type at least 2 characters to search note names and content
+- Type at least 2 characters to search note names and category names
+- Use `category:` prefix to filter by category (e.g., `category:holiday`)
 - Click a result to open the note
 - Press **Escape** to close
 

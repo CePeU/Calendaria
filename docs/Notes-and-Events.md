@@ -265,6 +265,14 @@ Predefined categories:
 
 Custom categories are stored in world settings and available to all notes.
 
+### Auto-Apply Category Style
+
+When assigning categories to a note that uses default icon and color settings, the first selected category's icon and color are automatically applied to the note. This only occurs when:
+
+- The note uses the default icon (`fas fa-calendar`)
+- The note uses the default color (`#4a9eff`)
+- At least one category is assigned
+
 ## Icons
 
 Notes support two icon types:
@@ -323,7 +331,7 @@ Select a macro to execute when the event triggers. The macro runs when the event
 
 ## Player Permissions
 
-Players can create, edit, and delete their own notes. Ownership is determined by standard Foundry document permissions.
+Players can create and edit notes based on Calendaria permissions. Ownership is determined by standard Foundry document permissions combined with the "Edit Notes" permission.
 
 > [!NOTE]
 > Players with the "Manage Notes" Calendaria permission but without Foundry's core `JOURNAL_CREATE` permission can still create notes. The request is relayed via socket to a connected GM who creates the note on their behalf.
@@ -332,13 +340,14 @@ Players can create, edit, and delete their own notes. Ownership is determined by
 
 - **Create notes**: Using the Add Note button on calendar UI
 - **Edit own notes**: Notes they created (Owner permission)
-- **Delete own notes**: Notes they created
+- **Edit others' notes**: If granted the "Edit Notes" permission (does not apply to GM-only notes)
+- **Delete own notes**: Authors can delete notes they created
 - **View shared notes**: Notes with appropriate permissions
 
 ### What Players Cannot Do
 
 - **View GM-only notes**: Hidden via ownership settings
-- **Edit others' notes**: Unless given explicit permission
+- **Delete others' notes**: Only the original author or a GM can delete
 - **Modify time/date**: All time controls are GM-only
 - **Change weather**: Weather picker is GM-only
 
@@ -347,14 +356,15 @@ Players can create, edit, and delete their own notes. Ownership is determined by
 When a player creates a note:
 
 1. The JournalEntry is created with the player as owner
-2. Other players see it based on default permissions
-3. GM always has full access
+2. Users with the "Edit Notes" permission automatically receive owner-level access
+3. Other players see it based on default permissions
+4. GM always has full access
 
 When a GM creates a note:
 
 1. "GM Only" checkbox controls player visibility
-2. If checked, ownership is set to GM-only
-3. If unchecked, default permissions apply
+2. If checked, ownership is set to GM-only (Edit Notes permission does not apply)
+3. If unchecked, users with "Edit Notes" permission receive owner-level access
 
 ## For Developers
 

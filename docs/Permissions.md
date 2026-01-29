@@ -37,13 +37,14 @@ GMs always have full access to all features.
 
 ### Action Permissions
 
-| Permission           | Description                                 |
-| -------------------- | ------------------------------------------- |
-| **Manage Notes**     | Can create, edit, and delete calendar notes |
-| **Change Date/Time** | Can modify the world date and time          |
-| **Change Weather**   | Can set weather conditions                  |
-| **Change Calendar**  | Can switch the active calendar              |
-| **Edit Calendars**   | Can access the Calendar Editor              |
+| Permission           | Description                                    |
+| -------------------- | ---------------------------------------------- |
+| **Manage Notes**     | Can create and delete own calendar notes       |
+| **Edit Notes**       | Can edit calendar notes owned by other players |
+| **Change Date/Time** | Can modify the world date and time             |
+| **Change Weather**   | Can set weather conditions                     |
+| **Change Calendar**  | Can switch the active calendar                 |
+| **Edit Calendars**   | Can access the Calendar Editor                 |
 
 ---
 
@@ -57,6 +58,7 @@ By default, all non-GM roles have restricted access:
 | View TimeKeeper  |   -    |    -    |      ✓       |
 | View HUD         |   ✓    |    ✓    |      ✓       |
 | Manage Notes     |   -    |    ✓    |      ✓       |
+| Edit Notes       |   -    |    -    |      -       |
 | Change Date/Time |   -    |    -    |      ✓       |
 | Change Weather   |   -    |    -    |      ✓       |
 | Change Calendar  |   -    |    -    |      -       |
@@ -107,8 +109,15 @@ The permission UI provides cascade-up behavior for easier configuration:
 
 - Users can always view non-GM-only notes
 - With this permission, users can create new notes
-- Users can only edit/delete notes they own (GM can edit all)
+- Users can only delete notes they created (original author); GMs can delete any note
 - If the user lacks Foundry's core `JOURNAL_CREATE` permission, note creation is relayed to a connected GM via socket
+
+### Edit Notes
+
+- Allows users to edit calendar notes owned by other players
+- Does not apply to GM-only notes
+- Ownership is automatically synced when the world loads
+- Only the original note author or a GM can delete a note (regardless of this permission)
 
 ### Change Date/Time
 

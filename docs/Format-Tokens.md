@@ -123,8 +123,8 @@ Format tokens are placeholders used in display format strings.
 Combine tokens to create custom formats:
 
 - `D MMM` → 15 Jan
-- `D MMMM, YYYY` → 15 January, 2026
-- `EEEE, D MMMM YYYY` → Thursday, 15 January 2026
+- `D MMMM, Y` → 15 January, 2026
+- `EEEE, D MMMM Y` → Thursday, 15 January 2026
 - `HH:mm` → 14:30
 - `h:mm A` → 2:30 PM
 
@@ -157,32 +157,32 @@ Use square brackets `[]` to include literal text:
 
 ### Standard Dates
 
-| Preset       | Format            | Example                |
-| ------------ | ----------------- | ---------------------- |
-| `dateShort`  | D MMM             | 5 Jan                  |
-| `dateMedium` | D MMMM            | 5 January              |
-| `dateLong`   | D MMMM, YYYY      | 5 January, 2026        |
-| `dateFull`   | EEEE, D MMMM YYYY | Monday, 5 January 2026 |
+| Preset       | Format         | Example                |
+| ------------ | -------------- | ---------------------- |
+| `dateShort`  | D MMM          | 5 Jan                  |
+| `dateMedium` | D MMMM         | 5 January              |
+| `dateLong`   | D MMMM, Y      | 5 January, 2026        |
+| `dateFull`   | EEEE, D MMMM Y | Monday, 5 January 2026 |
 
 ### Regional Dates
 
-| Preset          | Format             | Example                 |
-| --------------- | ------------------ | ----------------------- |
-| `dateUS`        | MMMM D, YYYY       | January 5, 2026         |
-| `dateUSFull`    | EEEE, MMMM D, YYYY | Monday, January 5, 2026 |
-| `dateISO`       | YYYY-MM-DD         | 2026-01-05              |
-| `dateNumericUS` | MM/DD/YYYY         | 01/05/2026              |
-| `dateNumericEU` | DD/MM/YYYY         | 05/01/2026              |
+| Preset          | Format          | Example                 |
+| --------------- | --------------- | ----------------------- |
+| `dateUS`        | MMMM D, Y       | January 5, 2026         |
+| `dateUSFull`    | EEEE, MMMM D, Y | Monday, January 5, 2026 |
+| `dateISO`       | YYYY-MM-DD      | 2026-01-05              |
+| `dateNumericUS` | MM/DD/YYYY      | 01/05/2026              |
+| `dateNumericEU` | DD/MM/YYYY      | 05/01/2026              |
 
 ### Ordinal/Fantasy
 
-| Preset        | Format                      | Example                                    |
-| ------------- | --------------------------- | ------------------------------------------ |
-| `ordinal`     | Do of MMMM                  | 5th of January                             |
-| `ordinalLong` | Do of MMMM, YYYY            | 5th of January, 2026                       |
-| `ordinalEra`  | Do of MMMM, YYYY GGGG       | 5th of January, 2026 Age of Heroes         |
-| `ordinalFull` | EEEE, Do of MMMM, YYYY GGGG | Monday, 5th of January, 2026 Age of Heroes |
-| `seasonDate`  | QQQQ, Do of MMMM            | Winter, 5th of January                     |
+| Preset        | Format                   | Example                                    |
+| ------------- | ------------------------ | ------------------------------------------ |
+| `ordinal`     | Do of MMMM               | 5th of January                             |
+| `ordinalLong` | Do of MMMM, Y            | 5th of January, 2026                       |
+| `ordinalEra`  | Do of MMMM, Y GGGG       | 5th of January, 2026 Age of Heroes         |
+| `ordinalFull` | EEEE, Do of MMMM, Y GGGG | Monday, 5th of January, 2026 Age of Heroes |
+| `seasonDate`  | QQQQ, Do of MMMM         | Winter, 5th of January                     |
 
 ### Time
 
@@ -195,12 +195,12 @@ Use square brackets `[]` to include literal text:
 
 ### DateTime
 
-| Preset            | Format              | Example                 |
-| ----------------- | ------------------- | ----------------------- |
-| `datetimeShort12` | D MMM, h:mm A       | 5 Jan, 9:30 AM          |
-| `datetimeShort24` | D MMM, HH:mm        | 5 Jan, 09:30            |
-| `datetime12`      | D MMMM YYYY, h:mm A | 5 January 2026, 9:30 AM |
-| `datetime24`      | D MMMM YYYY, HH:mm  | 5 January 2026, 09:30   |
+| Preset            | Format           | Example                 |
+| ----------------- | ---------------- | ----------------------- |
+| `datetimeShort12` | D MMM, h:mm A    | 5 Jan, 9:30 AM          |
+| `datetimeShort24` | D MMM, HH:mm     | 5 Jan, 09:30            |
+| `datetime12`      | D MMMM Y, h:mm A | 5 January 2026, 9:30 AM |
+| `datetime24`      | D MMMM Y, HH:mm  | 5 January 2026, 09:30   |
 
 ---
 
