@@ -287,7 +287,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       resetBtn.dataset.tooltip = 'Reset Form';
       resetBtn.setAttribute('aria-label', 'Reset Form');
       controlsContainer.appendChild(resetBtn);
-      if (this.isAuthor && this.document.id) {
+      if ((this.isAuthor || game.user.isGM) && this.document.id) {
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.className = 'header-control icon fas fa-trash';
@@ -336,12 +336,26 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         phases: moon.phases?.map((phase) => ({ name: localize(phase.name), start: phase.start, end: phase.end })) || []
       })) || [];
     context.hasMoons = context.moons.length > 0;
-    const modifierLabels = { any: null, rising: localize('CALENDARIA.Note.MoonModifier.Rising'), true: localize('CALENDARIA.Note.MoonModifier.True'), fading: localize('CALENDARIA.Note.MoonModifier.Fading') };
+    const modifierLabels = {
+      any: null,
+      rising: localize('CALENDARIA.Note.MoonModifier.Rising'),
+      true: localize('CALENDARIA.Note.MoonModifier.True'),
+      fading: localize('CALENDARIA.Note.MoonModifier.Fading')
+    };
     context.moonConditions = (this.document.system.moonConditions || []).map((cond, index) => {
       const moon = context.moons[cond.moonIndex];
       const matchingPhase = moon?.phases?.find((p) => Math.abs(p.start - cond.phaseStart) < 0.01 && Math.abs(p.end - cond.phaseEnd) < 0.01);
       const modifier = cond.modifier || 'any';
-      return { index, moonIndex: cond.moonIndex, moonName: moon?.name, phaseStart: cond.phaseStart, phaseEnd: cond.phaseEnd, phaseName: matchingPhase?.name, modifier, modifierLabel: modifierLabels[modifier] };
+      return {
+        index,
+        moonIndex: cond.moonIndex,
+        moonName: moon?.name,
+        phaseStart: cond.phaseStart,
+        phaseEnd: cond.phaseEnd,
+        phaseName: matchingPhase?.name,
+        modifier,
+        modifierLabel: modifierLabels[modifier]
+      };
     });
     context.showMoonConditions = this.document.system.repeat === 'moon' || this.document.system.moonConditions?.length > 0;
     context.showRandomConfig = this.document.system.repeat === 'random';
@@ -496,7 +510,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.isEditMode = this.isEditMode;
     context.canEdit = this.document.isOwner;
     if (this.isViewMode) {
-      context.enrichedContent = await foundry.applications.ux.TextEditor.implementation.enrichHTML(this.document.text?.content || '', { async: true, relativeTo: this.document, secrets: this.document.isOwner });
+      context.enrichedContent = await foundry.applications.ux.TextEditor.implementation.enrichHTML(this.document.text?.content || '', {
+        async: true,
+        relativeTo: this.document,
+        secrets: this.document.isOwner
+      });
       const allCategories = getAllCategories();
       context.displayCategories = selectedCategories.map((id) => allCategories.find((c) => c.id === id)?.label).filter(Boolean);
       context.hasEndDate = endYear !== startYear || endMonth !== startMonth || endDay !== startDay;
@@ -540,6 +558,28 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       this.element.querySelector('select[name="system.reminderTargets"]').disabled = disabled;
       this.element.querySelector('input[name="system.reminderOffset"]').disabled = disabled;
     }
+  }
+
+  /**
+   * Apply icon and color from first selected category if defaults are unchanged.
+   * @private
+   */
+  async #applyFirstCategoryStyle() {
+    const DEFAULT_ICON = 'fas fa-calendar';
+    const DEFAULT_COLOR = '#4a9eff';
+    const currentIcon = this.document.system.icon;
+    const currentColor = String(this.document.system.color || '').toLowerCase();
+    const isDefaultIcon = currentIcon === DEFAULT_ICON;
+    const isDefaultColor = currentColor === DEFAULT_COLOR;
+    if (!isDefaultIcon && !isDefaultColor) return;
+    const selectedCategories = this.document.system.categories || [];
+    if (selectedCategories.length === 0) return;
+    const firstCategory = getAllCategories().find((c) => c.id === selectedCategories[0]);
+    if (!firstCategory) return;
+    const updates = {};
+    if (isDefaultIcon && firstCategory.icon) updates['system.icon'] = `fas ${firstCategory.icon}`;
+    if (isDefaultColor && firstCategory.color) updates['system.color'] = firstCategory.color;
+    if (Object.keys(updates).length > 0) await this.document.update(updates);
   }
 
   /**
@@ -811,7 +851,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onDeleteNote(_event, _target) {
-    if (!this.isAuthor) return;
+    if (!this.isAuthor && !game.user.isGM) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
       content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: this.document.name })}</p>`,
@@ -1018,8 +1058,12 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
   /** @inheritdoc */
   async _processSubmitData(event, form, submitData, options = {}) {
+    const newCategories = submitData.system?.categories;
+    const oldCategories = this.document.system.categories || [];
+    const categoriesChanged = newCategories && JSON.stringify(newCategories) !== JSON.stringify(oldCategories);
     await super._processSubmitData(event, form, submitData, options);
     if (submitData.system?.repeat === 'random') setTimeout(() => this.#regenerateRandomOccurrences(), 100);
+    if (categoriesChanged && newCategories.length > 0 && oldCategories.length === 0) await this.#applyFirstCategoryStyle();
   }
 
   /**
