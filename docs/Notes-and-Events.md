@@ -265,13 +265,13 @@ Predefined categories:
 
 Custom categories are stored in world settings and available to all notes.
 
-### Auto-Apply Category Style
+### Category Style Confirmation
 
-When assigning categories to a note that uses default icon and color settings, the first selected category's icon and color are automatically applied to the note. This only occurs when:
+When adding a category to a note, a confirmation dialog appears offering to apply that category's icon and color to the note. The dialog previews the category's emblem and lets you accept or decline.
 
-- The note uses the default icon (`fas fa-calendar`)
-- The note uses the default color (`#4a9eff`)
-- At least one category is assigned
+- Triggers each time a new category is added
+- Detects the specific newly-added category rather than always using the first one
+- Declining keeps the note's current icon and color unchanged
 
 ## Icons
 
@@ -284,8 +284,10 @@ Right-click the icon picker to switch between modes. The icon color is controlle
 
 ## Visibility
 
-- **GM Only**: Note is only visible to GMs (uses Foundry ownership system)
+- **GM Only**: Note is only visible to GMs (uses Foundry ownership system). This checkbox is only visible to GMs.
 - **Silent**: Suppresses reminders and event announcements
+
+Note visibility also respects Foundry's journal-level permissions. Non-GM users must have at least OBSERVER permission on the parent journal entry to see a note on the calendar and in search results.
 
 ## Reminders
 

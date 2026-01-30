@@ -107,7 +107,7 @@ The permission UI provides cascade-up behavior for easier configuration:
 
 ### Manage Notes
 
-- Users can always view non-GM-only notes
+- Users can view non-GM-only notes that they have at least OBSERVER permission on (respects Foundry journal permissions)
 - With this permission, users can create new notes
 - Users can only delete notes they created (original author); GMs can delete any note
 - If the user lacks Foundry's core `JOURNAL_CREATE` permission, note creation is relayed to a connected GM via socket
@@ -116,7 +116,9 @@ The permission UI provides cascade-up behavior for easier configuration:
 
 - Allows users to edit calendar notes owned by other players
 - Does not apply to GM-only notes
-- Ownership is automatically synced when the world loads
+- Ownership is automatically synced when the world loads and whenever the permission setting changes
+- Removing a user from this permission revokes their ownership on all calendar notes (preserving author and GM ownership)
+- When a note's "GM Only" flag is toggled off, users with this permission automatically receive owner-level access
 - Only the original note author or a GM can delete a note (regardless of this permission)
 
 ### Change Date/Time
