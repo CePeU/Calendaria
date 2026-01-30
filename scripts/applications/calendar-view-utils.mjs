@@ -481,63 +481,57 @@ export function generateDayTooltip(calendar, year, month, day, festivalName = nu
  */
 export function setupDayContextMenu(container, selector, calendar, options = {}) {
   const itemsGenerator = getDayContextMenuItems({ calendar, ...options });
-  container.addEventListener('contextmenu', (event) => {
-    const target = event.target.closest(selector);
-    if (!target) return;
-    if (target.classList.contains('empty')) return;
-    event.preventDefault();
-    event.stopPropagation();
-    if (activeDayContextMenu) {
-      activeDayContextMenu.close();
-      activeDayContextMenu = null;
-    }
+  let currentItems = [];
 
-    const items = itemsGenerator(target);
-    activeDayContextMenu = new ContextMenu(container, selector, items, { fixed: true, jQuery: false });
-    activeDayContextMenu._onActivate(event);
-    const postProcessMenu = () => {
-      const menu = document.getElementById('context-menu');
-      if (!menu) return;
-      const menuItems = menu.querySelectorAll('.context-item');
-      menuItems.forEach((li, idx) => {
-        const item = items[idx];
-        if (!item?._noteData) return;
-        const { note, isOwner } = item._noteData;
-        const nameSpan = li.querySelector('span:not(.note-row)');
-        if (!nameSpan) return;
-        nameSpan.classList.add('note-row');
-        nameSpan.innerHTML = `<span class="note-name">${note.name}</span>`;
-        if (isOwner) {
-          const actions = document.createElement('span');
-          actions.className = 'note-actions';
-          actions.innerHTML = `<i class="fas fa-edit" data-action="edit" data-tooltip="${localize('CALENDARIA.ContextMenu.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${localize('CALENDARIA.ContextMenu.Delete')}"></i>`;
-          nameSpan.appendChild(actions);
-          actions.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const action = e.target.closest('[data-action]')?.dataset?.action;
-            if (action === 'edit') {
-              note.sheet.render(true, { mode: 'edit' });
-              activeDayContextMenu?.close();
-            } else if (action === 'delete') {
-              activeDayContextMenu?.close();
-              const confirmed = await foundry.applications.api.DialogV2.confirm({
-                window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
-                content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: note.name })}</p>`,
-                rejectClose: false,
-                modal: true
-              });
-              if (confirmed) {
-                const journal = note.parent;
-                if (journal.pages.size === 1) await journal.delete();
-                else await note.delete();
+  activeDayContextMenu = new ContextMenu(container, selector, [], {
+    fixed: true,
+    jQuery: false,
+    onOpen: (target) => {
+      currentItems = itemsGenerator(target);
+      ui.context.menuItems = currentItems;
+      setTimeout(() => {
+        const menu = document.getElementById('context-menu');
+        if (!menu) return;
+        const menuItems = menu.querySelectorAll('.context-item');
+        menuItems.forEach((li, idx) => {
+          const item = currentItems[idx];
+          if (!item?._noteData) return;
+          const { note, isOwner } = item._noteData;
+          const nameSpan = li.querySelector('span:not(.note-row)');
+          if (!nameSpan) return;
+          nameSpan.classList.add('note-row');
+          nameSpan.innerHTML = `<span class="note-name">${note.name}</span>`;
+          if (isOwner) {
+            const actions = document.createElement('span');
+            actions.className = 'note-actions';
+            actions.innerHTML = `<i class="fas fa-edit" data-action="edit" data-tooltip="${localize('CALENDARIA.ContextMenu.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${localize('CALENDARIA.ContextMenu.Delete')}"></i>`;
+            nameSpan.appendChild(actions);
+            actions.addEventListener('click', async (e) => {
+              e.stopPropagation();
+              const action = e.target.closest('[data-action]')?.dataset?.action;
+              if (action === 'edit') {
+                note.sheet.render(true, { mode: 'edit' });
+                ui.context?.close();
+              } else if (action === 'delete') {
+                ui.context?.close();
+                const confirmed = await foundry.applications.api.DialogV2.confirm({
+                  window: { title: localize('CALENDARIA.ContextMenu.DeleteNote') },
+                  content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: note.name })}</p>`,
+                  rejectClose: false,
+                  modal: true
+                });
+                if (confirmed) {
+                  const journal = note.parent;
+                  if (journal.pages.size === 1) await journal.delete();
+                  else await note.delete();
+                }
               }
-            }
-          });
-        }
-      });
-    };
-    setTimeout(postProcessMenu, 220);
+            });
+          }
+        });
+      }, 220);
+    }
   });
 
-  return null;
+  return activeDayContextMenu;
 }

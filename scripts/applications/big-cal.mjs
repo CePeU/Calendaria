@@ -1190,16 +1190,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       MiniCal.show();
     });
 
-    // Right-click context menu on header
-    const header = this.element.querySelector('.window-header');
-    header?.addEventListener('contextmenu', (e) => {
-      if (e.target.closest('#context-menu')) return;
-      e.preventDefault();
-      document.getElementById('context-menu')?.remove();
-      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.window-header', this.#getContextMenuItems(), { fixed: true, jQuery: false });
-      menu._onActivate(e);
-    });
-
     const searchInput = this.element.querySelector('.search-input');
     if (searchInput) {
       if (this._searchOpen) searchInput.focus();
@@ -1339,6 +1329,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       onCreateNote: () => this.render(),
       extraItems: this.#getContextMenuItems()
     });
+    new foundry.applications.ux.ContextMenu.implementation(this.element, '.window-header', this.#getContextMenuItems(), { fixed: true, jQuery: false });
     this._hooks = [];
     const c = game.time.components;
     this._lastDay = `${c.year}-${c.month}-${c.dayOfMonth}`;
