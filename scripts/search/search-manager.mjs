@@ -63,7 +63,7 @@ export default class SearchManager {
    */
   static #searchNotes(term, limit, searchContent) {
     const results = [];
-    const allNotes = NoteManager.getAllNotes();
+    const allNotes = NoteManager.getAllNotes().filter((stub) => stub.visible);
     const allCategories = getAllCategories();
 
     // Handle category: prefix search

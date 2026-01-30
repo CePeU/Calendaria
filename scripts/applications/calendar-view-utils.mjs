@@ -101,7 +101,12 @@ export function getCalendarNotes() {
  * @returns {object[]} Notes visible to the current user
  */
 export function getVisibleNotes(notes) {
-  return notes.filter((page) => !page.system.gmOnly || game.user.isGM);
+  if (game.user.isGM) return notes;
+  return notes.filter((page) => {
+    if (page.system.gmOnly) return false;
+    const journal = page.parent;
+    return journal ? journal.testUserPermission(game.user, 'OBSERVER') : page.testUserPermission(game.user, 'OBSERVER');
+  });
 }
 
 /**
