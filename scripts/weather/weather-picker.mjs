@@ -5,11 +5,12 @@
  * @author Tyler
  */
 
+import CalendarManager from '../calendar/calendar-manager.mjs';
 import { HOOKS, TEMPLATES } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
 import { fromDisplayUnit, getTemperatureUnit, toDisplayUnit } from './climate-data.mjs';
 import WeatherManager from './weather-manager.mjs';
-import { WEATHER_CATEGORIES, getPresetsByCategory } from './weather-presets.mjs';
+import { WEATHER_CATEGORIES, getPreset, getPresetAlias, getPresetsByCategory } from './weather-presets.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -17,22 +18,25 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * Weather picker application with selectable presets.
  */
 class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
-  /** @type {string|null} Selected zone ID (null = no filtering) */
-  #selectedZoneId = undefined;
+  /** @type {string|null|undefined} Zone override from dropdown (undefined = use calendar default) */
+  #zoneOverride = undefined;
 
-  /** @type {boolean} Whether to set selected zone as calendar's active zone */
-  #setAsActiveZone = false;
+  /** @type {string|null} Selected preset ID (null = none selected) */
+  #selectedPresetId = null;
 
-  /** @type {string|null} Custom weather label input (null = use current weather) */
+  /** @type {boolean} Whether user has edited custom fields */
+  #customEdited = false;
+
+  /** @type {string|null} Custom weather label input */
   #customLabel = null;
 
-  /** @type {string|null} Custom weather temperature input (null = use current weather) */
+  /** @type {string|null} Custom weather temperature input */
   #customTemp = null;
 
-  /** @type {string|null} Custom weather icon input (null = use current weather) */
+  /** @type {string|null} Custom weather icon input */
   #customIcon = null;
 
-  /** @type {string|null} Custom weather color input (null = use current weather) */
+  /** @type {string|null} Custom weather color input */
   #customColor = null;
 
   /** @override */
@@ -42,7 +46,7 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
     tag: 'form',
     window: { title: 'CALENDARIA.Weather.Picker.Title', icon: 'fas fa-cloud-sun', resizable: false },
     position: { width: 550, height: 'auto' },
-    form: { handler: WeatherPickerApp._onZoneChange, submitOnChange: true, closeOnSubmit: false },
+    form: { handler: WeatherPickerApp._onSave, submitOnChange: false, closeOnSubmit: false },
     actions: {
       selectWeather: WeatherPickerApp._onSelectWeather,
       randomWeather: WeatherPickerApp._onRandomWeather,
@@ -54,24 +58,40 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static PARTS = { content: { template: TEMPLATES.WEATHER.PICKER } };
 
   /** @override */
+  async close(options) {
+    this.#zoneOverride = undefined;
+    this.#selectedPresetId = null;
+    this.#customEdited = false;
+    this.#customLabel = null;
+    this.#customTemp = null;
+    this.#customIcon = null;
+    this.#customColor = null;
+    return super.close(options);
+  }
+
+  /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const customPresets = WeatherManager.getCustomPresets();
     const zones = WeatherManager.getCalendarZones() || [];
-    if (this.#selectedZoneId === undefined) this.#selectedZoneId = WeatherManager.getActiveZone(null, game.scenes.active)?.id ?? null;
-    const selectedZone = this.#selectedZoneId ? zones.find((z) => z.id === this.#selectedZoneId) : null;
-    context.setAsActiveZone = this.#setAsActiveZone;
-    context.zoneOptions = [{ value: '', label: localize('CALENDARIA.Common.None'), selected: !this.#selectedZoneId }];
-    for (const z of zones) context.zoneOptions.push({ value: z.id, label: localize(z.name), selected: z.id === this.#selectedZoneId });
+    const calendar = CalendarManager.getActiveCalendar();
+    const calendarActiveZone = calendar?.weather?.activeZone ?? null;
+    const selectedZoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : calendarActiveZone;
+    const selectedZone = selectedZoneId ? zones.find((z) => z.id === selectedZoneId) : null;
+    context.setAsActiveZone = selectedZoneId === calendarActiveZone && calendarActiveZone != null;
+    context.zoneOptions = [{ value: '', label: localize('CALENDARIA.Common.None'), selected: !selectedZoneId }];
+    for (const z of zones) context.zoneOptions.push({ value: z.id, label: localize(z.name), selected: z.id === selectedZoneId });
     context.zoneOptions.sort((a, b) => {
       if (a.value === '') return -1;
       if (b.value === '') return 1;
       return a.label.localeCompare(b.label, game.i18n.lang);
     });
     const enabledPresetIds = new Set();
-    if (selectedZone?.presets) for (const p of selectedZone.presets) if (p.enabled !== false) enabledPresetIds.add(p.id);
+    if (selectedZone?.presets) for (const p of Object.values(selectedZone.presets)) if (p.enabled !== false) enabledPresetIds.add(p.id);
     const shouldFilter = selectedZone && enabledPresetIds.size > 0;
     context.categories = [];
+    context.selectedPresetId = this.#selectedPresetId;
+    const calendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
     const categoryIds = ['standard', 'severe', 'environmental', 'fantasy'];
     for (const categoryId of categoryIds) {
       const category = WEATHER_CATEGORIES[categoryId];
@@ -81,7 +101,11 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
       context.categories.push({
         id: categoryId,
         label: localize(category.label),
-        presets: presets.map((p) => ({ id: p.id, label: localize(p.label), description: p.description ? localize(p.description) : localize(p.label), icon: p.icon, color: p.color }))
+        presets: presets.map((p) => {
+          const alias = getPresetAlias(p.id, calendarId, selectedZoneId);
+          const label = alias || localize(p.label);
+          return { id: p.id, label, description: p.description ? localize(p.description) : label, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId };
+        })
       });
     }
 
@@ -93,67 +117,91 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
           id: 'custom',
           label: localize(WEATHER_CATEGORIES.custom.label),
           presets: filtered.map((p) => {
-            const label = p.label.startsWith('CALENDARIA.') ? localize(p.label) : p.label;
+            const alias = getPresetAlias(p.id, calendarId, selectedZoneId);
+            const label = alias || (p.label.startsWith('CALENDARIA.') ? localize(p.label) : p.label);
             const description = p.description ? (p.description.startsWith('CALENDARIA.') ? localize(p.description) : p.description) : label;
-            return { id: p.id, label, description, icon: p.icon, color: p.color };
+            return { id: p.id, label, description, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId };
           })
         });
       }
     }
 
     context.temperatureUnit = getTemperatureUnit() === 'fahrenheit' ? '°F' : '°C';
-
     const currentWeather = WeatherManager.getCurrentWeather();
     const currentTemp = WeatherManager.getTemperature();
-    context.customLabel = this.#customLabel ?? (currentWeather?.label ? localize(currentWeather.label) : '');
+    context.selectedZoneId = selectedZoneId;
+    const currentWeatherAlias = currentWeather?.id ? getPresetAlias(currentWeather.id, calendarId, selectedZoneId) : null;
+    context.customLabel = this.#customLabel ?? (currentWeatherAlias || (currentWeather?.label ? localize(currentWeather.label) : ''));
     context.customTemp = this.#customTemp ?? (currentTemp != null ? toDisplayUnit(currentTemp) : '');
     context.customIcon = this.#customIcon ?? (currentWeather?.icon || 'fa-question');
     context.customColor = this.#customColor ?? (currentWeather?.color || '#888888');
-
     return context;
   }
 
-  /**
-   * Handle zone selection change.
-   * @param {Event} _event - The change event
-   * @param {HTMLFormElement} _form - The form element
-   * @param {object} formData - The form data
-   */
-  static async _onZoneChange(_event, _form, formData) {
-    const data = foundry.utils.expandObject(formData.object);
-    this.#selectedZoneId = data.climateZone || null;
-    this.#setAsActiveZone = data.setAsActiveZone ?? false;
-    this.#customLabel = data.customLabel ?? '';
-    this.#customTemp = data.customTemp ?? '';
-    this.#customIcon = data.customIcon ?? '';
-    this.#customColor = data.customColor ?? '#888888';
-    if (this.#setAsActiveZone && this.#selectedZoneId) await WeatherManager.setActiveZone(this.#selectedZoneId);
-
-    // Update weather live when custom fields change
-    if (this.#customLabel) {
-      const temperature = this.#customTemp ? fromDisplayUnit(parseInt(this.#customTemp, 10)) : null;
-      await WeatherManager.setCustomWeather({
-        label: this.#customLabel,
-        temperature,
-        icon: this.#customIcon || 'fa-question',
-        color: this.#customColor || '#888888'
+  /** @override */
+  _onRender(context, options) {
+    super._onRender?.(context, options);
+    const zoneSelect = this.element.querySelector('select[name="climateZone"]');
+    if (zoneSelect) {
+      zoneSelect.addEventListener('change', (e) => {
+        this.#zoneOverride = e.target.value || null;
+        this.render();
       });
-      Hooks.callAll(HOOKS.WEATHER_CHANGE);
     }
-
-    this.render();
+    for (const input of this.element.querySelectorAll('.weather-picker-custom input')) {
+      input.addEventListener('input', () => {
+        this.#customEdited = true;
+        this.#selectedPresetId = null;
+        for (const btn of this.element.querySelectorAll('.weather-btn.active')) btn.classList.remove('active');
+      });
+    }
   }
 
   /**
-   * Select a specific weather preset.
+   * Handle save button. Applies selected preset or custom weather.
+   * @param {Event} _event - The submit event
+   * @param {HTMLFormElement} _form - The form element
+   * @param {object} formData - The form data
+   */
+  static async _onSave(_event, _form, formData) {
+    if (this.#selectedPresetId && !this.#customEdited) {
+      await WeatherManager.setWeather(this.#selectedPresetId);
+    } else {
+      const data = foundry.utils.expandObject(formData.object);
+      const label = data.customLabel?.trim();
+      if (!label) return;
+      const temp = data.customTemp;
+      const icon = data.customIcon?.trim() || 'fa-question';
+      const color = data.customColor || '#888888';
+      const temperature = temp ? fromDisplayUnit(parseInt(temp, 10)) : null;
+      await WeatherManager.setCustomWeather({ label, temperature, icon, color });
+    }
+    const setActive = formData.object.setAsActiveZone;
+    const zoneId = formData.object.climateZone || null;
+    if (setActive && zoneId) await WeatherManager.setActiveZone(zoneId);
+    Hooks.callAll(HOOKS.WEATHER_CHANGE);
+    await this.close();
+  }
+
+  /**
+   * Select a weather preset — populates custom fields for preview/editing.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
-  static async _onSelectWeather(_event, target) {
+  static _onSelectWeather(_event, target) {
     const presetId = target.dataset.presetId;
-    await WeatherManager.setWeather(presetId);
-    await this.close();
-    Hooks.callAll(HOOKS.WEATHER_CHANGE);
+    const preset = getPreset(presetId, WeatherManager.getCustomPresets());
+    if (!preset) return;
+    this.#selectedPresetId = presetId;
+    this.#customEdited = false;
+    const calendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
+    const zoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : (CalendarManager.getActiveCalendar()?.weather?.activeZone ?? null);
+    const alias = getPresetAlias(presetId, calendarId, zoneId);
+    this.#customLabel = alias || localize(preset.label);
+    this.#customTemp = null;
+    this.#customIcon = preset.icon || 'fa-question';
+    this.#customColor = preset.color || '#888888';
+    this.render();
   }
 
   /**
@@ -162,7 +210,10 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onRandomWeather(_event, _target) {
-    await WeatherManager.generateAndSetWeather({ zoneId: this.#selectedZoneId });
+    const zoneId = this.#zoneOverride !== undefined ? this.#zoneOverride : (CalendarManager.getActiveCalendar()?.weather?.activeZone ?? null);
+    await WeatherManager.generateAndSetWeather({ zoneId });
+    this.#selectedPresetId = null;
+    this.#customEdited = false;
     this.#customLabel = null;
     this.#customTemp = null;
     this.#customIcon = null;
@@ -172,14 +223,20 @@ class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Clear current weather.
+   * Clear current weather and reset custom fields.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onClearWeather(_event, _target) {
     await WeatherManager.clearWeather();
-    await this.close();
+    this.#selectedPresetId = null;
+    this.#customEdited = false;
+    this.#customLabel = '';
+    this.#customTemp = '';
+    this.#customIcon = '';
+    this.#customColor = '#888888';
     Hooks.callAll(HOOKS.WEATHER_CHANGE);
+    this.render();
   }
 }
 

@@ -1,54 +1,60 @@
-<div class="set-date-form">
+<div>
   {{!-- Date Section --}}
-  <section class="set-date-section">
-    <h3>{{localize "CALENDARIA.SetDate.DateSection"}}</h3>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>{{dayLabel}}</label>
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SetDate.DateSection"}}</legend>
+    <div class="form-group">
+      <label>{{dayLabel}}</label>
+      <div class="form-fields">
         <select name="day">
           {{#each days}}
             <option value="{{this}}" {{#if (eq this ../currentDay)}}selected{{/if}}>{{this}}</option>
           {{/each}}
         </select>
       </div>
-      {{#unless isMonthless}}
-        <div class="form-group">
-          <label>{{localize "CALENDARIA.Common.Month"}}</label>
+    </div>
+    {{#unless isMonthless}}
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Common.Month"}}</label>
+        <div class="form-fields">
           <select name="month">
             {{#each months}}
               <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>
             {{/each}}
           </select>
         </div>
-      {{/unless}}
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Common.Year"}}</label>
+      </div>
+    {{/unless}}
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Common.Year"}}</label>
+      <div class="form-fields">
         <input type="number" name="year" value="{{year}}" step="1">
       </div>
     </div>
-  </section>
+  </fieldset>
 
   {{!-- Time Section --}}
-  <section class="set-date-section">
-    <h3>{{localize "CALENDARIA.SetDate.TimeSection"}}</h3>
-    <div class="form-grid time-grid">
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Common.Hour"}}</label>
+  <fieldset>
+    <legend>{{localize "CALENDARIA.SetDate.TimeSection"}}</legend>
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Common.Hour"}}</label>
+      <div class="form-fields">
         <input type="number" name="hour" value="{{hour}}" min="0" max="{{maxHour}}" step="1">
       </div>
-      <div class="form-group">
-        <label>{{localize "CALENDARIA.Common.Minute"}}</label>
+    </div>
+    <div class="form-group">
+      <label>{{localize "CALENDARIA.Common.Minute"}}</label>
+      <div class="form-fields">
         <input type="number" name="minute" value="{{minute}}" min="0" max="59" step="1">
       </div>
     </div>
-  </section>
+  </fieldset>
 
   {{!-- Skip Triggers Checkbox --}}
-  <div class="form-group checkbox-group">
-    <label class="checkbox">
+  <div class="form-group">
+    <label>{{localize "CALENDARIA.SetDate.SkipTriggers"}}</label>
+    <div class="form-fields">
       <input type="checkbox" name="skipTriggers" {{#if skipTriggers}}checked{{/if}}>
-      {{localize "CALENDARIA.SetDate.SkipTriggers"}}
-    </label>
+    </div>
     <p class="hint">{{localize "CALENDARIA.SetDate.SkipTriggersHint"}}</p>
   </div>
 
@@ -100,9 +106,8 @@
     {{/if}}
   </section>
 
-  {{!-- Submit Button --}}
   <footer class="form-footer">
-    <button type="submit" class="submit-btn">
+    <button type="submit">
       <i class="fas fa-calendar-check"></i>
       {{localize "CALENDARIA.SetDate.SetDate"}}
     </button>

@@ -6,8 +6,8 @@
  */
 
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import NoteManager from '../notes/note-manager.mjs';
 import { getAllCategories } from '../notes/note-data.mjs';
+import NoteManager from '../notes/note-manager.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 
@@ -204,7 +204,7 @@ export default class SearchManager {
     if (!flagData?.startDate) return '';
     const calendar = CalendarManager.getActiveCalendar();
     const { year, month, day } = flagData.startDate;
-    const monthData = calendar?.months?.values?.[month];
+    const monthData = calendar?.monthsArray?.[month];
     const monthName = monthData ? localize(monthData.name) : format('CALENDARIA.Calendar.MonthFallback', { num: month + 1 });
     return `${day} ${monthName}, ${year}`;
   }

@@ -5,6 +5,8 @@
  * @author Tyler
  */
 
+import { MODULE, SETTINGS } from '../constants.mjs';
+
 /**
  * Standard weather conditions - common everyday weather.
  * @type {object[]}
@@ -457,4 +459,40 @@ export function getAllPresets(customPresets = []) {
 export function getPresetsByCategory(category, customPresets = []) {
   const all = getAllPresets(customPresets);
   return all.filter((p) => p.category === category);
+}
+
+/**
+ * Get the alias for a specific preset if one exists.
+ * @param {string} presetId - Weather preset ID
+ * @param {string} [calendarId] - Calendar ID for zone-scoped lookup
+ * @param {string} [zoneId] - Zone ID for zone-scoped lookup
+ * @returns {string|null} Alias label or null if no alias
+ */
+export function getPresetAlias(presetId, calendarId, zoneId) {
+  const aliases = game.settings.get(MODULE.ID, SETTINGS.WEATHER_PRESET_ALIASES) || {};
+  if (calendarId && zoneId) return aliases[calendarId]?.[zoneId]?.[presetId] || null;
+  return null;
+}
+
+/**
+ * Set an alias for a weather preset, scoped to a calendar and zone.
+ * @param {string} presetId - Weather preset ID
+ * @param {string|null} alias - Alias label, or null to remove
+ * @param {string} calendarId - Calendar ID
+ * @param {string} zoneId - Zone ID
+ * @returns {Promise<void>}
+ */
+export async function setPresetAlias(presetId, alias, calendarId, zoneId) {
+  if (!calendarId || !zoneId) return;
+  const aliases = game.settings.get(MODULE.ID, SETTINGS.WEATHER_PRESET_ALIASES) || {};
+  if (alias && alias.trim()) {
+    aliases[calendarId] ??= {};
+    aliases[calendarId][zoneId] ??= {};
+    aliases[calendarId][zoneId][presetId] = alias.trim();
+  } else {
+    delete aliases[calendarId]?.[zoneId]?.[presetId];
+    if (aliases[calendarId]?.[zoneId] && Object.keys(aliases[calendarId][zoneId]).length === 0) delete aliases[calendarId][zoneId];
+    if (aliases[calendarId] && Object.keys(aliases[calendarId]).length === 0) delete aliases[calendarId];
+  }
+  await game.settings.set(MODULE.ID, SETTINGS.WEATHER_PRESET_ALIASES, aliases);
 }

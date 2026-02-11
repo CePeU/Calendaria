@@ -2,7 +2,8 @@
 
   {{#if isGM}}
     <fieldset data-section="weather-temperature">
-      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Temperature"}}
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.Temperature"}}
         <button type="button" class="reset-section" data-action="resetSection" data-section="weather-temperature"
           data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
             class="fas fa-undo"></i></button>
@@ -77,7 +78,8 @@
               <span class="preset-color-swatch" style="background-color: {{this.color}}"></span>
               <i class="fas {{this.icon}} preset-icon-display"></i>
               <span class="preset-label">{{this.label}}</span>
-              <span class="preset-temp-display">{{this.tempMin}} – {{this.tempMax}} {{@root.temperatureUnitSymbol}}</span>
+              <span class="preset-temp-display">{{this.tempMin}} – {{this.tempMax}}
+                {{@root.temperatureUnitSymbol}}</span>
               <span class="preset-darkness-display">{{this.darknessPenalty}}</span>
               <span class="preset-actions">
                 <button type="button" data-action="editWeatherPreset" data-preset-id="{{this.id}}" class="icon-button"

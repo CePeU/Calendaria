@@ -55,6 +55,8 @@
   --calendaria-title-text: rgb(255 255 255);
   --calendaria-today: rgb(255 100 0);
   --calendaria-today-bg: rgb(255 100 0 / 20%);
+  --calendaria-toggle: rgb(234 179 8);
+  --calendaria-toggle-active: rgb(76 175 80);
 
   /* ======================================== */
   /* Layout Dimensions (Content-Aware Sizing) */
@@ -130,6 +132,8 @@
   --calendaria-title-text: rgb(0 0 0);
   --calendaria-today: rgb(230 80 0);
   --calendaria-today-bg: rgb(230 80 0 / 15%);
+  --calendaria-toggle: rgb(161 98 7);
+  --calendaria-toggle-active: rgb(21 128 61);
   --calendaria-warning: rgb(245 180 0);
   --calendaria-weekday-header: rgb(64 64 64);
 }
@@ -139,13 +143,13 @@
 /* ======================================== */
 
 [class*='calendaria'] input[type='color'] {
+  -webkit-appearance: none;
+  appearance: none;
   height: 1.75rem;
   padding: 0;
   border: 0.0625rem solid var(--color-border-light-tertiary);
   border-radius: 0.25rem;
   cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
 
   &::-webkit-color-swatch-wrapper {
     padding: 0;
@@ -402,9 +406,9 @@
 .calendar-title {
   margin: 0;
   color: var(--calendaria-title-text);
-  font-family: var(--font-body);
   font-weight: bold;
   font-size: 1.1rem;
+  font-family: var(--font-body);
 }
 
 .calendar-indicators {
@@ -421,8 +425,8 @@
   .era-indicator i,
   .cycle-indicator i {
     display: inline-flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
   }
 }
 
@@ -743,8 +747,8 @@ span.calendaria-moon-icon {
 
   &.festival-day {
     position: relative;
-    border-color: var(--calendaria-festival-border);
-    background: color-mix(in srgb, var(--calendaria-festival-border) 15%, var(--calendaria-bg));
+    border-color: var(--festival-color, var(--calendaria-festival-border));
+    background: color-mix(in srgb, var(--festival-color, var(--calendaria-festival-border)) 15%, var(--calendaria-bg));
 
     &::after {
       opacity: 0.6;
@@ -754,11 +758,11 @@ span.calendaria-moon-icon {
       left: 0;
       height: 0.1875rem;
       content: '';
-      background: linear-gradient(90deg, transparent, var(--calendaria-festival-text) 50%, transparent);
+      background: linear-gradient(90deg, transparent, var(--festival-color, var(--calendaria-festival-text)) 50%, transparent);
     }
 
     .day-number {
-      color: var(--calendaria-festival-text);
+      color: var(--festival-color, var(--calendaria-festival-text));
     }
   }
 }
@@ -773,20 +777,8 @@ span.calendaria-moon-icon {
 }
 
 .festival-icon {
-  color: var(--calendaria-festival-text);
+  color: var(--festival-color, var(--calendaria-festival-text));
   font-size: 0.75rem;
-  animation: twinkle 2s ease-in-out infinite;
-}
-
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.6;
-  }
 }
 
 .day-notes {
@@ -798,9 +790,9 @@ span.calendaria-moon-icon {
   overflow: hidden;
 
   .add-note-btn {
+    opacity: 0;
     position: static;
     flex-shrink: 0;
-    opacity: 0;
     margin-left: auto;
     transform: none;
 
@@ -838,11 +830,11 @@ span.calendaria-moon-icon {
 
 .add-note-btn {
   display: flex;
-  z-index: 5;
   opacity: 0;
+  z-index: 5;
   position: absolute;
-  bottom: 0.125rem;
   right: 0.125rem;
+  bottom: 0.125rem;
   justify-content: center;
   align-items: center;
   width: 0.875rem;
@@ -851,16 +843,16 @@ span.calendaria-moon-icon {
   padding: 0;
   border: none;
   border-radius: 0;
-  box-shadow: none;
   color: var(--calendaria-text-muted);
   font-size: 0.875rem;
-  background: none;
   cursor: pointer;
+  pointer-events: auto;
+  background: none;
+  box-shadow: none;
   transition:
     opacity 0.2s,
     color 0.15s,
     transform 0.1s;
-  pointer-events: auto;
 
   i {
     margin: 0;
@@ -2040,15 +2032,124 @@ span.calendaria-moon-icon {
 }
 
 /* ======================================== */
+/* Shared Vertical Tab Navigation           */
+/* ======================================== */
+
+.calendaria {
+  nav.sheet-tabs {
+    gap: 0;
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    width: max-content;
+    min-width: 8rem;
+    max-width: 8rem;
+    height: 100%;
+    padding: 0;
+    border-top: none;
+    border-right: 0.0625rem solid var(--color-cool-4);
+    border-bottom: none;
+
+    .tab-group {
+      display: flex;
+      flex-direction: column;
+
+      .tab-group-header {
+        padding: 0.5rem;
+        color: var(--color-text-dark-secondary);
+        font-weight: 500;
+        font-size: var(--font-size-18);
+        text-align: left;
+      }
+    }
+
+    [data-tab] {
+      gap: 0.5rem;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      max-width: 100%;
+      padding: 0.5rem;
+      border-bottom: none;
+      border-left: 0.1875rem solid var(--group-color, transparent);
+      border-radius: 0;
+      font-size: var(--font-size-14);
+      text-align: left;
+
+      > span:not(.notification-pip) {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      i {
+        width: 1.25em;
+        margin: 0;
+        text-align: center;
+      }
+
+      &.active {
+        border-left-color: var(--group-color, var(--color-warm-1));
+        background: color-mix(in srgb, var(--group-color, var(--color-warm-1)) 40%, transparent);
+      }
+    }
+  }
+
+  .nav-search {
+    position: relative;
+
+    input[type='search'] {
+      margin: 0;
+      padding: 0 0.3rem 0 2rem;
+      border: none;
+      border-radius: 0;
+      font-size: var(--font-size-11);
+    }
+
+    > i {
+      position: absolute;
+      top: 50%;
+      left: 0.5rem;
+      font-size: var(--font-size-16);
+      pointer-events: none;
+      transform: translateY(-50%);
+    }
+  }
+}
+
+/* ======================================== */
 /* Calendar Editor Styles                   */
 /* ======================================== */
 
 .calendar-editor {
-  --editor-sidebar-max-width: 11.25rem;
-  --editor-sidebar-min-width: 7.5rem;
-
   &.standard-form {
     gap: 0;
+  }
+
+  fieldset legend {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .legend-help {
+    opacity: 0.6;
+    height: 1.25rem;
+    margin-right: 0.125rem;
+    padding: 0;
+    border: none;
+    font-size: var(--font-size-14);
+    cursor: pointer;
+    background: none;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   .window-content {
@@ -2066,21 +2167,25 @@ span.calendaria-moon-icon {
   }
 
   section.tab {
-    grid-column: 2;
-    grid-row: 1;
-    display: none;
-    padding: 1rem;
+    padding: 0.75rem;
     overflow-y: auto;
-
-    &.active {
-      gap: 1rem;
-      display: flex;
-      flex-direction: column;
-    }
   }
 
   .warning {
-    color: var(--color-level-warning, var(--calendaria-warning));
+    color: var(--color-level-warning);
+  }
+
+  .format-input.invalid {
+    border-color: var(--calendaria-error);
+    outline: 0.0625rem solid var(--calendaria-error);
+  }
+
+  .format-preview {
+    font-style: italic;
+
+    &.error {
+      color: var(--calendaria-error);
+    }
   }
 
   .template-selector {
@@ -2102,23 +2207,6 @@ span.calendaria-moon-icon {
       display: flex;
       justify-content: flex-end;
     }
-  }
-
-  .form-fields .year-input,
-  input.year-input {
-    flex: none;
-    width: 6em;
-  }
-
-  .form-fields.fit-content {
-    flex: none;
-    width: auto;
-  }
-
-  .form-fields select.fit-content,
-  select.fit-content {
-    flex: none;
-    width: fit-content;
   }
 
   .header-row {
@@ -2146,18 +2234,108 @@ span.calendaria-moon-icon {
     }
 
     &.warning i {
-      color: var(--color-level-warning, var(--calendaria-warning));
+      color: var(--color-level-warning);
     }
 
     .mismatch {
-      color: var(--color-level-warning, var(--calendaria-warning));
+      color: var(--color-level-warning);
     }
   }
 
   .items-list {
-    gap: 0.5rem;
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: var(--list-columns, 2fr 1fr auto);
+    row-gap: 0.5rem;
+    display: grid;
+
+    > .list-header,
+    > .item {
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
+      display: grid;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      column-gap: 0.5rem;
+    }
+
+    > .item:not(.flexrow) {
+      row-gap: 0.5rem;
+
+      > * {
+        grid-column: 1 / -1;
+      }
+
+      > .flexrow {
+        grid-template-columns: subgrid;
+        display: grid;
+        align-items: center;
+        column-gap: 0.5rem;
+      }
+    }
+
+    label.checkbox {
+      justify-self: center;
+    }
+
+    input.duplicate {
+      border-color: var(--color-level-error);
+      color: var(--color-level-error);
+    }
+  }
+
+  .months-list {
+    --list-columns: 2fr 1fr 3.5rem 3.5rem 1fr 1fr auto;
+  }
+
+  .weekdays-list {
+    --list-columns: 2fr 1fr auto auto;
+  }
+
+  .named-weeks-list {
+    --list-columns: 2fr 1fr 5rem auto;
+  }
+
+  .named-weeks-list.no-week-number {
+    --list-columns: 2fr 1fr auto;
+  }
+
+  .named-years-list {
+    --list-columns: 2fr 6rem auto;
+  }
+
+  .festivals-list {
+    --list-columns: 2fr auto 1fr 3.5rem 3.5rem 3.5rem auto auto auto;
+  }
+
+  .festival-icon-display {
+    --button-background-color: transparent;
+    --button-border-color: transparent;
+
+    padding: 0.25rem;
+    font-size: 1.25em;
+
+    &:hover {
+      --button-hover-text-color: currentcolor;
+
+      opacity: 0.8;
+    }
+  }
+
+  .festival-description {
+    height: calc(var(--input-height, 1.75rem) * 2);
+    font-size: 0.85rem;
+    resize: none;
+  }
+
+  .canonical-hours-list {
+    --list-columns: 2fr 1fr 3.5rem 3.5rem auto;
+  }
+
+  .eras-list {
+    --list-columns: 2fr 0.5fr 5rem 5rem auto;
+  }
+
+  .moons-list {
+    --list-columns: 3fr 1fr auto auto;
   }
 
   .item {
@@ -2188,11 +2366,15 @@ span.calendaria-moon-icon {
       }
 
       &:hover:not(:disabled) {
-        --button-hover-text-color: var(--color-text-primary, var(--calendaria-text));
+        --button-hover-text-color: var(--color-text-primary);
       }
 
-      &.active {
-        color: var(--calendaria-primary);
+      &[data-action='toggleCustomWeekdays'] {
+        color: var(--calendaria-toggle);
+
+        &.toggled {
+          color: var(--calendaria-toggle-active);
+        }
       }
 
       &[data-action='removeMonth'],
@@ -2200,9 +2382,10 @@ span.calendaria-moon-icon {
       &[data-action='removeSeason'],
       &[data-action='removeFestival'],
       &[data-action='removeMoon'],
+      &[data-action='removeMoonPhase'],
       &[data-action='removeEra'] {
         &:hover:not(:disabled) {
-          --button-hover-text-color: var(--color-level-error, var(--calendaria-error));
+          --button-hover-text-color: var(--color-level-error);
         }
       }
     }
@@ -2267,7 +2450,7 @@ span.calendaria-moon-icon {
   }
 
   .computed-value {
-    color: var(--color-text-primary, var(--calendaria-text));
+    color: var(--color-text-primary);
     font-weight: 600;
     font-size: var(--font-size-16);
   }
@@ -2292,11 +2475,6 @@ span.calendaria-moon-icon {
       flex: none;
       margin-top: 0.15rem;
     }
-
-    &.warning {
-      border: 0.0625rem solid color-mix(in srgb, var(--color-level-warning, var(--calendaria-warning)) 40%, transparent);
-      background: color-mix(in srgb, var(--color-level-warning, var(--calendaria-warning)) 15%, transparent);
-    }
   }
 
   .list-header {
@@ -2306,340 +2484,60 @@ span.calendaria-moon-icon {
     padding: 0.25rem 0.5rem;
     color: var(--color-text-secondary);
     font-weight: 600;
-    font-size: var(--font-size-12);
+    font-size: var(--font-size-14);
 
     > span {
       text-align: center;
     }
   }
 
-  .months-list {
-    .list-header,
-    .month-row-main {
-      gap: 0.5rem;
-      display: flex;
-      flex-wrap: nowrap;
-      align-items: center;
-    }
-
-    .col-name {
-      flex: 2 1 5rem;
-      min-width: 5rem;
-    }
-
-    .col-abbr {
-      flex: 1 1 3.75rem;
-      min-width: 3.75rem;
-    }
-
-    .col-days,
-    .col-leap {
-      flex: 0 0 3.4375rem;
-      width: 3.4375rem;
-      text-align: center;
-    }
-
-    .col-start-weekday {
-      flex: 0 0 5rem;
-      width: 5rem;
-    }
-
-    .col-type {
-      flex: 0 0 6.875rem;
-      width: 6.875rem;
-    }
-
-    .col-controls {
-      flex: 0 0 7.1875rem;
-      width: 7.1875rem;
-    }
-
-    .list-header > span {
-      text-align: center;
-    }
-  }
-
-  .month-item {
-    padding: 0.25rem 0.5rem;
-
-    .month-row-main {
-      gap: 0.5rem;
-    }
-  }
-
-  .weekdays-list {
-    .col-name {
-      flex: 1;
-      min-width: 5rem;
-    }
-
-    .col-abbr {
-      flex: 0.5;
-      min-width: 4.375rem;
-    }
-
-    .col-rest {
-      display: flex;
-      flex: 0.2;
-      justify-content: center;
-      width: 3.75rem;
-    }
-
-    .col-controls {
-      flex: none;
-      width: 5.625rem;
-    }
-  }
-
-  .weekday-item {
-    padding: 0.25rem 0.5rem;
-  }
-
-  .seasons-hint {
-    margin-bottom: 0.75rem;
-  }
-
   .seasons-list {
-    .season-item {
-      display: block;
-      margin-bottom: 0.5rem;
-      padding: 0.25rem 0.5rem;
+    &.date-based {
+      --list-columns: 1.5fr 0.75fr auto 1.5fr 1.5fr 1fr auto;
     }
 
-    .season-row-top {
-      gap: 0.5rem;
-
-      .col-name {
-        flex: 0 0 30%;
-      }
-
-      .col-abbr {
-        flex: 0 0 15%;
-      }
-
-      .col-icon {
-        flex: 0 0 30%;
-      }
-
-      .col-color {
-        flex: 0 0 15%;
-      }
-
-      .col-controls {
-        width: fit-content;
-        margin-left: auto;
-      }
-    }
-
-    .season-row-single {
-      gap: 0.5rem;
-
-      .col-name {
-        flex: 1 1 7.5rem;
-      }
-
-      .col-abbr {
-        flex: 0 0 3.75rem;
-      }
-
-      .col-icon {
-        flex: 1 1 6.25rem;
-      }
-
-      .col-color {
-        flex: 0 0 2.5rem;
-      }
-
-      .col-seasonal-type {
-        flex: 0 0 5rem;
-      }
-
-      .col-duration {
-        flex: 0 0 3.75rem;
-      }
-
-      .col-controls {
-        width: fit-content;
-        margin-left: auto;
-      }
-    }
-
-    .season-row-bottom {
-      gap: 0.5rem;
-      margin-top: 0.25rem;
-
-      .col-start-month {
-        flex: 1 1 25%;
-      }
-
-      .col-start-day {
-        flex: 0 0 3.125rem;
-      }
-
-      .col-end-month {
-        flex: 1 1 25%;
-      }
-
-      .col-end-day {
-        flex: 0 0 3.125rem;
-      }
-
-      .col-seasonal-type {
-        flex: 0 0 5rem;
-      }
-
-      .col-controls {
-        width: fit-content;
-        margin-left: auto;
-      }
+    &.periodic {
+      --list-columns: 1.5fr 0.75fr auto 4rem 1fr auto;
     }
   }
 
-  .festivals-list {
-    .col-name {
-      flex: 2;
-      min-width: 6.25rem;
-    }
+  .season-item {
+    border-left: 0.1875rem solid var(--season-color, var(--color-cool-4));
+  }
 
-    .col-month {
-      flex: none;
-      width: 6.875rem;
-    }
+  .season-icon-display {
+    --button-background-color: transparent;
+    --button-border-color: transparent;
 
-    .col-day {
-      flex: none;
-      width: 3.125rem;
-    }
+    padding: 0.25rem;
+    font-size: 1.25em;
 
-    .col-duration,
-    .col-leap-duration {
-      flex: none;
-      width: 3.4375rem;
-    }
+    &:hover {
+      --button-hover-text-color: currentcolor;
 
-    .col-leap,
-    .col-weekday {
-      display: flex;
-      flex: none;
-      justify-content: center;
-      align-items: center;
-      width: 4.375rem;
-    }
-
-    .col-controls {
-      flex: none;
-      width: 3.125rem;
+      opacity: 0.8;
     }
   }
 
-  .canonical-hours-list {
-    .col-name {
-      flex: 2;
-      min-width: 6.25rem;
-    }
+  .season-date-fields {
+    gap: 0.375rem;
+    display: flex;
+    align-items: center;
 
-    .col-abbr {
-      flex: none;
-      width: 5rem;
-    }
-
-    .col-start,
-    .col-end {
-      flex: none;
-      width: 3.75rem;
-    }
-
-    .col-controls {
-      flex: none;
-      width: 3.125rem;
-    }
-  }
-
-  .named-weeks-list {
-    .col-name {
-      flex: 2;
-      min-width: 7.5rem;
-    }
-
-    .col-abbr {
-      flex: none;
-      width: 6.25rem;
-    }
-
-    .col-controls {
-      flex: none;
-      width: 3.125rem;
-    }
-  }
-
-  .festival-item {
-    padding: 0.25rem 0.5rem;
-  }
-
-  .eras-list {
-    .col-name {
+    select {
       flex: 1;
-      min-width: 3.75rem;
+      min-width: 0;
     }
 
-    .col-abbr {
-      flex: none;
-      width: 5.3125rem;
-    }
-
-    .col-start-year,
-    .col-end-year {
-      flex: none;
-      width: 4.375rem;
-    }
-
-    .col-controls {
-      flex: none;
-      width: 3.125rem;
-    }
-  }
-
-  .era-item {
-    gap: 0.25rem;
-    flex-direction: column;
-    align-items: stretch;
-
-    .era-main {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-    }
-  }
-
-  .moons-list {
-    .moon-header {
-      gap: 0.5rem;
-      grid-template-columns: 1fr 6.25rem 5.625rem 3.125rem;
-      display: grid;
-      align-items: center;
-      padding: 0.25rem 0.5rem;
-    }
-
-    .moon-item:first-child .moon-header {
-      grid-template-rows: auto auto;
-      row-gap: 0.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 0.0625rem solid var(--color-cool-4);
+    input[type='number'] {
+      flex: 0 0 2.5rem;
     }
   }
 
   .moon-item {
-    flex-direction: column;
-    align-items: stretch;
     padding: 0.75rem 0.5rem;
 
     .moon-header {
-      border-bottom: 0.0625rem solid var(--color-cool-5);
-
-      .col-cycle {
-        text-align: right;
-      }
-
       .color-input-wrapper {
         gap: 0.375rem;
         display: flex;
@@ -2670,13 +2568,6 @@ span.calendaria-moon-icon {
           mix-blend-mode: multiply;
         }
       }
-
-      .item-controls {
-        gap: 0.5rem;
-        display: flex;
-        justify-content: flex-end;
-        padding-bottom: 0.125rem;
-      }
     }
 
     .moon-fields {
@@ -2686,109 +2577,36 @@ span.calendaria-moon-icon {
       padding-top: 0.75rem;
     }
 
-    .reference-date {
-      .ref-date-grid {
-        gap: 0.75rem;
-        grid-template-columns: 1fr 1fr 5rem 1fr 5rem;
-        display: grid;
-
-        .grid-col {
-          gap: 0.25rem;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-
-          label {
-            color: var(--color-text-secondary);
-            font-weight: 600;
-            font-size: var(--font-size-11);
-            text-align: center;
-          }
-
-          input,
-          select {
-            width: 100%;
-          }
-
-          input[type='checkbox'] {
-            width: auto;
-          }
-        }
-      }
-    }
-
     .moon-phases-section {
       margin-top: 0.5rem;
 
       .phases-list {
-        .list-header {
-          padding: 0.25rem 0.5rem;
-          border-bottom: 0.0625rem solid var(--color-cool-4);
-          font-weight: bold;
-          font-size: var(--font-size-12);
-        }
-
-        .phase-item {
-          gap: 0.5rem;
-          align-items: center;
-          padding: 0.25rem 0.5rem;
-
-          &:nth-child(even) {
-            background: var(--color-cool-5-50);
-          }
-        }
-
-        .col-icon {
-          flex: none;
-          width: 2.5rem;
-          text-align: center;
-        }
-
-        .col-phase-name {
-          flex: 2;
-          min-width: 4.7rem;
-        }
-
-        .col-rising,
-        .col-fading {
-          flex: 1;
-          min-width: 4.375rem;
-        }
-
-        .col-start,
-        .col-end {
-          flex: none;
-          width: 3.5rem;
-        }
-
-        .col-controls {
-          gap: 0.25rem;
-          display: flex;
-          flex: none;
-          justify-content: flex-end;
-          width: 3.125rem;
-        }
+        --list-columns: auto 1.6fr 1fr 1fr 4.25rem 4.25rem auto;
       }
 
       .empty-phases {
+        display: flex;
+        justify-content: center;
         padding-top: 0.75rem;
         text-align: center;
-        justify-content: center;
-        display: flex;
       }
 
       .phase-icon-btn {
         width: 2rem;
         height: 2rem;
         padding: 0.125rem;
-        border: 0.0625rem solid var(--color-cool-4);
-        border-radius: 0.25rem;
+        border: none;
+        border-radius: 50%;
+        overflow: hidden;
         cursor: pointer;
-        background: var(--color-cool-5);
+        background: transparent;
 
-        &:hover {
-          border-color: var(--color-warm-1);
-          background: var(--color-cool-4);
+        &.tinted {
+          background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
+        }
+
+        &.tinted img {
+          mix-blend-mode: multiply;
         }
 
         img {
@@ -2802,18 +2620,126 @@ span.calendaria-moon-icon {
           line-height: 1;
         }
       }
+    }
 
-      .phase-hint {
-        margin-top: 0.5rem;
-        font-size: var(--font-size-12);
+    .moon-phase-slider {
+      margin: 1.125rem 0 0.5rem;
+      border: 0.0625rem solid color-mix(in srgb, var(--color-light-2) 70%, transparent);
+      border-radius: 0.25rem;
+
+      .slider-track {
+        position: relative;
+        width: 100%;
+        height: 1.25rem;
+        border-radius: 0.25rem;
+        overflow: visible;
+        background:
+          radial-gradient(0.0625rem 0.0625rem at 10% 20%, rgb(255 255 255 / 80%), transparent), radial-gradient(0.0625rem 0.0625rem at 25% 70%, rgb(255 255 255 / 60%), transparent),
+          radial-gradient(0.0625rem 0.0625rem at 40% 30%, rgb(255 255 255 / 70%), transparent), radial-gradient(0.0625rem 0.0625rem at 55% 80%, rgb(255 255 255 / 50%), transparent),
+          radial-gradient(0.0625rem 0.0625rem at 70% 15%, rgb(255 255 255 / 80%), transparent), radial-gradient(0.0625rem 0.0625rem at 85% 60%, rgb(255 255 255 / 60%), transparent),
+          radial-gradient(0.0625rem 0.0625rem at 95% 40%, rgb(255 255 255 / 70%), transparent), radial-gradient(0.0313rem 0.0313rem at 5% 50%, rgb(255 255 255 / 40%), transparent),
+          radial-gradient(0.0313rem 0.0313rem at 15% 85%, rgb(255 255 255 / 40%), transparent), radial-gradient(0.0313rem 0.0313rem at 30% 10%, rgb(255 255 255 / 40%), transparent),
+          radial-gradient(0.0313rem 0.0313rem at 45% 55%, rgb(255 255 255 / 40%), transparent), radial-gradient(0.0313rem 0.0313rem at 60% 45%, rgb(255 255 255 / 40%), transparent),
+          radial-gradient(0.0313rem 0.0313rem at 75% 90%, rgb(255 255 255 / 40%), transparent), radial-gradient(0.0313rem 0.0313rem at 90% 25%, rgb(255 255 255 / 40%), transparent),
+          linear-gradient(to bottom, rgb(13 16 51) 0%, rgb(10 10 26) 50%, rgb(5 5 16) 100%);
+      }
+
+      .slider-segment {
+        display: flex;
+        position: absolute;
+        top: 0;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        height: 100%;
+        border-right: 0.0625rem solid rgb(255 255 255 / 15%);
+        transition: background 0.15s;
+
+        &:first-child {
+          border-radius: 0.25rem 0 0 0.25rem;
+        }
+
+        &:last-child {
+          border-right: none;
+          border-radius: 0 0.25rem 0.25rem 0;
+        }
+
+        &:hover {
+          background: rgb(255 255 255 / 10%);
+        }
+
+        .phase-icon-wrapper {
+          width: 0.875rem;
+          height: 0.875rem;
+          border-radius: 50%;
+          overflow: hidden;
+          pointer-events: none;
+        }
+
+        &.tinted .phase-icon-wrapper {
+          background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(255 255 255));
+        }
+
+        &.tinted .phase-icon-wrapper img {
+          mix-blend-mode: multiply;
+        }
+
+        .phase-icon {
+          object-fit: contain;
+          width: 100%;
+          height: 100%;
+        }
+
+        .phase-emoji {
+          font-size: 0.75rem;
+          line-height: 1;
+        }
+
+        .phase-percent {
+          position: absolute;
+          top: -1.125rem;
+          left: 50%;
+          color: var(--color-text-dark-secondary);
+          font-size: var(--font-size-13);
+          white-space: nowrap;
+          cursor: pointer;
+          transform: translateX(-50%);
+        }
+      }
+
+      .slider-handle {
+        z-index: 10;
+        position: absolute;
+        top: -0.0625rem;
+        width: 0.25rem;
+        height: calc(100% + 0.125rem);
+        border-radius: 0.125rem;
+        cursor: col-resize;
+        background: var(--color-warm-1);
+        transition:
+          background 0.15s,
+          box-shadow 0.15s;
+        transform: translateX(-50%);
+
+        &:hover,
+        &.dragging {
+          background: color-mix(in srgb, var(--color-warm-1) 80%, rgb(255 255 255));
+          box-shadow: 0 0 0.5rem var(--color-warm-1);
+        }
+
+        &::before {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0.0625rem;
+          height: 0.75rem;
+          border-radius: 0.0625rem;
+          content: '';
+          background: rgb(255 255 255 / 50%);
+          transform: translate(-50%, -50%);
+        }
       }
     }
-  }
-
-  .cycle-format-section {
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 0.0625rem solid var(--color-cool-4);
   }
 
   .cycle-item {
@@ -2837,7 +2763,7 @@ span.calendaria-moon-icon {
         label {
           color: var(--color-text-secondary);
           font-weight: 600;
-          font-size: var(--font-size-11);
+          font-size: var(--font-size-14);
           text-align: center;
           white-space: nowrap;
         }
@@ -2856,39 +2782,26 @@ span.calendaria-moon-icon {
       }
     }
 
-    .cycle-entries-section {
-      margin-top: 0.75rem;
-
+    .cycle-stages-section {
       legend {
         font-weight: bold;
-        font-size: var(--font-size-12);
+        font-size: var(--font-size-14);
       }
 
-      .entries-list {
+      .stages-list {
         gap: 0.25rem;
         display: flex;
         flex-direction: column;
-        max-height: 12.5rem;
         overflow-y: auto;
       }
 
-      .entry-item {
+      .stage-item {
         gap: 0.5rem;
         display: flex;
         align-items: center;
         padding: 0.25rem 0.5rem;
 
-        &:nth-child(even) {
-          background: var(--color-cool-5-50);
-        }
-
-        .entry-number {
-          flex: 0 0 1.875rem;
-          color: var(--color-text-secondary);
-          font-weight: bold;
-        }
-
-        .col-entry-name {
+        .col-stage-name {
           flex: 1;
           min-width: 6.25rem;
         }
@@ -2921,7 +2834,7 @@ span.calendaria-moon-icon {
     grid-row: 2;
     display: flex;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 1rem;
     border-top: 0.0625rem solid var(--color-cool-4);
     background: var(--color-cool-5);
 
@@ -2941,10 +2854,12 @@ span.calendaria-moon-icon {
         box-shadow: 0 0 0.25rem var(--button-focus-outline-color);
       }
 
-      /* Export and Save get equal flex width */
-      &[data-action='exportCalendar'],
-      &[data-action='saveCalendar'] {
+      &[data-action='exportCalendar'] {
         flex: 1;
+      }
+
+      &[data-action='saveCalendar'] {
+        flex: 2;
       }
 
       &.primary {
@@ -2960,434 +2875,27 @@ span.calendaria-moon-icon {
   }
 
   /* -------------------------------------------- */
-  /*  Vertical Tab Sidebar Layout                 */
-  /* -------------------------------------------- */
-
-  nav.sheet-tabs {
-    gap: 0.125rem;
-    grid-column: 1;
-    grid-row: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
-    width: max-content;
-    min-width: var(--editor-sidebar-min-width);
-    max-width: var(--editor-sidebar-max-width);
-    padding: 0;
-    border-top: none;
-    border-right: 0.0625rem solid var(--color-cool-4);
-    border-bottom: none;
-    overflow: hidden auto;
-
-    [data-tab] {
-      gap: 0.5rem;
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-end;
-      align-items: center;
-      max-width: 100%;
-      padding-right: 0.5rem;
-      border-bottom: none;
-      border-left: 0.1875rem solid transparent;
-      border-radius: 0;
-      text-align: right;
-
-      > span:not(.notification-pip) {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      i {
-        width: 1.25em;
-        margin: 0;
-        text-align: center;
-      }
-
-      &.active {
-        border-left-color: var(--color-warm-1);
-        background: var(--color-cool-5);
-      }
-
-      &:hover:not(.active) {
-        background: var(--color-cool-5-50);
-      }
-    }
-  }
-
-  /* -------------------------------------------- */
   /*  Weather Tab Styles                          */
   /* -------------------------------------------- */
-
-  .weather-header {
-    gap: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 0.0625rem solid var(--color-cool-4);
-
-    .zone-controls {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-
-      .form-group {
-        gap: 0.5rem;
-        display: flex;
-        align-items: center;
-        margin: 0;
-      }
-
-      .zone-select {
-        min-width: 9.375rem;
-      }
-    }
-
-    .zone-actions {
-      gap: 0.25rem;
-      display: flex;
-    }
-
-    .zone-btn {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 1.75rem;
-      height: 1.75rem;
-      padding: 0;
-      border: 0.0625rem solid var(--color-cool-4);
-      border-radius: 0.1875rem;
-      color: var(--color-text-secondary);
-      cursor: pointer;
-      background: var(--color-cool-5);
-
-      &:hover {
-        color: var(--color-text-primary, var(--calendaria-text));
-        background: var(--color-cool-4);
-      }
-    }
-
-    .auto-generate {
-      margin: 0;
-    }
-  }
-
-  .season-climate-section {
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    border: 0.0625rem solid var(--color-cool-4);
-    border-radius: 0.25rem;
-
-    legend {
-      padding: 0 0.5rem;
-      font-weight: 600;
-    }
-
-    .hint {
-      margin: 0 0 0.5rem;
-      font-size: 0.85rem;
-    }
-  }
-
   .season-climate-list {
-    gap: 0.5rem;
-    grid-template-columns: repeat(2, 1fr);
-    display: grid;
+    --list-columns: auto 1fr auto;
   }
 
-  .season-climate-item {
-    gap: 0.5rem;
-    display: flex;
-    align-items: center;
-    padding: 0.35rem 0.5rem;
-    border-radius: 0.1875rem;
-    background: var(--color-cool-5);
-
-    .season-info {
-      gap: 0.35rem;
-      display: flex;
-      flex: 1;
-      align-items: center;
-      min-width: 0;
-    }
-
-    .season-icon {
-      flex-shrink: 0;
-      width: 1.125rem;
-      text-align: center;
-    }
-
-    .season-name {
-      overflow: hidden;
-      font-weight: 500;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .season-climate-status {
-      gap: 0.25rem;
-      display: flex;
-      flex-shrink: 0;
-      align-items: center;
-      color: var(--color-text-secondary);
-      font-size: 0.8rem;
-    }
-
-    .season-climate-btn {
-      flex-shrink: 0;
-      width: fit-content;
-      padding: 0.2rem 0.4rem;
-      border: 0.0625rem solid var(--color-cool-4);
-      border-radius: 0.1875rem;
-      cursor: pointer;
-      background: transparent;
-
-      &:hover {
-        background: var(--color-cool-4);
-      }
-    }
-  }
-
-  .zone-presets-section {
-    padding: 0.75rem;
-    border: 0.0625rem solid var(--color-cool-4);
-    border-radius: 0.25rem;
-
-    legend {
-      padding: 0 0.5rem;
-      font-weight: 600;
-    }
-
-    > .hint {
-      margin: 0 0 0.5rem;
-      font-size: 0.85rem;
-    }
-  }
-
-  .weather-presets-list {
-    gap: 1rem;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .weather-category {
-    border: 0.0625rem solid var(--color-cool-4);
-    border-radius: 0.25rem;
-
-    .category-header {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-      padding: 0.5rem 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      user-select: none;
-      background: var(--color-cool-5);
-
-      i.toggle-icon {
-        transition: transform 0.2s;
-      }
-
-      .category-select-all {
-        margin: 0;
-        padding: 0;
-      }
-
-      .category-name {
-        flex: 1;
-      }
-
-      .category-stats {
-        gap: 0.5rem;
-        display: flex;
-        color: var(--color-text-secondary);
-        font-weight: 400;
-        font-size: var(--font-size-12);
-
-        .category-percent {
-          min-width: 2.5rem;
-          text-align: right;
-        }
-
-        .category-count {
-          opacity: 0.7;
-        }
-      }
-
-      &:hover {
-        background: var(--color-cool-4);
-      }
-    }
-
-    &.collapsed {
-      .category-header i.toggle-icon {
-        transform: rotate(-90deg);
-      }
-
-      .category-content {
-        display: none;
-      }
-    }
-  }
-
-  .weather-preset-header,
-  .weather-preset-item {
-    gap: 0.5rem;
-    grid-template-columns: 1.5rem 1.75rem 1fr 5.625rem 8.125rem 3.125rem;
-    display: grid;
-    align-items: center;
-    padding: 0.35rem 0.75rem;
-  }
-
-  .weather-preset-header {
-    color: var(--color-text-secondary);
-    font-weight: 600;
-    font-size: var(--font-size-12);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .weather-preset-item {
-    position: relative;
-    border-top: 0.0625rem solid var(--color-cool-4-50, var(--calendaria-cool-4-50));
-
-    &:hover {
-      background: var(--color-cool-5-50);
-    }
-
-    .preset-icon {
-      display: flex;
-      justify-content: center;
-
-      i {
-        font-size: var(--font-size-16);
-      }
-    }
-
-    .preset-name {
-      font-weight: 500;
-    }
-
-    .preset-chance {
-      gap: 0.25rem;
-      display: flex;
-      align-items: center;
-
-      input {
-        width: 3.75rem;
-        text-align: right;
-      }
-    }
-
-    .preset-temp {
-      gap: 0.25rem;
-      display: flex;
-      align-items: center;
-
-      input {
-        width: 2.8125rem;
-        text-align: right;
-      }
-
-      .temp-separator,
-      .temp-unit {
-        color: var(--color-text-secondary);
-        font-size: var(--font-size-12);
-      }
-    }
-
-    .preset-actions {
-      gap: 0.25rem;
-      display: flex;
-
-      button {
-        width: 1.5rem;
-        height: 1.5rem;
-        padding: 0.25rem;
-      }
-    }
-
-    .description-popover {
-      display: none;
-      z-index: 10;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      left: 0;
-      padding: 0.5rem;
-      border: 0.0625rem solid var(--color-cool-4);
-      border-radius: 0.25rem;
-      background: var(--color-cool-5);
-      box-shadow: 0 0.125rem 0.5rem var(--calendaria-shadow-light);
-
-      &.show {
-        display: block;
-      }
-
-      textarea {
-        width: 100%;
-        min-height: 3.75rem;
-        font-size: var(--font-size-13);
-        resize: vertical;
-      }
-    }
-  }
-
-  .weather-totals {
-    gap: 1rem;
-    display: flex;
-    align-items: center;
-    margin-top: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.25rem;
-    background: var(--color-cool-5);
-
-    .total-label {
-      font-weight: 600;
-    }
-
-    .total-value {
-      font-size: var(--font-size-16);
-
-      &.warning {
-        color: var(--color-level-warning, var(--calendaria-warning));
-      }
-
-      &.valid {
-        color: var(--color-level-success);
-      }
-    }
-
-    .total-hint {
-      margin-left: auto;
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-12);
-    }
+  .zone-climate-list {
+    --list-columns: auto 1fr auto;
   }
 }
-
 /* -------------------------------------------- */
-/*  Climate Settings Dialog                     */
+/*  Climate Editor                              */
 /* -------------------------------------------- */
 
-.calendaria.climate-settings-dialog {
-  .dialog-content {
-    max-height: 31.25rem;
+.calendaria.climate-editor {
+  max-width: 62.5rem;
+  max-height: 50rem;
+
+  .window-content {
+    padding: 1rem;
     overflow-y: auto;
-  }
-
-  .temp-fields {
-    gap: 0.5rem;
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-
-    input {
-      width: 5rem;
-    }
   }
 
   .preset-category {
@@ -3407,7 +2915,7 @@ span.calendaria-moon-icon {
     align-items: center;
     padding: 0.25rem 0;
 
-    input {
+    input[type='number'] {
       text-align: right;
     }
   }
@@ -3416,9 +2924,50 @@ span.calendaria-moon-icon {
     text-align: center;
   }
 
+  .preset-name {
+    gap: 0.25rem;
+    display: flex;
+    align-items: center;
+
+    input {
+      flex: 1;
+    }
+
+    .preset-reset-alias {
+      flex: none;
+      padding: 0.125rem 0.25rem;
+      font-size: 0.75rem;
+    }
+  }
+
   .units {
     color: var(--color-text-secondary);
     font-size: 0.85rem;
+  }
+
+  /* Zone mode: wider grid with checkbox, alias, and temp columns */
+  &.zone-mode .preset-row {
+    grid-template-columns: 1.5rem 1.5rem 1fr 3.75rem 1.25rem 3.75rem 1.25rem 3.75rem 1.25rem;
+  }
+
+  .preset-temp-input {
+    width: 3.75rem;
+  }
+
+  .form-fields.temperature > i {
+    flex: 0 0 0.5rem;
+    text-align: center;
+  }
+
+  .daylight-fieldset {
+    .solstice-value {
+      font-weight: 600;
+    }
+
+    .solstice-date {
+      color: var(--color-text-secondary, hsl(0deg 0% 60%));
+      font-size: 0.85rem;
+    }
   }
 }
 
@@ -3514,7 +3063,7 @@ span.calendaria-moon-icon {
 .custom-weekday-header span {
   color: var(--color-text-dark-secondary);
   font-weight: 600;
-  font-size: 0.85em;
+  font-size: var(--font-size-14);
   text-align: center;
 }
 
@@ -3522,6 +3071,21 @@ span.calendaria-moon-icon {
   justify-self: center;
   width: 1rem;
   height: 1rem;
+}
+
+.custom-weekdays-dialog .form-footer,
+.season-icon-dialog .form-footer {
+  gap: 0.5rem;
+  display: flex;
+
+  button {
+    flex: 1;
+
+    &[data-action='disable'],
+    &[data-action='reset'] {
+      flex: none;
+    }
+  }
 }
 
 /* ======================================== */
@@ -3635,9 +3199,9 @@ span.calendaria-moon-icon {
 .time-keeper .time-btn {
   display: flex;
   flex: 1;
-  box-sizing: border-box;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box;
   height: 1.5rem;
   padding: 0;
   border: 0.0625rem solid var(--calendaria-button-border);
@@ -4515,10 +4079,10 @@ span.calendaria-moon-icon {
 
     .mini-day.intercalary {
       width: 100%;
-      background: var(--calendaria-festival-bg);
+      background: color-mix(in srgb, var(--festival-color, var(--calendaria-festival-border)) 15%, var(--calendaria-bg));
 
       .festival-name {
-        color: var(--calendaria-festival-text);
+        color: var(--festival-color, var(--calendaria-festival-text));
         font-weight: 500;
         font-size: 0.85rem;
         white-space: nowrap;
@@ -4579,10 +4143,10 @@ span.calendaria-moon-icon {
     }
 
     &.festival {
-      background: var(--calendaria-festival-bg);
+      background: color-mix(in srgb, var(--festival-color, var(--calendaria-festival-border)) 15%, var(--calendaria-bg));
 
       .day-num {
-        color: var(--calendaria-festival-text);
+        color: var(--festival-color, var(--calendaria-festival-text));
       }
     }
 
@@ -4726,9 +4290,9 @@ span.calendaria-moon-icon {
 
     .time-btn {
       display: flex;
-      box-sizing: border-box;
       justify-content: center;
       align-items: center;
+      box-sizing: border-box;
       width: 1.75rem;
       height: 1.75rem;
       padding: 0;
@@ -4815,21 +4379,21 @@ span.calendaria-moon-icon {
 
     .note-row {
       display: flex;
-      align-items: center;
       flex: 1;
+      align-items: center;
       min-width: 0;
     }
 
     .note-name {
+      max-width: 9.375rem;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 9.375rem;
     }
 
     .note-actions {
-      display: inline-flex;
       gap: 0.5rem;
+      display: inline-flex;
       margin-left: auto;
       padding-left: 0.5rem;
 
@@ -4848,12 +4412,12 @@ span.calendaria-moon-icon {
 
 /* Day Cell Tooltip Styles */
 .calendaria-day-tooltip {
-  text-align: center;
   line-height: 1.4;
+  text-align: center;
 
   .calendaria-day-tooltip-date {
-    font-size: 0.9rem;
     margin-bottom: 0.125rem;
+    font-size: 0.9rem;
 
     strong {
       color: var(--color-text-primary, rgb(238 238 238));
@@ -4861,19 +4425,19 @@ span.calendaria-moon-icon {
   }
 
   .calendaria-day-tooltip-festival {
-    font-size: 0.85rem;
     color: var(--calendaria-primary, rgb(74 158 255));
+    font-size: 0.85rem;
   }
 
   .calendaria-day-tooltip-season {
-    font-size: 0.8rem;
     color: var(--color-text-secondary, rgb(170 170 170));
+    font-size: 0.8rem;
   }
 
   .calendaria-day-tooltip-sun {
-    font-size: 0.8rem;
-    color: var(--color-text-secondary, rgb(170 170 170));
     margin-top: 0.25rem;
+    color: var(--color-text-secondary, rgb(170 170 170));
+    font-size: 0.8rem;
 
     i {
       opacity: 0.7;
@@ -4985,9 +4549,9 @@ span.calendaria-moon-icon {
     min-width: 0;
     max-width: 100%;
     padding: 0.75rem;
-    overflow: hidden;
     border: 0.0625rem dashed var(--color-border-light-tertiary, var(--calendaria-input-border));
     border-radius: 0.375rem;
+    overflow: hidden;
     cursor: pointer;
     transition: border-color 0.2s;
 
@@ -5338,6 +4902,10 @@ span.calendaria-moon-icon {
 /* ======================================== */
 
 .calendaria.settings-panel {
+  nav.sheet-tabs .tab-group:last-child {
+    margin-top: auto;
+  }
+
   .season-triggers-list,
   .moon-triggers-list {
     gap: 0.5rem;
@@ -5352,8 +4920,8 @@ span.calendaria-moon-icon {
     align-items: center;
     padding: 0.25rem 0;
     color: var(--color-text-dark-secondary);
-    font-size: var(--font-size-13);
     font-weight: 500;
+    font-size: var(--font-size-13);
 
     span:first-child {
       flex: 0 0 10rem;
@@ -5426,8 +4994,8 @@ span.calendaria-moon-icon {
   }
 
   .add-trigger-row {
-    display: flex;
     gap: 0.5rem;
+    display: flex;
     align-items: center;
 
     select {
@@ -5436,15 +5004,15 @@ span.calendaria-moon-icon {
   }
 
   .toolbar-apps-checkboxes {
-    display: flex;
     gap: 0.5rem;
+    display: flex;
     margin-right: 0.1875rem;
 
     .checkbox-inline {
+      gap: 0.25rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.25rem;
       cursor: pointer;
 
       input[type='checkbox'] {
@@ -5527,6 +5095,12 @@ span.calendaria-moon-icon {
       transform: translateY(0);
     }
 
+    &.active {
+      border-color: var(--weather-color);
+      background: color-mix(in srgb, var(--weather-color) 40%, var(--calendaria-bg-lighter));
+      box-shadow: 0 0 0 0.0625rem var(--weather-color);
+    }
+
     i {
       flex-shrink: 0;
       width: 1rem;
@@ -5552,8 +5126,8 @@ span.calendaria-moon-icon {
     .footer-btn {
       gap: 0.5rem;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       padding: 0.5rem 1.5rem;
       border: none;
       border-radius: 0.25rem;
@@ -5578,8 +5152,13 @@ span.calendaria-moon-icon {
     }
 
     .random-btn {
-      flex: 1;
+      flex-shrink: 0;
       background: var(--calendaria-primary);
+    }
+
+    .save-btn {
+      flex: 1;
+      background: var(--calendaria-success);
     }
   }
 }
@@ -6354,8 +5933,8 @@ span.calendaria-moon-icon {
 
 .calendaria-widget-indicator i {
   display: inline-flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   font-size: 0.75em;
   line-height: 1;
 }
@@ -7138,14 +6717,14 @@ span.calendaria-moon-icon {
   /* Legend action buttons (reset, help) */
   .reset-section,
   .legend-help {
-    height: 1.25rem;
-    padding: 0;
-    margin-right: 0.125rem;
-    border: none;
     opacity: 0.6;
-    background: none;
+    height: 1.25rem;
+    margin-right: 0.125rem;
+    padding: 0;
+    border: none;
     font-size: var(--font-size-14);
     cursor: pointer;
+    background: none;
 
     &:hover {
       opacity: 1;
@@ -7188,95 +6767,6 @@ span.calendaria-moon-icon {
 
     .form-group > label {
       flex: 2;
-    }
-  }
-
-  nav.sheet-tabs {
-    gap: 0;
-    grid-column: 1;
-    grid-row: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
-    width: max-content;
-    min-width: 8rem;
-    max-width: 8rem;
-    height: 100%;
-    padding: 0;
-    border-top: none;
-    border-right: 0.0625rem solid var(--color-cool-4);
-    border-bottom: none;
-
-    .tab-group {
-      display: flex;
-      flex-direction: column;
-
-      &:last-child {
-        margin-top: auto;
-      }
-
-      .tab-group-header {
-        padding: 0.5rem;
-        color: var(--color-text-dark-secondary);
-        font-weight: 500;
-        font-size: var(--font-size-18);
-        text-align: right;
-      }
-    }
-
-    [data-tab] {
-      gap: 0.5rem;
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-end;
-      align-items: center;
-      max-width: 100%;
-      padding: 0.5rem;
-      border-bottom: none;
-      border-left: 0.1875rem solid var(--group-color, transparent);
-      border-radius: 0;
-      font-size: var(--font-size-16);
-      text-align: right;
-
-      > span:not(.notification-pip) {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      i {
-        width: 1.25em;
-        margin: 0;
-        text-align: center;
-      }
-
-      &.active {
-        border-left-color: var(--group-color, var(--color-warm-1));
-        background: color-mix(in srgb, var(--group-color, var(--color-warm-1)) 40%, transparent);
-      }
-    }
-  }
-
-  /* Settings Search */
-  .settings-search {
-    position: relative;
-
-    input[type='search'] {
-      border: none;
-      border-radius: 0;
-      font-size: var(--font-size-11);
-      padding: 0 0.3rem 0 2rem;
-      margin: 0;
-    }
-
-    > i {
-      position: absolute;
-      top: 50%;
-      left: 0.5rem;
-      transform: translateY(-50%);
-      font-size: var(--font-size-16);
-      pointer-events: none;
     }
   }
 
@@ -7329,21 +6819,21 @@ span.calendaria-moon-icon {
   }
 
   .settings-footer {
+    gap: 1rem;
     grid-column: 1 / -1;
     grid-row: 2;
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    align-items: center;
     padding: 0.5rem 1rem;
     border-top: 0.0625rem solid var(--color-cool-4);
     background: var(--color-cool-5-75);
 
     .footer-left,
     .footer-right {
+      gap: 0.5rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
       min-width: 7.5rem;
     }
 
@@ -7356,11 +6846,11 @@ span.calendaria-moon-icon {
     }
 
     .save-indicator {
+      gap: 0.35rem;
       display: flex;
       align-items: center;
-      gap: 0.35rem;
-      font-size: var(--font-size-13);
       color: var(--color-level-success);
+      font-size: var(--font-size-13);
 
       i {
         font-size: var(--font-size-13);
@@ -7379,8 +6869,8 @@ span.calendaria-moon-icon {
     }
 
     .module-name {
-      font-size: var(--font-size-14);
       font-weight: 600;
+      font-size: var(--font-size-14);
     }
 
     .version-link {
@@ -7396,8 +6886,8 @@ span.calendaria-moon-icon {
 
     .social-icon {
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       width: 1.5rem;
       height: 1.5rem;
       border-radius: 0.25rem;
@@ -7486,15 +6976,15 @@ span.calendaria-moon-icon {
 
   /* Recent Settings */
   .recent-settings {
-    flex: 1 1 auto;
-    min-height: 0;
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
+    min-height: 0;
 
     .recent-list {
       display: flex;
-      flex-direction: column;
       flex: 1 1 auto;
+      flex-direction: column;
       min-height: 0;
       overflow-y: auto;
     }
@@ -7638,8 +7128,8 @@ span.calendaria-moon-icon {
     }
 
     .range-value {
-      min-width: 2.5em;
       flex: 0;
+      min-width: 2.5em;
       color: var(--color-text-secondary);
       font-size: var(--font-size-13);
       text-align: center;
@@ -7653,11 +7143,11 @@ span.calendaria-moon-icon {
   }
 
   .slider-with-ticks {
+    gap: 0.125rem;
+    display: flex;
     position: relative;
     flex: 1;
-    display: flex;
     flex-direction: column;
-    gap: 0.125rem;
 
     input[type='range'] {
       width: 100%;
@@ -7689,8 +7179,8 @@ span.calendaria-moon-icon {
     align-items: center;
     padding: 0.25rem 0;
     color: var(--color-text-dark-secondary);
-    font-size: var(--font-size-13);
     font-weight: 500;
+    font-size: var(--font-size-13);
 
     .col-color {
       width: 2rem;
@@ -8192,9 +7682,9 @@ span.calendaria-moon-icon {
 
     span {
       padding: 0.25rem 0;
+      color: var(--color-text-dark-secondary);
       font-weight: 500;
       font-size: var(--font-size-13);
-      color: var(--color-text-dark-secondary);
       text-align: center;
     }
 
@@ -8222,9 +7712,9 @@ span.calendaria-moon-icon {
 
     label.permission-name {
       padding: 0.25rem 0;
+      color: var(--color-text-dark-secondary);
       font-weight: 500;
       font-size: var(--font-size-14);
-      color: var(--color-text-dark-secondary);
     }
 
     input[type='checkbox'] {
@@ -8246,9 +7736,9 @@ span.calendaria-moon-icon {
 
 /* Settings Search Dropdown (appended to body) */
 .calendaria-search-results {
-  position: fixed;
-  z-index: 10000;
   display: flex;
+  z-index: 10000;
+  position: fixed;
   flex-direction: column;
   max-height: 30rem;
   border-radius: 0.25rem;
@@ -8265,8 +7755,8 @@ span.calendaria-moon-icon {
     border: none;
     border-bottom: 0.0625rem solid var(--color-cool-4);
     color: var(--color-text-light-highlight);
-    cursor: pointer;
     text-align: left;
+    cursor: pointer;
     background: transparent;
 
     &:last-child {
@@ -8274,8 +7764,8 @@ span.calendaria-moon-icon {
     }
 
     &:hover {
-      background: var(--color-cool-4);
       color: var(--color-text-light-highlight);
+      background: var(--color-cool-4);
     }
 
     .result-label {
@@ -8296,9 +7786,31 @@ span.calendaria-moon-icon {
   .no-results {
     padding: 0.75rem;
     color: var(--color-text-dark-secondary);
-    font-size: var(--font-size-12);
     font-style: italic;
+    font-size: var(--font-size-12);
     text-align: center;
+  }
+}
+
+/* Calendar Editor - Light Theme */
+.theme-light .calendar-editor {
+  footer.form-footer {
+    border-top-color: var(--color-border-light-tertiary);
+    background: var(--color-light-2);
+  }
+
+  .warning {
+    color: var(--color-level-error);
+  }
+
+  .item {
+    border-color: var(--color-border-light-tertiary);
+    background: none;
+  }
+
+  .empty-list {
+    color: unset;
+    background: unset;
   }
 }
 
@@ -8312,8 +7824,8 @@ span.calendaria-moon-icon {
     color: var(--color-text-dark-primary);
 
     &:hover {
-      background: rgb(0 0 0 / 8%);
       color: var(--color-text-dark-primary);
+      background: rgb(0 0 0 / 8%);
     }
 
     .result-tab {
@@ -8364,25 +7876,25 @@ span.calendaria-moon-icon {
 
 .token-reference-dialog {
   .token-reference-content {
+    gap: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
     height: 100%;
     overflow-y: auto;
   }
 
   .context-hint {
-    margin: 0 0 0.5rem;
     opacity: 0.8;
-    font-size: var(--font-size-12);
+    margin: 0 0 0.5rem;
     font-style: italic;
+    font-size: var(--font-size-12);
   }
 
   .token-groups {
-    display: flex;
-    flex-direction: column;
     gap: 0.75rem;
+    display: flex;
     flex: 1;
+    flex-direction: column;
     overflow-y: auto;
   }
 
@@ -8395,18 +7907,18 @@ span.calendaria-moon-icon {
     }
 
     .token-list {
+      gap: 0.125rem;
       display: flex;
       flex-direction: column;
-      gap: 0.125rem;
     }
 
     .token-item {
-      display: flex;
-      align-items: baseline;
       gap: 0.75rem;
+      display: flex;
+      opacity: 0.5;
+      align-items: baseline;
       padding: 0.25rem 0.5rem;
       border-radius: 0.1875rem;
-      opacity: 0.5;
       font-size: var(--font-size-12);
 
       &.highlighted {
@@ -8423,8 +7935,8 @@ span.calendaria-moon-icon {
         padding: 0.125rem 0.375rem;
         border: 0.0625rem solid var(--color-border-light-tertiary);
         border-radius: 0.1875rem;
-        font-family: var(--font-mono);
         font-size: var(--font-size-11);
+        font-family: var(--font-mono);
       }
 
       .token-description {
@@ -8449,8 +7961,8 @@ span.calendaria-moon-icon {
     }
 
     p {
-      margin: 0 0 0.5rem;
       opacity: 0.8;
+      margin: 0 0 0.5rem;
     }
 
     .syntax-examples {
@@ -8665,298 +8177,123 @@ span.calendaria-moon-icon {
 /* Set Date Dialog                          */
 /* ======================================== */
 
-.set-date-dialog {
-  .window-content {
-    padding: 0;
-  }
+.set-date-dialog .timepoints-section {
+  border: 0.0625rem solid var(--color-border-light-tertiary);
+  border-radius: 0.25rem;
 
-  .set-date-form {
-    gap: 1rem;
+  .timepoints-header {
+    gap: 0.5rem;
     display: flex;
-    flex-direction: column;
-    padding: 1rem;
-  }
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    user-select: none;
 
-  .set-date-section {
+    i {
+      width: 0.75rem;
+      font-size: var(--font-size-13);
+    }
+
     h3 {
-      margin: 0 0 0.5rem;
-      padding-bottom: 0.25rem;
-      border-bottom: 0.0625rem solid var(--calendaria-border-light);
-      color: var(--calendaria-text-heading);
-      font-weight: 600;
-      font-size: var(--font-size-14);
-    }
-  }
-
-  .form-grid {
-    gap: 0.75rem;
-    grid-template-columns: 1fr 1fr 1fr;
-    display: grid;
-
-    &.time-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  .form-group {
-    gap: 0.25rem;
-    display: flex;
-    flex-direction: column;
-
-    > label {
-      color: var(--calendaria-text-dim);
-      font-weight: 500;
-      font-size: var(--font-size-11);
-    }
-
-    input:not([type='checkbox']),
-    select {
-      box-sizing: border-box;
-      height: 1.875rem;
-      padding: 0 0.5rem;
-      border: 0.0625rem solid var(--calendaria-input-border);
-      border-radius: 0.25rem;
-      color: var(--calendaria-text);
-      font-size: var(--font-size-13);
-      line-height: 1.75rem;
-      text-align: center;
-      background: var(--calendaria-input-bg);
-
-      &:focus {
-        border-color: var(--calendaria-primary);
-        outline: none;
-      }
-    }
-
-    select {
-      appearance: none;
-      padding-right: 1.5rem;
-      cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.5rem center;
-      background-size: 0.625rem;
-    }
-
-    input[type='number'] {
-      -moz-appearance: textfield;
-      appearance: textfield;
-
-      &::-webkit-outer-spin-button,
-      &::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-    }
-  }
-
-  .checkbox-group {
-    padding: 0.5rem 0;
-
-    .checkbox {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-      font-size: var(--font-size-13);
-      cursor: pointer;
-    }
-
-    .hint {
-      margin: 0.25rem 0 0 1.75rem;
-      color: var(--calendaria-text-dim);
-      font-size: var(--font-size-11);
-    }
-  }
-
-  /* Timepoints Section */
-  .timepoints-section {
-    border: 0.0625rem solid var(--calendaria-border-light);
-    border-radius: 0.25rem;
-    background: var(--calendaria-bg-lighter);
-
-    .timepoints-header {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-      padding: 0.5rem 0.75rem;
-      cursor: pointer;
-      user-select: none;
-
-      &:hover {
-        background: var(--calendaria-bg-hover);
-      }
-
-      i {
-        width: 0.75rem;
-        color: var(--calendaria-text-dim);
-        font-size: var(--font-size-10);
-      }
-
-      h3 {
-        flex: 1;
-        margin: 0;
-        color: var(--calendaria-text);
-        font-weight: 600;
-        font-size: var(--font-size-13);
-      }
-
-      .timepoints-count {
-        padding: 0.125rem 0.5rem;
-        border-radius: 0.625rem;
-        font-size: var(--font-size-11);
-        background: var(--calendaria-primary);
-      }
-    }
-
-    .timepoints-content {
-      padding: 0.5rem;
-      border-top: 0.0625rem solid var(--calendaria-border-light);
-    }
-
-    .timepoints-list {
-      max-height: 11.25rem;
-      margin: 0 0 0.5rem;
-      padding: 0;
-      overflow-y: auto;
-      list-style: none;
-    }
-
-    .timepoint-row {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-      padding: 0.5rem;
-      border-radius: 0.25rem;
-
-      &:hover {
-        background: var(--calendaria-bg-hover);
-      }
-
-      .timepoint-info {
-        flex: 1;
-        min-width: 0;
-        cursor: pointer;
-
-        .timepoint-name {
-          display: block;
-          overflow: hidden;
-          color: var(--calendaria-text);
-          font-weight: 500;
-          font-size: var(--font-size-13);
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .timepoint-date {
-          display: block;
-          color: var(--calendaria-text-dim);
-          font-size: var(--font-size-11);
-        }
-      }
-
-      .timepoint-name-input {
-        flex: 1;
-        padding: 0.25rem 0.5rem;
-        border: 0.0625rem solid var(--calendaria-primary);
-        border-radius: 0.1875rem;
-        color: var(--calendaria-text);
-        font-size: var(--font-size-13);
-        background: var(--calendaria-input-bg);
-
-        &:focus {
-          outline: none;
-        }
-      }
-
-      .timepoint-actions {
-        gap: 0.25rem;
-        display: flex;
-      }
-
-      .timepoint-btn {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 1.75rem;
-        height: 1.75rem;
-        padding: 0;
-        border: 0.0625rem solid var(--calendaria-border);
-        border-radius: 0.25rem;
-        color: var(--calendaria-text-dim);
-        font-size: var(--font-size-12);
-        cursor: pointer;
-        background: var(--calendaria-button-bg);
-
-        &:hover {
-          color: var(--calendaria-text);
-          background: var(--calendaria-button-hover);
-        }
-
-        &.jump:hover {
-          border-color: var(--calendaria-primary);
-          color: var(--calendaria-primary);
-        }
-
-        &.delete:hover {
-          border-color: var(--calendaria-error);
-          color: var(--calendaria-error);
-        }
-      }
-    }
-
-    .no-timepoints {
+      flex: 1;
       margin: 0;
-      padding: 1rem;
-      color: var(--calendaria-text-dim);
-      font-size: var(--font-size-12);
-      text-align: center;
+      font-size: var(--font-size-13);
     }
 
-    .save-timepoint-btn {
-      gap: 0.5rem;
+    .timepoints-count {
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.625rem;
+      font-size: var(--font-size-13);
+    }
+  }
+
+  .timepoints-content {
+    padding: 0.5rem;
+    border-top: 0.0625rem solid var(--color-border-light-tertiary);
+  }
+
+  .timepoints-list {
+    max-height: 11.25rem;
+    margin: 0 0 0.5rem;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  .timepoint-row {
+    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.25rem;
+
+    .timepoint-info {
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+
+      .timepoint-name {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .timepoint-date {
+        display: block;
+        opacity: 0.7;
+        font-size: var(--font-size-11);
+      }
+    }
+
+    .timepoint-name-input {
+      flex: 1;
+    }
+
+    .timepoint-actions {
+      gap: 0.25rem;
+      display: flex;
+    }
+
+    .timepoint-btn {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 100%;
-      padding: 0.5rem;
-      border: 0.0625rem dashed var(--calendaria-border);
-      border-radius: 0.25rem;
-      color: var(--calendaria-text-dim);
-      font-size: var(--font-size-12);
+      width: 1.75rem;
+      height: 1.75rem;
+      padding: 0;
       cursor: pointer;
-      background: transparent;
 
-      &:hover {
-        border-color: var(--calendaria-primary);
-        color: var(--calendaria-primary);
-        background: var(--calendaria-primary);
-        background: rgb(74 144 226 / 10%);
+      &.delete:hover {
+        color: var(--color-level-error);
       }
     }
   }
 
-  /* Form Footer */
-  .form-footer {
+  .no-timepoints {
+    opacity: 0.7;
+    margin: 0;
+    padding: 1rem;
+    font-size: var(--font-size-12);
+    text-align: center;
+  }
+
+  .save-timepoint-btn {
+    gap: 0.5rem;
     display: flex;
     justify-content: center;
-    padding-top: 0.5rem;
-    border-top: 0.0625rem solid var(--calendaria-border-light);
+    align-items: center;
+    width: 100%;
+    padding: 0.5rem;
+    border: 0.0625rem dashed var(--color-border-light-tertiary);
+    border-radius: 0.25rem;
+    font-size: var(--font-size-12);
+    cursor: pointer;
+    background: transparent;
 
-    .submit-btn {
-      gap: 0.5rem;
-      display: flex;
-      align-items: center;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 0.25rem;
-      font-weight: 500;
-      font-size: var(--font-size-13);
-      cursor: pointer;
-      background: var(--calendaria-primary);
-
-      &:hover {
-        background: rgb(60 130 210);
-      }
+    &:hover {
+      border-color: var(--color-warm-1);
+      color: var(--color-warm-1);
     }
   }
 }
@@ -9030,15 +8367,15 @@ span.calendaria-moon-icon {
 /* ======================================== */
 
 .directory-footer.calendaria-footer {
+  gap: 0.125rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.125rem;
   border-top: 0.0625rem solid var(--color-border-light-tertiary);
 
   .calendaria-footer-buttons {
-    display: flex;
     gap: 0.25rem;
+    display: flex;
   }
 
   i {
@@ -9053,9 +8390,9 @@ span.calendaria-moon-icon {
 .reset-section-list {
   margin: 0.5rem 0 0 1.5rem;
   padding: 0;
+  list-style-type: disc;
   color: var(--color-text-secondary);
   font-size: var(--font-size-13);
-  list-style-type: disc;
 
   li {
     margin-bottom: 0.25rem;

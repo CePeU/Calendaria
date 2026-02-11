@@ -19,6 +19,7 @@ import * as StickyZones from '../utils/sticky-zones.mjs';
 import * as WidgetManager from '../utils/widget-manager.mjs';
 import WeatherManager from '../weather/weather-manager.mjs';
 import { openWeatherPicker } from '../weather/weather-picker.mjs';
+import { getPresetAlias } from '../weather/weather-presets.mjs';
 import { BigCal } from './big-cal.mjs';
 import * as ViewUtils from './calendar-view-utils.mjs';
 import { SetDateDialog } from './set-date-dialog.mjs';
@@ -1068,8 +1069,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
       const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
       const midday = hoursPerDay / 2;
-      const sunrise = this.calendar?.sunrise?.() ?? hoursPerDay / 4;
-      const sunset = this.calendar?.sunset?.() ?? (hoursPerDay * 3) / 4;
+      const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+      const sunrise = this.calendar?.sunrise?.(undefined, zone) ?? hoursPerDay / 4;
+      const sunset = this.calendar?.sunset?.(undefined, zone) ?? (hoursPerDay * 3) / 4;
       const dawnStart = sunrise - 0.5;
       const dawnEnd = sunrise + 1;
       const duskStart = sunset - 0.5;
@@ -1142,8 +1144,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const sunSize = isCompact ? 12 : 14;
     const moonSize = isCompact ? 10 : 12;
     const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    const sunrise = this.calendar?.sunrise?.() ?? hoursPerDay / 4;
-    const sunset = this.calendar?.sunset?.() ?? (hoursPerDay * 3) / 4;
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const sunrise = this.calendar?.sunrise?.(undefined, zone) ?? hoursPerDay / 4;
+    const sunset = this.calendar?.sunset?.(undefined, zone) ?? (hoursPerDay * 3) / 4;
     const isSunVisible = hour >= sunrise && hour < sunset;
     const sun = slice.querySelector('.calendaria-slice-sun');
     const moon = slice.querySelector('.calendaria-slice-moon');
@@ -1414,13 +1417,17 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!weather) return null;
     let icon = weather.icon || 'fa-cloud';
     if (icon && !icon.includes('fa-solid') && !icon.includes('fa-regular') && !icon.includes('fa-light') && !icon.includes('fas ') && !icon.includes('far ')) icon = `fa-solid ${icon}`;
+    const calendarId = this.calendar?.metadata?.id;
+    const zoneId = WeatherManager.getActiveZone(null, game.scenes.active)?.id;
+    const alias = getPresetAlias(weather.id, calendarId, zoneId);
+    const label = alias || localize(weather.label);
     return {
       id: weather.id,
-      label: localize(weather.label),
+      label,
       icon,
       color: weather.color,
       temp: WeatherManager.formatTemperature(WeatherManager.getTemperature()),
-      tooltip: weather.description ? localize(weather.description) : localize(weather.label)
+      tooltip: weather.description ? localize(weather.description) : label
     };
   }
 
@@ -1896,7 +1903,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
           const icons = [];
           if (r.data?.icon) icons.push(`<i class="result-note-icon ${r.data.icon}" style="color: ${r.data.color || '#4a9eff'}" data-tooltip="${localize('CALENDARIA.Search.NoteIcon')}"></i>`);
           if (r.data?.gmOnly) icons.push(`<i class="result-gm-icon fas fa-lock" data-tooltip="${localize('CALENDARIA.Search.GMOnly')}"></i>`);
-          if (r.data?.repeatIcon) icons.push(`<i class="result-repeat-icon ${r.data.repeatIcon}" data-tooltip="${r.data.repeatTooltip || ''}"></i>`);
+          if (r.data?.repeatIcon) icons.push(`<i class="result-repeat-icon ${r.data.repeatIcon}"${r.data.repeatTooltip ? ` data-tooltip="${r.data.repeatTooltip}"` : ''}></i>`);
           if (r.data?.categoryIcons?.length) {
             for (const cat of r.data.categoryIcons) icons.push(`<i class="result-category-icon fas ${cat.icon}" style="color: ${cat.color}" data-tooltip="${cat.label}"></i>`);
           }
@@ -2087,7 +2094,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onToSunrise(_event, _target) {
     const calendar = this.calendar;
     if (!calendar?.sunrise) return;
-    const targetHour = calendar.sunrise();
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const targetHour = calendar.sunrise(undefined, zone);
     if (targetHour !== null) await this.#advanceToHour(targetHour);
   }
 
@@ -2098,7 +2106,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onToMidday(_event, _target) {
     const calendar = this.calendar;
-    const targetHour = calendar?.solarMidday?.() ?? (game.time.calendar?.days?.hoursPerDay ?? 24) / 2;
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const targetHour = calendar?.solarMidday?.(undefined, zone) ?? (game.time.calendar?.days?.hoursPerDay ?? 24) / 2;
     await this.#advanceToHour(targetHour);
   }
 
@@ -2110,7 +2119,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onToSunset(_event, _target) {
     const calendar = this.calendar;
     if (!calendar?.sunset) return;
-    const targetHour = calendar.sunset();
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+    const targetHour = calendar.sunset(undefined, zone);
     if (targetHour !== null) await this.#advanceToHour(targetHour);
   }
 
@@ -2121,8 +2131,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onToMidnight(_event, _target) {
     const calendar = this.calendar;
+    const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
     if (calendar?.solarMidnight) {
-      const targetHour = calendar.solarMidnight();
+      const targetHour = calendar.solarMidnight(undefined, zone);
       const hoursPerDay = game.time.calendar?.days?.hoursPerDay ?? 24;
       if (targetHour >= hoursPerDay) await this.#advanceToHour(targetHour - hoursPerDay, true);
       else await this.#advanceToHour(targetHour);

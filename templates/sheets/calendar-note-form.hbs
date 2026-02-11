@@ -31,11 +31,11 @@
       <legend>{{localize "CALENDARIA.Note.Visibility"}}</legend>
       <div class="checkbox-group">
         {{#if isGM}}
-        <label>
-          <input type="checkbox" name="system.gmOnly" {{checked
+          <label>
+            <input type="checkbox" name="system.gmOnly" {{checked
             system.gmOnly}} data-tooltip aria-label="{{localize 'CALENDARIA.UI.GmOnlyTooltip'}}">
-          {{localize "CALENDARIA.Common.GMOnly"}}
-        </label>
+            {{localize "CALENDARIA.Common.GMOnly"}}
+          </label>
         {{/if}}
         <label>
           <input type="checkbox" name="system.silent" {{checked
@@ -531,7 +531,8 @@
         </div>
         <div class="form-group-stacked">
           <label>{{localize "CALENDARIA.Note.ReminderTargets"}}</label>
-          <select name="system.reminderTargets" data-tooltip aria-label="{{localize 'CALENDARIA.UI.ReminderTargetsTooltip'}}"
+          <select name="system.reminderTargets" data-tooltip
+            aria-label="{{localize 'CALENDARIA.UI.ReminderTargetsTooltip'}}"
             {{#unless showReminderOptions}}disabled{{/unless}}>
             {{#each reminderTargetOptions}}
               <option value=" {{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>

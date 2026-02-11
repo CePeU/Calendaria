@@ -7,6 +7,20 @@
 import { format, localize } from './localization.mjs';
 
 /**
+ * Resolve a convenience array getter from a calendar object, falling back to Object.values()
+ * for plain data objects (e.g., in-progress editor data) that lack model getters.
+ * @param {object} calendar - Calendar model or plain data object
+ * @param {string} getter - Getter name (e.g., 'monthsArray')
+ * @param {string} path - Dot-separated path to the keyed object (e.g., 'months.values')
+ * @returns {Array<object>} Ordered array of collection items
+ */
+function resolveArray(calendar, getter, path) {
+  if (calendar?.[getter]) return calendar[getter];
+  const obj = path.split('.').reduce((o, k) => o?.[k], calendar);
+  return obj ? Object.values(obj) : [];
+}
+
+/**
  * Get ordinal suffix for a number.
  * @param {number} n - Number
  * @returns {string} - Number with ordinal suffix (1st, 2nd, 3rd, etc.)
@@ -48,17 +62,18 @@ export function dateFormattingParts(calendar, components) {
   const yearZero = calendar?.years?.yearZero ?? 0;
   const internalYear = displayYear - yearZero;
   const isMonthless = calendar?.isMonthless ?? false;
-  const monthData = isMonthless ? null : calendar?.months?.values?.[month];
+  const months = resolveArray(calendar, 'monthsArray', 'months.values');
+  const monthData = isMonthless ? null : months[month];
   const festivalDay = calendar?.findFestivalDay?.({ ...components, year: internalYear, dayOfMonth: dayOfMonth - 1 });
   const isIntercalaryMonth = monthData?.type === 'intercalary';
   const isIntercalaryFestival = festivalDay?.countsForWeekday === false || isIntercalaryMonth;
   const intercalaryName = festivalDay ? localize(festivalDay.name) : monthData ? localize(monthData.name) : '';
   const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Calendar.MonthFallback', { num: month + 1 });
   const monthAbbr = isIntercalaryFestival ? intercalaryName.slice(0, 3) : isMonthless ? '' : monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
-  const weekdays = calendar?.days?.values || [];
+  const weekdays = resolveArray(calendar, 'weekdaysArray', 'days.values');
   let daysInMonthsBefore = 0;
   if (!isMonthless && calendar?.getDaysInMonth) for (let m = 0; m < month; m++) daysInMonthsBefore += calendar.getDaysInMonth(m, internalYear);
-  else if (!isMonthless) daysInMonthsBefore = (calendar?.months?.values || []).slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
+  else if (!isMonthless) daysInMonthsBefore = months.slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
   const dayOfYear = isMonthless ? dayOfMonth : daysInMonthsBefore + dayOfMonth;
   let totalDaysFromPriorYears = 0;
   if (calendar?.getDaysInYear) {
@@ -80,21 +95,29 @@ export function dateFormattingParts(calendar, components) {
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
   const midday = Math.floor(hoursPerDay / 2);
   const hour12 = hour === 0 ? midday : hour > midday ? hour - midday : hour;
-  const ampm = hour < midday ? 'AM' : 'PM';
-  let eraName = '';
-  let eraAbbr = '';
-  let eraYear = '';
-  const erasArray = Array.isArray(calendar?.eras) ? calendar.eras : calendar?.eras?.values;
-  if (erasArray?.length > 0) {
-    for (const era of erasArray) {
+  const amPm = calendar?.amPmNotation ?? {};
+  const isPM = hour >= midday;
+  const meridiemFull = isPM ? amPm.pm || 'PM' : amPm.am || 'AM';
+  const meridiemAbbr = isPM ? amPm.pmAbbr || meridiemFull : amPm.amAbbr || meridiemFull;
+  const eras = resolveArray(calendar, 'erasArray', 'eras');
+  const matchingEras = [];
+  if (eras.length > 0) {
+    for (const era of eras) {
       if (displayYear >= era.startYear && (era.endYear == null || displayYear <= era.endYear)) {
-        eraName = localize(era.name);
-        eraAbbr = era.abbreviation ? localize(era.abbreviation) : eraName.slice(0, 2);
-        eraYear = displayYear - era.startYear + 1;
-        break;
+        const name = localize(era.name);
+        const abbr = era.abbreviation ? localize(era.abbreviation) : name.slice(0, 2);
+        matchingEras.push({ name, abbr, yearInEra: displayYear - era.startYear + 1 });
       }
     }
   }
+  const primaryEra = matchingEras[0] || {};
+  const eraName = primaryEra.name || '';
+  const eraAbbr = primaryEra.abbr || '';
+  const eraYear = primaryEra.yearInEra || '';
+
+  const yearNames = calendar?.years?.names || [];
+  const yearNameEntry = yearNames.find((e) => e.year === displayYear);
+  const yearName = yearNameEntry ? localize(yearNameEntry.name) : '';
 
   let seasonName = '';
   let seasonAbbr = '';
@@ -103,13 +126,20 @@ export function dateFormattingParts(calendar, components) {
   if (currentSeason) {
     seasonName = localize(currentSeason.name);
     seasonAbbr = currentSeason.abbreviation ? localize(currentSeason.abbreviation) : seasonName.slice(0, 3);
-    const seasonsArray = calendar?.seasons?.values || [];
-    seasonIndex = seasonsArray.indexOf(currentSeason);
+    const allSeasons = resolveArray(calendar, 'seasonsArray', 'seasons.values');
+    seasonIndex = allSeasons.indexOf(currentSeason);
   }
 
   const daysPerWeek = weekdays.length || 7;
   const weekOfYear = Math.ceil(dayOfYear / daysPerWeek);
   const weekOfMonth = Math.ceil(dayOfMonth / daysPerWeek);
+  let namedWeek = '';
+  let namedWeekAbbr = '';
+  const currentWeek = calendar?.getCurrentWeek?.({ year: internalYear, month, dayOfMonth: dayOfMonth - 1 });
+  if (currentWeek) {
+    namedWeek = localize(currentWeek.name) || '';
+    namedWeekAbbr = currentWeek.abbreviation ? localize(currentWeek.abbreviation) : namedWeek.slice(0, 3);
+  }
   let climateZoneName = '';
   let climateZoneAbbr = '';
   const activeZone = calendar?.getActiveClimateZone?.();
@@ -123,6 +153,7 @@ export function dateFormattingParts(calendar, components) {
     y: displayYear,
     yy: String(displayYear).slice(-2),
     yyyy: String(displayYear).padStart(4, '0'),
+    yearName: yearName,
 
     // Month (empty for monthless calendars and intercalary festivals, festival name for MMMM/MMM)
     M: isIntercalaryFestival || isMonthless ? '' : month + 1,
@@ -153,6 +184,8 @@ export function dateFormattingParts(calendar, components) {
     w: weekOfYear,
     ww: String(weekOfYear).padStart(2, '0'),
     W: weekOfMonth,
+    namedWeek: namedWeek,
+    namedWeekAbbr: namedWeekAbbr,
 
     // Hour
     H: hour,
@@ -168,9 +201,10 @@ export function dateFormattingParts(calendar, components) {
     s: second,
     ss: String(second).padStart(2, '0'),
 
-    // AM/PM
-    A: ampm,
-    a: ampm.toLowerCase(),
+    // AM/PM (abbreviation by default, [meridiemFull] for full name)
+    A: meridiemAbbr,
+    a: meridiemAbbr.toLowerCase(),
+    meridiemFull: meridiemFull,
 
     // Era (G tokens are UTS #35 standard, era* tokens deprecated)
     G: eraAbbr,
@@ -180,6 +214,7 @@ export function dateFormattingParts(calendar, components) {
     era: eraName,
     eraAbbr: eraAbbr,
     eraYear: eraYear,
+    matchingEras: matchingEras,
 
     // Season/Quarter (Q tokens mapped to season, season* tokens deprecated)
     Q: seasonIndex >= 0 ? seasonIndex + 1 : '',
@@ -306,13 +341,14 @@ export function formatDateTime12(calendar, components) {
  * Format time to approximate value (e.g., "Dawn", "Noon", "Night").
  * @param {object} calendar - The calendar data
  * @param {object} components - Time components
+ * @param {object} [zone] - Optional climate zone for latitude-based daylight
  * @returns {string} - Formatted string
  */
-export function formatApproximateTime(calendar, components) {
+export function formatApproximateTime(calendar, components, zone = null) {
   const { hour = 0 } = components;
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
-  const sunriseHour = calendar?.sunrise?.(components) ?? hoursPerDay * 0.25;
-  const sunsetHour = calendar?.sunset?.(components) ?? hoursPerDay * 0.75;
+  const sunriseHour = calendar?.sunrise?.(components, zone) ?? hoursPerDay * 0.25;
+  const sunsetHour = calendar?.sunset?.(components, zone) ?? hoursPerDay * 0.75;
   const daylightHours = sunsetHour - sunriseHour;
   const dayProgress = (hour - sunriseHour) / daylightHours;
   const nightProgress = hour >= sunsetHour ? (hour - sunsetHour) / (hoursPerDay - daylightHours) : hour < sunriseHour ? (hour + hoursPerDay - sunsetHour) / (hoursPerDay - daylightHours) : -1;
@@ -352,7 +388,7 @@ export function formatApproximateDate(calendar, components) {
 
   // Calculate day of year
   let dayOfYear = components.dayOfMonth;
-  const monthsValues = calendar?.months?.values || [];
+  const monthsValues = resolveArray(calendar, 'monthsArray', 'months.values');
   for (let i = 0; i < components.month; i++) {
     dayOfYear += monthsValues[i]?.days ?? 0;
   }
@@ -360,7 +396,7 @@ export function formatApproximateDate(calendar, components) {
   // Get season bounds - check month-based first (most specific), then periodic, then day-of-year
   let seasonStart = 0;
   let seasonEnd = 365;
-  const seasonsArray = calendar?.seasons?.values || [];
+  const seasonsArray = resolveArray(calendar, 'seasonsArray', 'seasons.values');
   const seasonIdx = seasonsArray.indexOf(season);
 
   if (season.monthStart != null && season.monthEnd != null) {
@@ -426,6 +462,8 @@ export function formatCustom(calendar, components, formatStr) {
     yearInEra: parts.eraYear,
     season: parts.season,
     seasonAbbr: parts.seasonAbbr,
+    namedWeek: parts.namedWeek,
+    namedWeekAbbr: parts.namedWeekAbbr,
     ch: getCanonicalHour(calendar, components),
     chAbbr: getCanonicalHourAbbr(calendar, components),
     cycle: cycleNum,
@@ -433,11 +471,88 @@ export function formatCustom(calendar, components, formatStr) {
     cycleRoman: cycleNum ? toRomanNumeral(cycleNum) : '',
     cycleYear: cycleNum,
     approxTime: formatApproximateTime(calendar, components),
-    approxDate: formatApproximateDate(calendar, components)
+    approxDate: formatApproximateDate(calendar, components),
+    meridiemFull: parts.meridiemFull,
+    yearName: parts.yearName
+  };
+
+  // Standard token map (built once, used for both direct and fallback resolution)
+  const tokenMap = {
+    YYYY: parts.yyyy,
+    YY: parts.yy,
+    Y: parts.y,
+    MMMM: parts.MMMM,
+    MMM: parts.MMM,
+    MM: parts.MM,
+    Mo: parts.Mo,
+    M: parts.M,
+    EEEEE: parts.EEEEE,
+    EEEE: parts.EEEE,
+    EEE: parts.EEE,
+    EE: parts.EE,
+    E: parts.E,
+    e: parts.e,
+    dddd: parts.dddd,
+    ddd: parts.ddd,
+    dd: parts.dd,
+    d: parts.d,
+    Do: parts.Do,
+    DDD: parts.DDD,
+    DD: parts.DD,
+    D: parts.D,
+    GGGG: parts.GGGG,
+    GGG: parts.GGG,
+    GG: parts.GG,
+    G: parts.G,
+    QQQQ: parts.QQQQ,
+    QQQ: parts.QQQ,
+    QQ: parts.QQ,
+    Q: parts.Q,
+    zzzz: parts.zzzz,
+    z: parts.z,
+    ww: parts.ww,
+    w: parts.w,
+    W: parts.W,
+    HH: parts.HH,
+    H: parts.H,
+    hh: parts.hh,
+    h: parts.h,
+    mm: parts.mm,
+    m: parts.m,
+    ss: parts.ss,
+    s: parts.s,
+    A: parts.A,
+    a: parts.a
+  };
+
+  /**
+   * Resolve a token string to its value.
+   * @param {string} token - Format token to resolve
+   */
+  const resolveToken = (token) => {
+    if (token in tokenMap) return tokenMap[token];
+    if (token in customContext) return customContext[token];
+    return token;
   };
 
   return formatStr.replace(TOKEN_REGEX, (match, customToken) => {
     if (customToken) {
+      // Handle pipe fallback syntax: [token|fallback]
+      if (customToken.includes('|')) {
+        const [primary, fallback] = customToken.split('|', 2);
+        const value = customContext[primary] ?? '';
+        return value || String(resolveToken(fallback));
+      }
+      // Handle era index syntax: [era=N], [eraAbbr=N], [yearInEra=N]
+      const eraIndexMatch = customToken.match(/^(era|eraAbbr|yearInEra)=(\d+)$/);
+      if (eraIndexMatch) {
+        const [, field, idxStr] = eraIndexMatch;
+        const era = parts.matchingEras?.[parseInt(idxStr)] || {};
+        if (field === 'era') return era.name || '';
+        if (field === 'eraAbbr') return era.abbr || '';
+        if (field === 'yearInEra') return era.yearInEra != null ? String(era.yearInEra) : '';
+        return '';
+      }
       if (customToken.startsWith('moonIcon')) {
         const paramPart = customToken.slice(9);
         let moonSelector;
@@ -449,64 +564,6 @@ export function formatCustom(calendar, components, formatStr) {
       }
       return customContext[customToken] ?? customToken;
     }
-
-    // Standard token - map to parts
-    const tokenMap = {
-      // Year
-      YYYY: parts.yyyy,
-      YY: parts.yy,
-      Y: parts.y,
-      // Month
-      MMMM: parts.MMMM,
-      MMM: parts.MMM,
-      MM: parts.MM,
-      Mo: parts.Mo,
-      M: parts.M,
-      // Weekday
-      EEEEE: parts.EEEEE,
-      EEEE: parts.EEEE,
-      EEE: parts.EEE,
-      EE: parts.EE,
-      E: parts.E,
-      e: parts.e,
-      dddd: parts.dddd,
-      ddd: parts.ddd,
-      dd: parts.dd,
-      d: parts.d,
-      // Day
-      Do: parts.Do,
-      DDD: parts.DDD,
-      DD: parts.DD,
-      D: parts.D,
-      // Era
-      GGGG: parts.GGGG,
-      GGG: parts.GGG,
-      GG: parts.GG,
-      G: parts.G,
-      // Season/Quarter
-      QQQQ: parts.QQQQ,
-      QQQ: parts.QQQ,
-      QQ: parts.QQ,
-      Q: parts.Q,
-      // Climate zone
-      zzzz: parts.zzzz,
-      z: parts.z,
-      // Week
-      ww: parts.ww,
-      w: parts.w,
-      W: parts.W,
-      // Time
-      HH: parts.HH,
-      H: parts.H,
-      hh: parts.hh,
-      h: parts.h,
-      mm: parts.mm,
-      m: parts.m,
-      ss: parts.ss,
-      s: parts.s,
-      A: parts.A,
-      a: parts.a
-    };
 
     return tokenMap[match] ?? match;
   });
@@ -545,15 +602,17 @@ export function validateFormatString(formatStr, calendar, components) {
  * @returns {string} Moon phase name
  */
 function getMoonPhaseName(calendar, components) {
-  if (!calendar?.moons?.length) return '';
+  const moons = resolveArray(calendar, 'moonsArray', 'moons');
+  if (!moons.length) return '';
   if (calendar.getMoonPhase && calendar.componentsToTime) {
     const worldTime = calendar.componentsToTime(components);
     const phaseData = calendar.getMoonPhase(0, worldTime);
     return phaseData?.subPhaseName || phaseData?.name || '';
   }
   // Fallback for non-CalendariaCalendar objects
-  const moon = calendar.moons[0];
-  if (!moon.phases?.length) return '';
+  const moon = moons[0];
+  const phasesArr = Object.values(moon.phases ?? {});
+  if (!phasesArr.length) return '';
   const { year, month, dayOfMonth } = components;
   const cycleLength = moon.cycleLength || 29;
   const refDate = moon.referenceDate || { year: 0, month: 0, day: 1 };
@@ -561,8 +620,8 @@ function getMoonPhaseName(calendar, components) {
   const currentDays = year * 365 + month * 30 + dayOfMonth;
   const daysSinceRef = currentDays - refDays;
   const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
-  const phaseIndex = Math.floor(cyclePosition * moon.phases.length);
-  const phase = moon.phases[phaseIndex];
+  const phaseIndex = Math.floor(cyclePosition * phasesArr.length);
+  const phase = phasesArr[phaseIndex];
   return phase ? localize(phase.name) : '';
 }
 
@@ -574,14 +633,15 @@ function getMoonPhaseName(calendar, components) {
  * @returns {string} Moon phase icon marker (use renderMoonIcons to convert to HTML)
  */
 function getMoonPhaseIcon(calendar, components, moonSelector) {
-  if (!calendar?.moons?.length) return '';
+  const moons = resolveArray(calendar, 'moonsArray', 'moons');
+  if (!moons.length) return '';
   let moonIndex = 0;
   if (moonSelector !== undefined && moonSelector !== null && moonSelector !== '') {
     if (typeof moonSelector === 'number') moonIndex = moonSelector;
     else if (/^\d+$/.test(moonSelector)) moonIndex = parseInt(moonSelector, 10);
     else {
       const selectorLower = String(moonSelector).toLowerCase();
-      const foundIndex = calendar.moons.findIndex((m) => {
+      const foundIndex = moons.findIndex((m) => {
         const moonName = localize(m.name).toLowerCase();
         const rawName = (m.name || '').toLowerCase();
         return moonName === selectorLower || rawName === selectorLower;
@@ -590,7 +650,7 @@ function getMoonPhaseIcon(calendar, components, moonSelector) {
     }
   }
 
-  const moon = calendar.moons[moonIndex];
+  const moon = moons[moonIndex];
   if (!moon) return '';
   let phase;
   if (calendar.getMoonPhase && calendar.componentsToTime) {
@@ -605,16 +665,19 @@ function getMoonPhaseIcon(calendar, components, moonSelector) {
     if (phaseData) phase = { name: phaseData.name, icon: phaseData.icon };
   }
 
-  if (!phase && moon.phases?.length) {
-    const { year, month, dayOfMonth } = components;
-    const cycleLength = moon.cycleLength || 29;
-    const refDate = moon.referenceDate || { year: 0, month: 0, day: 1 };
-    const refDays = refDate.year * 365 + refDate.month * 30 + refDate.day;
-    const currentDays = year * 365 + month * 30 + dayOfMonth;
-    const daysSinceRef = currentDays - refDays;
-    const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
-    const phaseIndex = Math.floor(cyclePosition * moon.phases.length);
-    phase = moon.phases[phaseIndex];
+  if (!phase) {
+    const phasesArr = Object.values(moon.phases ?? {});
+    if (phasesArr.length) {
+      const { year, month, dayOfMonth } = components;
+      const cycleLength = moon.cycleLength || 29;
+      const refDate = moon.referenceDate || { year: 0, month: 0, day: 1 };
+      const refDays = refDate.year * 365 + refDate.month * 30 + refDate.day;
+      const currentDays = year * 365 + month * 30 + dayOfMonth;
+      const daysSinceRef = currentDays - refDays;
+      const cyclePosition = (((daysSinceRef % cycleLength) + cycleLength) % cycleLength) / cycleLength;
+      const phaseIndex = Math.floor(cyclePosition * phasesArr.length);
+      phase = phasesArr[phaseIndex];
+    }
   }
 
   if (!phase?.icon) return '';
@@ -664,8 +727,9 @@ export function stripMoonIconMarkers(str) {
  */
 function getCanonicalHour(calendar, components) {
   const { hour = 0 } = components;
-  if (!calendar?.canonicalHours?.length) return '';
-  for (const ch of calendar.canonicalHours) {
+  const hours = resolveArray(calendar, 'canonicalHoursArray', 'canonicalHours');
+  if (!hours.length) return '';
+  for (const ch of hours) {
     // Handle hours that wrap around midnight (e.g., 21-1 means 21:00 to 01:00)
     if (ch.startHour <= ch.endHour) {
       if (hour >= ch.startHour && hour < ch.endHour) return localize(ch.name);
@@ -685,8 +749,9 @@ function getCanonicalHour(calendar, components) {
  */
 function getCanonicalHourAbbr(calendar, components) {
   const { hour = 0 } = components;
-  if (!calendar?.canonicalHours?.length) return '';
-  for (const ch of calendar.canonicalHours) {
+  const hours = resolveArray(calendar, 'canonicalHoursArray', 'canonicalHours');
+  if (!hours.length) return '';
+  for (const ch of hours) {
     // Handle hours that wrap around midnight (e.g., 21-1 means 21:00 to 01:00)
     let matches = false;
     if (ch.startHour <= ch.endHour) matches = hour >= ch.startHour && hour < ch.endHour;
@@ -708,15 +773,17 @@ function getCycleName(calendar, components) {
     const entry = calendar.getCycleEntry(0, components);
     return entry?.name ? localize(entry.name) : '';
   }
-  if (!calendar?.cycles?.length) return '';
-  const cycle = calendar.cycles[0];
-  if (!cycle?.entries?.length) return '';
+  const cycles = resolveArray(calendar, 'cyclesArray', 'cycles');
+  if (!cycles.length) return '';
+  const cycle = cycles[0];
+  const stages = Object.values(cycle?.stages ?? {});
+  if (!stages.length) return '';
   const yearZero = calendar?.years?.yearZero ?? 0;
   const displayYear = components.year + yearZero;
   const adjustedValue = displayYear + (cycle.offset || 0);
-  let entryIndex = adjustedValue % cycle.entries.length;
-  if (entryIndex < 0) entryIndex += cycle.entries.length;
-  return localize(cycle.entries[entryIndex]?.name ?? '');
+  let entryIndex = adjustedValue % stages.length;
+  if (entryIndex < 0) entryIndex += stages.length;
+  return localize(stages[entryIndex]?.name ?? '');
 }
 
 /**
@@ -728,8 +795,9 @@ function getCycleName(calendar, components) {
  */
 function getCycleNumber(calendar, components) {
   if (calendar?.getCurrentCycleNumber) return calendar.getCurrentCycleNumber(0, components);
-  if (!calendar?.cycles?.length) return '';
-  const cycle = calendar.cycles[0];
+  const cycles = resolveArray(calendar, 'cyclesArray', 'cycles');
+  if (!cycles.length) return '';
+  const cycle = cycles[0];
   if (!cycle?.length) return '';
   const yearZero = calendar?.years?.yearZero ?? 0;
   const displayYear = components.year + yearZero;
@@ -1054,6 +1122,7 @@ export function getAvailableTokens() {
     { token: 'Y', descriptionKey: 'CALENDARIA.Format.Token.Y', type: 'standard' },
     { token: 'YY', descriptionKey: 'CALENDARIA.Format.Token.YY', type: 'standard' },
     { token: 'YYYY', descriptionKey: 'CALENDARIA.Format.Token.YYYY', type: 'standard' },
+    { token: '[yearName]', descriptionKey: 'CALENDARIA.Format.Token.yearName', type: 'custom' },
     // Month tokens
     { token: 'M', descriptionKey: 'CALENDARIA.Format.Token.M', type: 'standard' },
     { token: 'MM', descriptionKey: 'CALENDARIA.Format.Token.MM', type: 'standard' },
@@ -1076,12 +1145,17 @@ export function getAvailableTokens() {
     { token: 'w', descriptionKey: 'CALENDARIA.Format.Token.w', type: 'standard' },
     { token: 'ww', descriptionKey: 'CALENDARIA.Format.Token.ww', type: 'standard' },
     { token: 'W', descriptionKey: 'CALENDARIA.Format.Token.W', type: 'standard' },
+    { token: '[namedWeek]', descriptionKey: 'CALENDARIA.Format.Token.namedWeek', type: 'custom' },
+    { token: '[namedWeekAbbr]', descriptionKey: 'CALENDARIA.Format.Token.namedWeekAbbr', type: 'custom' },
     // Era tokens
     { token: 'GGGG', descriptionKey: 'CALENDARIA.Format.Token.GGGG', type: 'standard' },
     { token: 'GGG', descriptionKey: 'CALENDARIA.Format.Token.GGG', type: 'standard' },
     { token: 'GG', descriptionKey: 'CALENDARIA.Format.Token.GG', type: 'standard' },
     { token: 'G', descriptionKey: 'CALENDARIA.Format.Token.G', type: 'standard' },
     { token: '[yearInEra]', descriptionKey: 'CALENDARIA.Format.Token.yearInEra', type: 'custom' },
+    { token: '[era=N]', descriptionKey: 'CALENDARIA.Format.Token.eraIndex', type: 'custom' },
+    { token: '[eraAbbr=N]', descriptionKey: 'CALENDARIA.Format.Token.eraAbbrIndex', type: 'custom' },
+    { token: '[yearInEra=N]', descriptionKey: 'CALENDARIA.Format.Token.yearInEraIndex', type: 'custom' },
     // Season/Quarter tokens
     { token: 'QQQQ', descriptionKey: 'CALENDARIA.Format.Token.QQQQ', type: 'standard' },
     { token: 'QQQ', descriptionKey: 'CALENDARIA.Format.Token.QQQ', type: 'standard' },
@@ -1101,6 +1175,7 @@ export function getAvailableTokens() {
     { token: 'ss', descriptionKey: 'CALENDARIA.Format.Token.ss', type: 'standard' },
     { token: 'A', descriptionKey: 'CALENDARIA.Format.Token.A', type: 'standard' },
     { token: 'a', descriptionKey: 'CALENDARIA.Format.Token.a', type: 'standard' },
+    { token: '[meridiemFull]', descriptionKey: 'CALENDARIA.Format.Token.meridiemFull', type: 'custom' },
     // Custom tokens (bracket syntax)
     { token: '[moon]', descriptionKey: 'CALENDARIA.Format.Token.moon', type: 'custom' },
     { token: '[moonIcon]', descriptionKey: 'CALENDARIA.Format.Token.moonIcon', type: 'custom' },

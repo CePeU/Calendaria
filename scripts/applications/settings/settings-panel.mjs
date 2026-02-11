@@ -82,7 +82,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   static PARTS = {
-    tabs: { template: TEMPLATES.SETTINGS.TAB_NAVIGATION },
+    tabs: { template: TEMPLATES.TAB_NAVIGATION },
     home: { template: TEMPLATES.SETTINGS.PANEL_HOME, scrollable: [''] },
     notes: { template: TEMPLATES.SETTINGS.PANEL_NOTES, scrollable: [''] },
     time: { template: TEMPLATES.SETTINGS.PANEL_TIME, scrollable: [''] },
@@ -139,6 +139,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const { tabGroups, ungroupedTabs } = this.#prepareTabGroups();
     context.tabGroups = tabGroups;
     context.ungroupedTabs = ungroupedTabs;
+    context.showSearch = true;
+    context.searchPlaceholder = 'CALENDARIA.SettingsPanel.Search.Placeholder';
+    context.searchLabel = 'CALENDARIA.SettingsPanel.Search.Label';
     return context;
   }
 
@@ -283,7 +286,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * Setup search input listeners.
    */
   #setupSearchListeners() {
-    const searchInput = this.element.querySelector('input[name="settingsSearch"]');
+    const searchInput = this.element.querySelector('input[name="navSearch"]');
     if (!searchInput || searchInput.dataset.listenerAttached) return;
     searchInput.dataset.listenerAttached = 'true';
     let searchTimeout = null;
@@ -389,7 +392,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {string} type - Result type ('setting' or 'fieldset')
    */
   #onSearchResultClick(tab, key, type) {
-    const searchInput = this.element.querySelector('input[name="settingsSearch"]');
+    const searchInput = this.element.querySelector('input[name="navSearch"]');
     if (searchInput) searchInput.value = '';
     this.#destroySearchDropdown();
     this.changeTab(tab, 'primary');
@@ -526,7 +529,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         .join('');
       context.calendarOptions.push({ value: id, label: localize(`CALENDARIA.Calendar.${key}.Name`), selected: id === activeCalendarId, isCustom: false });
     }
-    for (const [id, data] of Object.entries(customCalendars)) context.calendarOptions.push({ value: id, label: data.name || id, selected: id === activeCalendarId, isCustom: true });
+    for (const [id, data] of Object.entries(customCalendars))
+      context.calendarOptions.push({ value: id, label: localize(data.name) || data.name || id, selected: id === activeCalendarId, isCustom: true });
     context.calendarOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
     context.recentSettings = this.#prepareRecentSettings();
   }
@@ -1334,12 +1338,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // Season triggers
     const calendar = CalendarManager.getActiveCalendar();
-    context.hasSeasons = calendar?.seasons?.values?.length > 0;
+    context.hasSeasons = calendar?.seasonsArray?.length > 0;
     if (context.hasSeasons) {
-      context.seasons = calendar.seasons.values.map((season, index) => ({ index, name: localize(season.name) }));
+      context.seasons = calendar.seasonsArray.map((season, index) => ({ index, name: localize(season.name) }));
       context.seasonTriggers = (config.season || []).map((trigger, index) => {
         const isAll = trigger.seasonIndex === -1;
-        const season = isAll ? null : calendar.seasons.values[trigger.seasonIndex];
+        const season = isAll ? null : calendar.seasonsArray[trigger.seasonIndex];
         return {
           index,
           seasonIndex: trigger.seasonIndex,
@@ -1350,19 +1354,19 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     // Moon phase triggers
-    context.hasMoons = calendar?.moons?.length > 0;
+    context.hasMoons = calendar?.moonsArray?.length > 0;
     if (context.hasMoons) {
-      context.moons = calendar.moons.map((moon, index) => ({ index, name: localize(moon.name) }));
+      context.moons = calendar.moonsArray.map((moon, index) => ({ index, name: localize(moon.name) }));
       context.moonPhases = {};
-      calendar.moons.forEach((moon, moonIndex) => {
-        context.moonPhases[moonIndex] = moon.phases?.map((phase, phaseIndex) => ({ index: phaseIndex, name: localize(phase.name) })) || [];
+      calendar.moonsArray.forEach((moon, moonIndex) => {
+        context.moonPhases[moonIndex] = Object.values(moon.phases ?? {}).map((phase, phaseIndex) => ({ index: phaseIndex, name: localize(phase.name) }));
       });
 
       context.moonTriggers = (config.moonPhase || []).map((trigger, index) => {
         const isAllMoons = trigger.moonIndex === -1;
         const isAllPhases = trigger.phaseIndex === -1;
-        const moon = isAllMoons ? null : calendar.moons[trigger.moonIndex];
-        const phase = isAllMoons || isAllPhases ? null : moon?.phases?.[trigger.phaseIndex];
+        const moon = isAllMoons ? null : calendar.moonsArray[trigger.moonIndex];
+        const phase = isAllMoons || isAllPhases ? null : Object.values(moon?.phases ?? {})[trigger.phaseIndex];
         return {
           index,
           moonIndex: trigger.moonIndex,
@@ -2094,13 +2098,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const config = foundry.utils.deepClone(game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS));
     if (!config.moonPhase) config.moonPhase = [];
     const calendar = CalendarManager.getActiveCalendar();
-    const moons = calendar?.moons?.values || [];
+    const moons = calendar?.moonsArray ?? [];
     const usedCombos = new Set(config.moonPhase.map((t) => `${t.moonIndex}:${t.phaseIndex}`));
     let found = false;
     let moonIndex = -1;
     let phaseIndex = -1;
     for (let m = 0; m < moons.length && !found; m++) {
-      const phases = moons[m]?.phases || [];
+      const phases = Object.values(moons[m]?.phases ?? {});
       for (let p = 0; p < phases.length && !found; p++) {
         if (!usedCombos.has(`${m}:${p}`)) {
           moonIndex = m;
@@ -2147,7 +2151,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const config = foundry.utils.deepClone(game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS));
     if (!config.season) config.season = [];
     const calendar = CalendarManager.getActiveCalendar();
-    const seasons = calendar?.seasons?.values || [];
+    const seasons = calendar?.seasonsArray ?? [];
     const usedIndices = new Set(config.season.map((t) => t.seasonIndex));
     let seasonIndex = seasons.findIndex((_, i) => !usedIndices.has(i));
     if (seasonIndex === -1 && !usedIndices.has(-1)) seasonIndex = -1;

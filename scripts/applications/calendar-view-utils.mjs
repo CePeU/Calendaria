@@ -12,6 +12,7 @@ import { isRecurringMatch } from '../notes/utils/recurrence.mjs';
 import { formatCustom } from '../utils/format-utils.mjs';
 import { format, localize } from '../utils/localization.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
+import WeatherManager from '../weather/weather-manager.mjs';
 
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
@@ -200,8 +201,8 @@ export function getNotesForDay(notes, year, month, day) {
  * @returns {object|null} Moon phase data with icon and tooltip
  */
 export function getFirstMoonPhase(calendar, year, month, day) {
-  if (!calendar?.moons?.length) return null;
-  const sortedMoons = [...calendar.moons].map((m, i) => ({ ...m, originalIndex: i })).sort((a, b) => localize(a.name).localeCompare(localize(b.name)));
+  if (!calendar?.moonsArray?.length) return null;
+  const sortedMoons = [...calendar.moonsArray].map((m, i) => ({ ...m, originalIndex: i })).sort((a, b) => localize(a.name).localeCompare(localize(b.name)));
   let moon = sortedMoons[0];
   if (selectedMoonOverride) {
     const overrideMoon = sortedMoons.find((m) => localize(m.name) === selectedMoonOverride);
@@ -225,11 +226,11 @@ export function getFirstMoonPhase(calendar, year, month, day) {
  * @returns {Array|null} Array of moon phase data sorted alphabetically by moon name
  */
 export function getAllMoonPhases(calendar, year, month, day) {
-  if (!calendar?.moons?.length) return null;
+  if (!calendar?.moonsArray?.length) return null;
   const internalYear = year - (calendar.years?.yearZero ?? 0);
   const dayComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
   const dayWorldTime = calendar.componentsToTime(dayComponents);
-  return calendar.moons
+  return calendar.moonsArray
     .map((moon, index) => {
       const phase = calendar.getMoonPhase(index, dayWorldTime);
       if (!phase) return null;
@@ -391,8 +392,9 @@ export function injectContextMenuInfo(target, calendar) {
   const fullDate = formatCustom(calendar, displayComponents, 'Do of MMMM, Y GGGG');
   const season = calendar.getCurrentSeason?.(internalComponents);
   const seasonName = season ? localize(season.name) : null;
-  const sunriseHour = calendar.sunrise?.(internalComponents) ?? 6;
-  const sunsetHour = calendar.sunset?.(internalComponents) ?? 18;
+  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+  const sunriseHour = calendar.sunrise?.(internalComponents, zone) ?? 6;
+  const sunsetHour = calendar.sunset?.(internalComponents, zone) ?? 18;
   const formatTime = (hours) => {
     let h = Math.floor(hours);
     let m = Math.round((hours - h) * 60);
@@ -437,18 +439,22 @@ function encodeHtmlAttribute(html) {
  * @param {number} year - Display year (with yearZero applied)
  * @param {number} month - Month (0-indexed)
  * @param {number} day - Day of month (1-indexed)
- * @param {string} [festivalName] - Optional festival name to include
+ * @param {object} [festival] - Optional festival data
+ * @param {string} [festival.name] - Festival name
+ * @param {string} [festival.description] - Festival description
+ * @param {string} [festival.color] - Festival color
  * @returns {string} HTML tooltip content (HTML-encoded for use in data-tooltip-html attribute)
  */
-export function generateDayTooltip(calendar, year, month, day, festivalName = null) {
+export function generateDayTooltip(calendar, year, month, day, festival = null) {
   const internalYear = year - (calendar.years?.yearZero ?? 0);
   const internalComponents = { year: internalYear, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 };
   const displayComponents = { year, month, dayOfMonth: day, hour: 12, minute: 0, second: 0 };
   const fullDate = formatCustom(calendar, displayComponents, 'Do of MMMM, Y GGGG');
   const season = calendar.getCurrentSeason?.(internalComponents);
   const seasonName = season ? localize(season.name) : null;
-  const sunriseHour = calendar.sunrise?.(internalComponents) ?? 6;
-  const sunsetHour = calendar.sunset?.(internalComponents) ?? 18;
+  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+  const sunriseHour = calendar.sunrise?.(internalComponents, zone) ?? 6;
+  const sunsetHour = calendar.sunset?.(internalComponents, zone) ?? 18;
   const formatTime = (hours) => {
     let h = Math.floor(hours);
     let m = Math.round((hours - h) * 60);
@@ -461,7 +467,12 @@ export function generateDayTooltip(calendar, year, month, day, festivalName = nu
 
   const rows = [];
   rows.push(`<div class="calendaria-day-tooltip-date"><strong>${escapeText(fullDate)}</strong></div>`);
-  if (festivalName) rows.push(`<div class="calendaria-day-tooltip-festival"><em>${escapeText(festivalName)}</em></div>`);
+  if (festival?.name) {
+    const colorStyle = festival.color ? ` style="color: ${festival.color}"` : '';
+    let festivalText = escapeText(festival.name);
+    if (festival.description) festivalText += `: ${escapeText(festival.description)}`;
+    rows.push(`<div class="calendaria-day-tooltip-festival"${colorStyle}><em>${festivalText}</em></div>`);
+  }
   if (seasonName) rows.push(`<div class="calendaria-day-tooltip-season">${escapeText(seasonName)}</div>`);
   rows.push(`<div class="calendaria-day-tooltip-sun"><i class="fas fa-sun"></i> ${formatTime(sunriseHour)} <i class="fas fa-moon"></i> ${formatTime(sunsetHour)}</div>`);
   const rawHtml = `<div class="calendaria-day-tooltip">${rows.join('')}</div>`;

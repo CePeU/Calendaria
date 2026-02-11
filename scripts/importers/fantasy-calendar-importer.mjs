@@ -251,7 +251,6 @@ export default class FantasyCalendarImporter extends BaseImporter {
       cycleLength: moon.cycle,
       cycleDayAdjust: moon.shift ?? 0,
       color: moon.color || '',
-      hidden: moon.hidden ?? false,
       phases: this.#generateMoonPhases(),
       referenceDate: { year: 1, month: 0, day: 1 }
     }));
@@ -293,7 +292,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
       length: cycle.length || 12,
       offset: cycle.offset ?? 0,
       basedOn: basedOnMap[cycle.type] || 'year',
-      entries: (cycle.data || []).map((entry) => ({ name: entry.name || entry }))
+      stages: (cycle.data || []).map((entry) => ({ name: entry.name || entry }))
     }));
   }
 
@@ -1021,7 +1020,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
   #addDaysToDate(date, daysToAdd, calendar) {
     let { year, month, day } = { ...date };
     let remaining = daysToAdd;
-    const months = calendar?.months?.values || [];
+    const months = calendar?.monthsArray || [];
     if (!months.length) return { year, month, day: day + daysToAdd };
     while (remaining > 0) {
       const monthData = months[month];
