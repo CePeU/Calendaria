@@ -76,7 +76,9 @@ export function dateFormattingParts(calendar, components) {
   else if (!isMonthless) daysInMonthsBefore = months.slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
   const dayOfYear = isMonthless ? dayOfMonth : daysInMonthsBefore + dayOfMonth;
   let totalDaysFromPriorYears = 0;
-  if (calendar?.getDaysInYear) {
+  if (calendar?.totalDaysBeforeYear) {
+    totalDaysFromPriorYears = calendar.totalDaysBeforeYear(internalYear);
+  } else if (calendar?.getDaysInYear) {
     if (internalYear > 0) for (let y = 0; y < internalYear; y++) totalDaysFromPriorYears += calendar.getDaysInYear(y);
     else if (internalYear < 0) for (let y = -1; y >= internalYear; y--) totalDaysFromPriorYears -= calendar.getDaysInYear(y);
   }

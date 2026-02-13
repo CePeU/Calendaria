@@ -14,6 +14,29 @@ import * as LeapYearUtils from '../leap-year-utils.mjs';
 const { ArrayField, BooleanField, NumberField, SchemaField, StringField, TypedObjectField } = foundry.data.fields;
 
 /**
+ * @param {number} a - First number
+ * @param {number} b - Second number
+ * @returns {number} Greatest common divisor
+ */
+function _gcd(a, b) {
+  a = Math.abs(a);
+  b = Math.abs(b);
+  while (b) {
+    [a, b] = [b, a % b];
+  }
+  return a;
+}
+
+/**
+ * @param {number} a - First number
+ * @param {number} b - Second number
+ * @returns {number} Least common multiple
+ */
+function _lcm(a, b) {
+  return (a / _gcd(a, b)) * b;
+}
+
+/**
  * Calendar data model with extended features for fantasy calendars.
  */
 export default class CalendariaCalendar extends foundry.data.CalendarData {
@@ -50,15 +73,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const hoursPerDay = calendar.time?.hoursPerDay ?? 24;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const secondsPerDay = hoursPerDay * secondsPerHour;
-    const daysPerYear = calendar.days?.daysPerYear ?? 365;
     const yearZero = calendar.years?.yearZero ?? 0;
     const golarionYear = wc.year;
     const internalYear = golarionYear - yearZero;
     let dayOfYear = dt.day - 1;
     for (let m = 0; m < dt.month - 1; m++) dayOfYear += calendar.getDaysInMonth?.(m, internalYear) ?? 30;
-    let totalDays = 0;
-    if (internalYear > 0) for (let y = 0; y < internalYear; y++) totalDays += calendar.getDaysInYear?.(y) ?? daysPerYear;
-    else if (internalYear < 0) for (let y = -1; y >= internalYear; y--) totalDays -= calendar.getDaysInYear?.(y) ?? daysPerYear;
+    let totalDays = calendar.totalDaysBeforeYear?.(internalYear) ?? 0;
     totalDays += dayOfYear;
     const internalTime = totalDays * secondsPerDay + dt.hour * secondsPerHour + dt.minute * secondsPerMinute + dt.second;
     this.#epochOffset = internalTime - game.time.worldTime;
@@ -196,23 +216,30 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const minute = Math.floor((daySeconds % secondsPerHour) / secondsPerMinute);
     const second = Math.floor(daySeconds % secondsPerMinute);
 
-    let year = 0;
-    if (totalDays >= 0) {
-      while (totalDays >= this.getDaysInYear(year)) {
-        totalDays -= this.getDaysInYear(year);
-        year++;
-      }
-    } else {
-      while (totalDays < 0) {
-        year--;
-        totalDays += this.getDaysInYear(year);
-      }
+    // Estimate year via O(1) totalDaysBeforeYear, then adjust a few iterations
+    const { regular: regularDays } = this._getDaysPerYear();
+    let year = regularDays > 0 ? Math.floor(totalDays / regularDays) : 0;
+    let dby = this.totalDaysBeforeYear(year);
+    while (dby > totalDays) {
+      year--;
+      dby = this.totalDaysBeforeYear(year);
     }
+    let nextDby = this.totalDaysBeforeYear(year + 1);
+    while (nextDby <= totalDays) {
+      year++;
+      dby = nextDby;
+      nextDby = this.totalDaysBeforeYear(year + 1);
+    }
+    totalDays -= dby;
 
     let month = 0;
     const months = this.monthsArray;
-    while (month < months.length && totalDays >= this.getDaysInMonth(month, year)) {
-      totalDays -= this.getDaysInMonth(month, year);
+    const isLeap = this.isLeapYear(year);
+    while (month < months.length) {
+      const m = months[month];
+      const d = isLeap && m.leapDays != null ? m.leapDays : m.days;
+      if (totalDays < d) break;
+      totalDays -= d;
       month++;
     }
 
@@ -228,13 +255,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const secondsPerHour = secondsPerMinute * minutesPerHour;
     const secondsPerDay = secondsPerHour * hoursPerDay;
 
-    let totalDays = 0;
-    if (year >= 0) {
-      for (let y = 0; y < year; y++) totalDays += this.getDaysInYear(y);
-    } else {
-      for (let y = -1; y >= year; y--) totalDays -= this.getDaysInYear(y);
-    }
-
+    let totalDays = this.totalDaysBeforeYear(year);
     for (let m = 0; m < month; m++) totalDays += this.getDaysInMonth(m, year);
     totalDays += dayOfMonth;
 
@@ -712,16 +733,135 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {boolean} True if the year is a leap year
    */
   isLeapYear(year) {
-    const yearZero = this.years?.yearZero ?? 0;
-    const displayYear = year + yearZero;
+    const { intervals, yearZero } = this._getLeapYearLookup();
+    if (!intervals.length) return false;
+    return LeapYearUtils.intersectsYear(intervals, year + yearZero, true);
+  }
+
+  /**
+   * Build or retrieve cached leap year lookup table for O(1) leap year counting.
+   * Cache is keyed on leap year config — automatically invalidates when config changes.
+   * @returns {{intervals: Array, period: number, perPeriod: number, cumulative: Int32Array|null, yearZero: number}} Lookup table
+   */
+  _getLeapYearLookup() {
     const advancedConfig = this.leapYearConfig;
-    if (advancedConfig?.rule && advancedConfig.rule !== 'none') return LeapYearUtils.isLeapYear(advancedConfig, displayYear, true);
     const leapConfig = this.years?.leapYear;
-    if (!leapConfig) return false;
-    const interval = leapConfig.leapInterval;
-    const start = leapConfig.leapStart ?? 0;
-    if (!interval || interval <= 0) return false;
-    return LeapYearUtils.isLeapYear({ rule: 'simple', interval, start }, displayYear, true);
+    const yearZero = this.years?.yearZero ?? 0;
+    const key = `${advancedConfig?.rule}|${advancedConfig?.interval}|${advancedConfig?.start}|${advancedConfig?.pattern}|${leapConfig?.leapInterval}|${leapConfig?.leapStart}|${yearZero}`;
+    if (this.__leapLookup?.key === key) return this.__leapLookup;
+    this.__dpy = null;
+
+    let intervals = [];
+    if (advancedConfig?.rule && advancedConfig.rule !== 'none') {
+      const start = advancedConfig.start ?? 0;
+      switch (advancedConfig.rule) {
+        case 'simple': {
+          const interval = advancedConfig.interval;
+          if (interval && interval > 0) intervals = [LeapYearUtils.parseInterval(String(interval), start)];
+          break;
+        }
+        case 'gregorian':
+          intervals = LeapYearUtils.parsePattern('400,!100,4', start);
+          break;
+        case 'custom':
+          if (advancedConfig.pattern) intervals = LeapYearUtils.parsePattern(advancedConfig.pattern, start);
+          break;
+      }
+    } else if (leapConfig) {
+      const interval = leapConfig.leapInterval;
+      const start = leapConfig.leapStart ?? 0;
+      if (interval && interval > 0) intervals = [LeapYearUtils.parseInterval(String(interval), start)];
+    }
+
+    if (!intervals.length) {
+      const lookup = { key, intervals, period: 1, perPeriod: 0, cumulative: null, yearZero };
+      this.__leapLookup = lookup;
+      return lookup;
+    }
+
+    const period = intervals.reduce((acc, iv) => _lcm(acc, iv.interval), 1);
+    let cumulative = null;
+    let perPeriod = 0;
+    if (period <= 100_000) {
+      cumulative = new Int32Array(period + 1);
+      for (let i = 0; i < period; i++) {
+        cumulative[i + 1] = cumulative[i] + (LeapYearUtils.intersectsYear(intervals, i, true) ? 1 : 0);
+      }
+      perPeriod = cumulative[period];
+    }
+
+    const lookup = { key, intervals, period, perPeriod, cumulative, yearZero };
+    this.__leapLookup = lookup;
+    return lookup;
+  }
+
+  /**
+   * Count leap years in display year range [0, displayYear) using period-based O(1) math.
+   * Falls back to iterative O(n) counting if the period exceeds the lookup table cap.
+   * @param {number} displayYear - Display year
+   * @returns {number} Count of leap years
+   */
+  _cumulativeLeapCount(displayYear) {
+    const { period, perPeriod, cumulative, intervals } = this._getLeapYearLookup();
+    if (!cumulative) {
+      // Fallback for pathological period sizes — iterate like the old code
+      let count = 0;
+      if (displayYear > 0) {
+        for (let y = 0; y < displayYear; y++) if (LeapYearUtils.intersectsYear(intervals, y, true)) count++;
+      } else {
+        for (let y = -1; y >= displayYear; y--) if (LeapYearUtils.intersectsYear(intervals, y, true)) count--;
+      }
+      return count;
+    }
+    if (perPeriod === 0) return 0;
+    const fullPeriods = Math.floor(displayYear / period);
+    const remainder = ((displayYear % period) + period) % period;
+    return fullPeriods * perPeriod + cumulative[remainder];
+  }
+
+  /**
+   * Count leap years between epoch (internal year 0) and the given internal year. O(1).
+   * @param {number} year - Internal year (0-based)
+   * @returns {number} Signed leap year count (positive for future, negative for past)
+   */
+  countLeapYearsBefore(year) {
+    if (year === 0) return 0;
+    const { yearZero } = this._getLeapYearLookup();
+    return this._cumulativeLeapCount(yearZero + year) - this._cumulativeLeapCount(yearZero);
+  }
+
+  /**
+   * Get days-per-year for regular and leap years (cached).
+   * @returns {{regular: number, leap: number}} Days per regular and leap year
+   */
+  _getDaysPerYear() {
+    if (this.__dpy) return this.__dpy;
+    let regular, leap;
+    if (this.isMonthless) {
+      regular = this.days?.daysPerYear ?? 365;
+      leap = regular + 1;
+    } else {
+      regular = 0;
+      leap = 0;
+      for (const m of this.monthsArray) {
+        regular += m.days ?? 0;
+        leap += m.leapDays ?? m.days ?? 0;
+      }
+    }
+    this.__dpy = { regular, leap };
+    return this.__dpy;
+  }
+
+  /**
+   * Get total days from epoch (internal year 0) to the start of the given internal year. O(1).
+   * @param {number} year - Internal year (0-based)
+   * @returns {number} Signed total days
+   */
+  totalDaysBeforeYear(year) {
+    if (year === 0) return 0;
+    const leapCount = this.countLeapYearsBefore(year);
+    const { regular, leap } = this._getDaysPerYear();
+    return year * regular + leapCount * (leap - regular);
   }
 
   /**
@@ -1107,19 +1247,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (!this.festivalsArray.length || year === 0) return 0;
     const regularYearDays = this.countNonWeekdayFestivalsInYear(false);
     const leapYearDays = this.countNonWeekdayFestivalsInYear(true);
-
-    if (year > 0) {
-      let leapYears = 0;
-      for (let y = 0; y < year; y++) if (this.isLeapYear(y)) leapYears++;
-      const regularYears = year - leapYears;
-      return regularYears * regularYearDays + leapYears * leapYearDays;
-    } else {
-      let leapYears = 0;
-      for (let y = -1; y >= year; y--) if (this.isLeapYear(y)) leapYears++;
-      const totalYears = -year;
-      const regularYears = totalYears - leapYears;
-      return -(regularYears * regularYearDays + leapYears * leapYearDays);
-    }
+    const leapCount = this.countLeapYearsBefore(year);
+    return year * regularYearDays + leapCount * (leapYearDays - regularYearDays);
   }
 
   /**
@@ -1183,18 +1312,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (!this.monthsArray.length || year === 0) return 0;
     const regularCount = this.countIntercalaryDaysInYear();
     const leapCount = this.countIntercalaryDaysInLeapYear();
-    if (year > 0) {
-      let leapYears = 0;
-      for (let y = 0; y < year; y++) if (this.isLeapYear(y)) leapYears++;
-      const regularYears = year - leapYears;
-      return regularYears * regularCount + leapYears * leapCount;
-    } else {
-      let leapYears = 0;
-      for (let y = -1; y >= year; y--) if (this.isLeapYear(y)) leapYears++;
-      const totalYears = -year;
-      const regularYears = totalYears - leapYears;
-      return -(regularYears * regularCount + leapYears * leapCount);
-    }
+    const leapYears = this.countLeapYearsBefore(year);
+    return year * regularCount + leapYears * (leapCount - regularCount);
   }
 
   /**
@@ -1403,7 +1522,9 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         const currentMonth = components.month + 1;
         const startDay = season.dayStart ?? 1;
         const endDay = season.dayEnd ?? months[season.monthEnd - 1]?.days ?? 30;
-        if (season.monthStart <= season.monthEnd) {
+        if (season.monthStart === season.monthEnd) {
+          if (currentMonth === season.monthStart && components.dayOfMonth + 1 >= startDay && components.dayOfMonth + 1 <= endDay) return season;
+        } else if (season.monthStart < season.monthEnd) {
           if (currentMonth > season.monthStart && currentMonth < season.monthEnd) return season;
           if (currentMonth === season.monthStart && components.dayOfMonth + 1 >= startDay) return season;
           if (currentMonth === season.monthEnd && components.dayOfMonth + 1 <= endDay) return season;
@@ -1474,10 +1595,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     }
     let dayOfYear = components.dayOfMonth ?? 0;
     for (let m = 0; m < components.month; m++) dayOfYear += this.getDaysInMonth(m, components.year);
-    let totalDaysFromPriorYears = 0;
-    if (components.year > 0) for (let y = 0; y < components.year; y++) totalDaysFromPriorYears += this.getDaysInYear(y);
-    else if (components.year < 0) for (let y = -1; y >= components.year; y--) totalDaysFromPriorYears -= this.getDaysInYear(y);
-    const totalDays = totalDaysFromPriorYears + dayOfYear;
+    const totalDays = this.totalDaysBeforeYear(components.year) + dayOfYear;
     const ctx = { year: components.year, month: components.month, dayOfMonth: components.dayOfMonth ?? 0 };
     const totalNonCounting =
       (this.countNonWeekdayFestivalsBeforeYear?.(components.year) ?? 0) +
