@@ -960,7 +960,6 @@
   "CALENDARIA.Importer.OpeningEditor": "Kalender-Editor zur Überprüfung wird geöffnet",
   "CALENDARIA.Importer.Options.CalendarId": "Kalender-ID",
   "CALENDARIA.Importer.Options.CalendarName": "Kalendername",
-  "CALENDARIA.Importer.Options.IdPrefix": "custom-",
   "CALENDARIA.Importer.Options.Title": "Importoptionen",
   "CALENDARIA.Importer.ParseError": "Fehler beim Parsen der Datei: {error}",
   "CALENDARIA.Importer.Preview.ClearData": "Leeren",
