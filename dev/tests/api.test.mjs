@@ -136,7 +136,9 @@ vi.mock('../../scripts/utils/migrations.mjs', () => ({
 }));
 vi.mock('../../scripts/applications/calendar/big-cal.mjs', () => ({
   BigCal: class {
-    /** @returns {object} this */
+    static show() {
+      return new this();
+    }
     render() {
       return this;
     }
@@ -155,6 +157,7 @@ vi.mock('../../scripts/applications/calendar/mini-cal.mjs', () => ({
 }));
 vi.mock('../../scripts/applications/hud/hud.mjs', () => ({ HUD: {} }));
 vi.mock('../../scripts/applications/time/stopwatch.mjs', () => ({ Stopwatch: {} }));
+vi.mock('../../scripts/applications/time/sun-dial.mjs', () => ({ SunDial: {} }));
 vi.mock('../../scripts/applications/time/time-keeper.mjs', () => ({ TimeKeeper: {} }));
 
 import { CalendariaAPI, createGlobalNamespace } from '../../scripts/api.mjs';

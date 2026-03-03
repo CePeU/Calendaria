@@ -13,6 +13,7 @@ import { SunDial } from './applications/time/sun-dial.mjs';
 import { TimeKeeper } from './applications/time/time-keeper.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
 import { HOOKS, REPLACEABLE_ELEMENTS, SOCKET_TYPES, WIDGET_POINTS } from './constants.mjs';
+import { log } from './utils/logger.mjs';
 import CalendariaCalendar from './data/calendaria-calendar.mjs';
 import { addDays, addMonths, addYears, compareDates, compareDays, dayOfWeek, daysBetween, isSameDay, isValidDate, monthsBetween } from './notes/date-utils.mjs';
 import NoteManager from './notes/note-manager.mjs';

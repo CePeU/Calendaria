@@ -88,10 +88,12 @@ export function applyTempModifier(value, base) {
 export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, season) {
   const probabilities = {};
   let tempRange = { min: 10, max: 22 };
-  const seasonPresets = Object.values(seasonClimate?.presets ?? {});
-  if (seasonPresets.length) for (const preset of seasonPresets) if (preset.chance > 0) probabilities[preset.id] = preset.chance;
-  const zonePresets = Object.values(zoneOverride?.presets ?? {});
+  const rawZonePresets = zoneOverride?.presets;
+  const zonePresets = rawZonePresets ? Object.values(rawZonePresets) : [];
   if (zonePresets.length) {
+    if (!Array.isArray(rawZonePresets)) {
+      for (const preset of Object.values(seasonClimate?.presets ?? {})) if (preset.chance > 0) probabilities[preset.id] = preset.chance;
+    }
     for (const preset of zonePresets) {
       if (typeof preset.chance === 'string' && /^[+-]/.test(preset.chance)) {
         const delta = Number(preset.chance);
@@ -106,8 +108,8 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
       }
     }
   } else {
-    const fallbackPresets = Object.values(zoneFallback?.presets ?? {});
-    if (fallbackPresets.length) for (const preset of fallbackPresets) if (preset.enabled && preset.chance > 0) probabilities[preset.id] = preset.chance;
+    for (const preset of Object.values(seasonClimate?.presets ?? {})) if (preset.chance > 0) probabilities[preset.id] = preset.chance;
+    for (const preset of Object.values(zoneFallback?.presets ?? {})) if (preset.enabled && preset.chance > 0) probabilities[preset.id] = preset.chance;
   }
   const baseMin = seasonClimate?.temperatures?.min ?? 10;
   const baseMax = seasonClimate?.temperatures?.max ?? 22;

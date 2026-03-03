@@ -146,7 +146,8 @@ globalThis.foundry = {
       })
     },
     saveDataToFile: vi.fn(),
-    readTextFromFile: vi.fn()
+    readTextFromFile: vi.fn(),
+    logCompatibilityWarning: vi.fn()
   },
   applications: {
     handlebars: {
