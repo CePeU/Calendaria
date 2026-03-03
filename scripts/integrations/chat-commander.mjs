@@ -118,7 +118,6 @@ function registerCommands() {
     },
     {
       name: '/weather',
-      aliases: ['/w'],
       description: localize('CALENDARIA.ChatCommander.WeatherDesc'),
       icon: '<i class="fas fa-cloud-sun"></i>',
       requiredRole: 'NONE',

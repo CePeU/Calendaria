@@ -17,7 +17,7 @@ const COMMAND_PATTERNS = {
   time: /^\/(?:time|t)(?:\s+(.*))?$/i,
   datetime: /^\/(?:datetime|dt)(?:\s+(.*))?$/i,
   note: /^\/(?:note|n)(?:\s+(.*))?$/i,
-  weather: /^\/(?:weather|w)(?:\s+(.*))?$/i,
+  weather: /^\/weather(?:\s+(.*))?$/i,
   moon: /^\/moon(?:\s+(.*))?$/i,
   season: /^\/season$/i,
   today: /^\/today$/i,

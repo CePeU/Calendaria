@@ -18,7 +18,7 @@ If the [Chat Commander](https://foundryvtt.com/packages/_chatcommands) module is
 | `/sunset`    |           | Display today's sunset time           | Everyone         |
 | `/moon`      |           | Display current moon phase(s)         | Everyone         |
 | `/season`    |           | Display current season                | Everyone         |
-| `/weather`   | `/w`      | Display current or historical weather | Everyone         |
+| `/weather`   |           | Display current or historical weather | Everyone         |
 | `/forecast`  | `/fc`     | Display weather forecast              | Permission-gated |
 | `/weekday`   |           | Display current weekday               | Everyone         |
 | `/festival`  |           | Display current festival              | Everyone         |
