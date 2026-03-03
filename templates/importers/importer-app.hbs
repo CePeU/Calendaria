@@ -138,19 +138,14 @@
               {{localize "CALENDARIA.Importer.Options.Title"}}
             </legend>
 
-            <div class="form-group slim">
+            <div class="import-field">
               <label>{{localize "CALENDARIA.Importer.Options.CalendarId"}}</label>
-              <div class="form-fields">
-                <span class="id-prefix">{{localize 'CALENDARIA.Importer.Options.IdPrefix'}}</span>
-                <input type="text" name="calendarId" value="{{suggestedId}}" placeholder="{{suggestedId}}">
-              </div>
+              <input type="text" name="calendarId" value="{{suggestedId}}" placeholder="{{suggestedId}}">
             </div>
 
-            <div class="form-group slim">
+            <div class="import-field">
               <label>{{localize "CALENDARIA.Importer.Options.CalendarName"}}</label>
-              <div class="form-fields">
-                <input type="text" name="calendarName" value="{{previewData.name}}" placeholder="{{previewData.name}}">
-              </div>
+              <input type="text" name="calendarName" value="{{previewData.name}}" placeholder="{{previewData.name}}">
             </div>
           </fieldset>
         {{/if}}

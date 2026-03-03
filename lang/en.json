@@ -1099,7 +1099,6 @@
   "CALENDARIA.Importer.OpeningEditor": "Opening calendar editor for review",
   "CALENDARIA.Importer.Options.CalendarId": "Calendar ID",
   "CALENDARIA.Importer.Options.CalendarName": "Calendar Name",
-  "CALENDARIA.Importer.Options.IdPrefix": "custom-",
   "CALENDARIA.Importer.Options.Title": "Import Options",
   "CALENDARIA.Importer.ParseError": "Error parsing file: {error}",
   "CALENDARIA.Importer.Preview.ClearData": "Clear",
