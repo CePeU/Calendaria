@@ -149,8 +149,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     super._onClose(options);
   }
 
-  // ── PixiJS Rendering ──────────────────────────────────────────────────
-
   /**
    * Initialize the PixiJS application and build the stopwatch face.
    * @private
@@ -680,8 +678,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     return total;
   }
 
-  // ── Format / Display ──────────────────────────────────────────────────
-
   /**
    * Get the current format setting based on mode.
    * @returns {string} Format string
@@ -750,8 +746,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     return total;
   }
-
-  // ── Actions ───────────────────────────────────────────────────────────
 
   /**
    * Start the stopwatch.
@@ -941,8 +935,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     }
   }
 
-  // ── Game Time Hooks ───────────────────────────────────────────────────
-
   /**
    * Register hooks for game-time updates.
    * @private
@@ -987,8 +979,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#checkNotification();
   }
 
-  // ── Notifications ─────────────────────────────────────────────────────
-
   /**
    * Check if elapsed time has reached the notification threshold.
    * @private
@@ -1014,8 +1004,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     if (type === 'toast' || type === 'both') ui.notifications.info(`<i class="fas fa-stopwatch"></i> ${message}`);
     if (type === 'sound' || type === 'both') foundry.audio.AudioHelper.play({ src: sound, volume: 1, autoplay: true });
   }
-
-  // ── State Persistence ─────────────────────────────────────────────────
 
   /**
    * Persist stopwatch state to world settings.
@@ -1070,8 +1058,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#registerTimeHook();
     }
   }
-
-  // ── Position / Size ───────────────────────────────────────────────────
 
   /**
    * Restore saved position from settings.
@@ -1136,8 +1122,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     const computed = getComputedStyle(this.element).getPropertyValue('--stopwatch-size');
     return parseInt(computed) || 140;
   }
-
-  // ── Dragging ──────────────────────────────────────────────────────────
 
   /**
    * Set up mouse-based dragging on the stopwatch face.
@@ -1243,8 +1227,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_POSITION, { left: this.position.left, top: this.position.top, size: this.#getSize(), zoneId: this.#snappedZoneId });
   }
 
-  // ── Context Menu ──────────────────────────────────────────────────────
-
   /**
    * Set up the right-click context menu on the stopwatch face.
    * @private
@@ -1317,8 +1299,6 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_POSITION, { left: 150, top: 150, size: 140, zoneId: null });
     ui.notifications.info('CALENDARIA.Stopwatch.ContextMenu.PositionReset', { localize: true });
   }
-
-  // ── Static API ────────────────────────────────────────────────────────
 
   /**
    * Get the singleton instance from Foundry's application registry.

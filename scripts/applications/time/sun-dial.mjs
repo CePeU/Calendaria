@@ -246,10 +246,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     return super.close({ animate: false, ...options });
   }
 
-  // ---------------------------------------------------------------------------
-  // Scene Renderer
-  // ---------------------------------------------------------------------------
-
   /** Initialize the PixiJS scene renderer on the dial canvas. */
   #initSceneRenderer() {
     const canvas = this.element.querySelector('.scene-canvas');
@@ -344,10 +340,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#sceneRenderer.update({ hour, sunrise, sunset, hoursPerDay, moons, skyColors: tintedColors, starAlpha });
   }
 
-  // ---------------------------------------------------------------------------
-  // Hour Markers
-  // ---------------------------------------------------------------------------
-
   /**
    * Generate hour marker data for the dial template.
    * @returns {Array} Array of hour marker objects with position data
@@ -380,10 +372,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     return markers;
   }
-
-  // ---------------------------------------------------------------------------
-  // Dial Time Formatting / Conversion
-  // ---------------------------------------------------------------------------
 
   /**
    * Format time for dial display using the sundialTime display format.
@@ -434,10 +422,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     return { hours, minutes };
   }
 
-  // ---------------------------------------------------------------------------
-  // Dial Rotation
-  // ---------------------------------------------------------------------------
-
   /**
    * Update the dial's visual rotation and PixiJS scene.
    * @param {number} angle - Rotation angle in degrees
@@ -478,10 +462,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const sign = dayOffset > 0 ? '+' : '';
     label.textContent = `${sign}${dayOffset} ${localize('CALENDARIA.SunDial.Days')}`;
   }
-
-  // ---------------------------------------------------------------------------
-  // Dial Interaction
-  // ---------------------------------------------------------------------------
 
   /** Setup handle drag and time input interaction. */
   #setupDialInteraction() {
@@ -608,10 +588,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     timeInput.addEventListener('focus', () => timeInput.select());
   }
 
-  // ---------------------------------------------------------------------------
-  // Time Input Parsing
-  // ---------------------------------------------------------------------------
-
   /**
    * Parse flexible time input string.
    * @param {string} input - Time input string (e.g., "14:30", "2:30pm")
@@ -646,10 +622,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     if (minutes < 0 || minutes >= minutesPerHour) return null;
     return { hours, minutes };
   }
-
-  // ---------------------------------------------------------------------------
-  // Apply Time Change
-  // ---------------------------------------------------------------------------
 
   /** Apply the current dial time as a world time change. */
   async #applyTimeChange() {
@@ -692,10 +664,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     this.#initialTime = this.#initialTime + timeDiff;
   }
-
-  // ---------------------------------------------------------------------------
-  // Context Menu
-  // ---------------------------------------------------------------------------
 
   /** Set up the right-click context menu on the dial. */
   #setupContextMenu() {
@@ -770,10 +738,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     ui.notifications.info(newLocked ? 'CALENDARIA.SunDial.ContextMenu.PositionLocked' : 'CALENDARIA.SunDial.ContextMenu.PositionUnlocked', { localize: true });
   }
 
-  // ---------------------------------------------------------------------------
-  // Action Handlers
-  // ---------------------------------------------------------------------------
-
   /**
    * Toggle clock running state. Shift-click toggles lock.
    * @param {PointerEvent} event - The triggering click event
@@ -819,10 +783,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     await game.settings.set(MODULE.ID, SETTINGS.SUN_DIAL_POSITION, { left, top, size: w, zoneId: null });
     ui.notifications.info('CALENDARIA.SunDial.ContextMenu.PositionReset', { localize: true });
   }
-
-  // ---------------------------------------------------------------------------
-  // Resize
-  // ---------------------------------------------------------------------------
 
   /** Set up mouse-based resizing via the resize handle. */
   #enableResizing() {
@@ -871,10 +831,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#lastSize = size;
     return size;
   }
-
-  // ---------------------------------------------------------------------------
-  // Position Persistence
-  // ---------------------------------------------------------------------------
 
   /** Save current position and size to settings. */
   async #savePosition() {

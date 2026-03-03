@@ -9,6 +9,7 @@ import { CalendarEditor } from './applications/calendar/calendar-editor.mjs';
 import { MiniCal } from './applications/calendar/mini-cal.mjs';
 import { HUD } from './applications/hud/hud.mjs';
 import { Stopwatch } from './applications/time/stopwatch.mjs';
+import { SunDial } from './applications/time/sun-dial.mjs';
 import { TimeKeeper } from './applications/time/time-keeper.mjs';
 import CalendarManager from './calendar/calendar-manager.mjs';
 import { HOOKS, REPLACEABLE_ELEMENTS, SOCKET_TYPES, WIDGET_POINTS } from './constants.mjs';
@@ -19,7 +20,6 @@ import TimeClock from './time/time-clock.mjs';
 import TimeTracker from './time/time-tracker.mjs';
 import { DEFAULT_FORMAT_PRESETS, formatCustom, getAvailableTokens, PRESET_FORMATTERS, resolveFormatString, timeSince } from './utils/formatting/format-utils.mjs';
 import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from './utils/formatting/moon-utils.mjs';
-import { log } from './utils/logger.mjs';
 import { diagnoseWeatherConfig } from './utils/migrations.mjs';
 import * as Permissions from './utils/permissions.mjs';
 import SearchManager from './utils/search-manager.mjs';
@@ -701,15 +701,136 @@ export const CalendariaAPI = {
   },
 
   /**
-   * Open the main BigCal application.
-   * @param {object} [options] - Open options
-   * @param {object} [options.date] - Date to display {year, month, day}
-   * @param {string} [options.view] - View mode: 'month', 'week', 'year'
+   * Show the BigCal application.
+   * @returns {BigCal} The BigCal instance
+   */
+  showBigCal() {
+    return BigCal.show();
+  },
+
+  /** Hide the BigCal application. */
+  hideBigCal() {
+    BigCal.hide();
+  },
+
+  /** Toggle BigCal visibility. */
+  toggleBigCal() {
+    BigCal.toggle();
+  },
+
+  /**
+   * Show the MiniCal widget.
+   * @returns {MiniCal} The MiniCal instance
+   */
+  showMiniCal() {
+    return MiniCal.show();
+  },
+
+  /** Hide the MiniCal widget. */
+  hideMiniCal() {
+    MiniCal.hide();
+  },
+
+  /** Toggle MiniCal visibility. */
+  toggleMiniCal() {
+    MiniCal.toggle();
+  },
+
+  /**
+   * Show the HUD.
+   * @returns {HUD|null} The HUD instance, or null if blocked by combat
+   */
+  showHUD() {
+    return HUD.show();
+  },
+
+  /** Hide the HUD. */
+  hideHUD() {
+    HUD.hide();
+  },
+
+  /** Toggle HUD visibility. */
+  toggleHUD() {
+    HUD.toggle();
+  },
+
+  /**
+   * Show the TimeKeeper.
+   * @returns {TimeKeeper} The TimeKeeper instance
+   */
+  showTimeKeeper() {
+    return TimeKeeper.show();
+  },
+
+  /** Hide the TimeKeeper. */
+  hideTimeKeeper() {
+    TimeKeeper.hide();
+  },
+
+  /** Toggle TimeKeeper visibility. */
+  toggleTimeKeeper() {
+    TimeKeeper.toggle();
+  },
+
+  /**
+   * Show the Sun Dial.
+   * @returns {SunDial} The Sun Dial instance
+   */
+  showSunDial() {
+    return SunDial.show();
+  },
+
+  /** Hide the Sun Dial. */
+  hideSunDial() {
+    SunDial.hide();
+  },
+
+  /** Toggle Sun Dial visibility. */
+  toggleSunDial() {
+    SunDial.toggle();
+  },
+
+  /**
+   * Show the Stopwatch.
+   * @returns {Stopwatch} The Stopwatch instance
+   */
+  showStopwatch() {
+    return Stopwatch.show();
+  },
+
+  /** Hide the Stopwatch. */
+  hideStopwatch() {
+    Stopwatch.hide();
+  },
+
+  /** Toggle Stopwatch visibility. */
+  toggleStopwatch() {
+    Stopwatch.toggle();
+  },
+
+  /** Show and start the Stopwatch. */
+  startStopwatch() {
+    Stopwatch.start();
+  },
+
+  /** Pause the running Stopwatch. */
+  pauseStopwatch() {
+    Stopwatch.pause();
+  },
+
+  /** Reset the Stopwatch to zero. */
+  resetStopwatch() {
+    Stopwatch.reset();
+  },
+
+  /**
+   * @deprecated Use `showBigCal()` instead.
+   * @param {object} [options] - Render options
    * @returns {Promise<object>} The BigCal application
    */
   async openBigCal(options = {}) {
-    const app = new BigCal();
-    return app.render(true, options);
+    foundry.utils.logCompatibilityWarning('CALENDARIA.api.openBigCal() is deprecated. Use CALENDARIA.api.showBigCal() instead.', { since: 'Calendaria 0.11', until: 'Calendaria 1.0' });
+    return BigCal.show();
   },
 
   /**
@@ -724,28 +845,6 @@ export const CalendariaAPI = {
     }
     const app = new CalendarEditor({ calendarId });
     return app.render(true);
-  },
-
-  /**
-   * Show the MiniCal widget.
-   * @returns {Promise<object>} The MiniCal application
-   */
-  async showMiniCal() {
-    return MiniCal.show();
-  },
-
-  /**
-   * Hide the MiniCal widget.
-   */
-  async hideMiniCal() {
-    MiniCal.hide();
-  },
-
-  /**
-   * Toggle the MiniCal widget visibility.
-   */
-  async toggleMiniCal() {
-    MiniCal.toggle();
   },
 
   /**
