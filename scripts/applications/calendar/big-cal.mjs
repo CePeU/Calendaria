@@ -1192,14 +1192,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         });
       }
     });
-    items.push({
-      name: 'CALENDARIA.BigCal.ContextMenu.SwapToMiniCal',
-      icon: '<i class="fas fa-calendar-alt"></i>',
-      callback: () => {
-        this.close();
-        MiniCal.show();
-      }
-    });
+    items.push(ViewUtils.buildOpenAppsMenuItem());
     if (game.user.isGM) {
       const forceBigCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL);
       items.push({

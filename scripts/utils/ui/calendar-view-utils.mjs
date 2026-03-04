@@ -13,6 +13,7 @@ import { formatCustom, toRomanNumeral } from '../formatting/format-utils.mjs';
 import { format, localize } from '../localization.mjs';
 import { canViewWeatherForecast } from '../permissions.mjs';
 import { CalendariaSocket } from '../socket.mjs';
+import { BigCal, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from '../../applications/_module.mjs';
 
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
@@ -818,4 +819,37 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
     }
   });
   return activeDayContextMenu;
+}
+
+/**
+ * Build the "Open" context menu entry that spawns a fixed submenu with all 6 apps.
+ * @returns {object} A ContextMenuEntry object
+ */
+export function buildOpenAppsMenuItem() {
+  const pointer = { x: 0, y: 0 };
+  const onMove = (e) => {
+    pointer.x = e.clientX;
+    pointer.y = e.clientY;
+  };
+  document.addEventListener('pointermove', onMove, { passive: true });
+  return {
+    name: 'CALENDARIA.Common.Open',
+    icon: '<i class="fas fa-arrow-right"></i>',
+    callback: () => {
+      document.removeEventListener('pointermove', onMove);
+      requestAnimationFrame(async () => {
+        const subItems = [
+          { name: 'CALENDARIA.Format.Category.BigCal', icon: '<i class="fas fa-calendar-days"></i>', callback: () => BigCal.show() },
+          { name: 'CALENDARIA.Format.Category.MiniCal', icon: '<i class="fas fa-calendar-alt"></i>', callback: () => MiniCal.show() },
+          { name: 'CALENDARIA.Format.Category.HUD', icon: '<i class="fas fa-layer-group"></i>', callback: () => HUD.show() },
+          { name: 'CALENDARIA.Format.Category.TimeKeeper', icon: '<i class="fas fa-clock"></i>', callback: () => TimeKeeper.show() },
+          { name: 'CALENDARIA.Format.Category.Stopwatch', icon: '<i class="fas fa-stopwatch"></i>', callback: () => Stopwatch.show() },
+          { name: 'CALENDARIA.SettingsPanel.Tab.SunDial', icon: '<i class="fas fa-sun"></i>', callback: () => SunDial.show() }
+        ];
+        const subMenu = new ContextMenu(document.body, '.calendaria-open-submenu-no-match', subItems, { fixed: true, jQuery: false });
+        await subMenu.render(document.body, { event: { clientX: pointer.x, clientY: pointer.y } });
+        ui.context = subMenu;
+      });
+    }
+  };
 }

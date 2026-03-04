@@ -14,6 +14,7 @@ import { CalendariaSocket } from '../../utils/socket.mjs';
 import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
 import { MiniCal } from '../calendar/mini-cal.mjs';
 import { SettingsPanel } from '../settings/settings-panel.mjs';
+import { buildOpenAppsMenuItem } from '../../utils/ui/calendar-view-utils.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -313,14 +314,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
       callback: () => this._toggleStickyPosition()
     });
-    items.push({
-      name: 'CALENDARIA.TimeKeeper.ContextMenu.SwapToMiniCal',
-      icon: '<i class="fas fa-calendar-alt"></i>',
-      callback: () => {
-        TimeKeeper.hide();
-        MiniCal.show();
-      }
-    });
+    items.push(buildOpenAppsMenuItem());
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
     return items;
   }

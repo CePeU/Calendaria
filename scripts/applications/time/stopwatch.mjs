@@ -13,6 +13,7 @@ import { localize } from '../../utils/localization.mjs';
 import { CalendariaSocket } from '../../utils/socket.mjs';
 
 import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
+import { buildOpenAppsMenuItem } from '../../utils/ui/calendar-view-utils.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -1279,6 +1280,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       });
     }
+    items.push(buildOpenAppsMenuItem());
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
     return items;
   }

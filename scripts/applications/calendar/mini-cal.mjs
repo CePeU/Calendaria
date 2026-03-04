@@ -1126,22 +1126,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       icon: this.#stickyPosition ? '<i class="fas fa-lock-open"></i>' : '<i class="fas fa-lock"></i>',
       callback: () => this._toggleStickyPosition()
     });
-    items.push({
-      name: 'CALENDARIA.MiniCal.ContextMenu.SwapToBigCal',
-      icon: '<i class="fas fa-calendar"></i>',
-      callback: () => {
-        this.close();
-        new BigCal().render(true);
-      }
-    });
-    items.push({
-      name: 'CALENDARIA.MiniCal.ContextMenu.SwapToTimeKeeper',
-      icon: '<i class="fas fa-clock"></i>',
-      callback: () => {
-        MiniCal.hide();
-        TimeKeeper.show();
-      }
-    });
+    items.push(ViewUtils.buildOpenAppsMenuItem());
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => MiniCal.hide() });
     return items;
   }

@@ -638,6 +638,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, newMode);
       }
     });
+    items.push(ViewUtils.buildOpenAppsMenuItem());
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => HUD.hide() });
     return items;
   }

@@ -15,7 +15,7 @@ import { log } from '../../utils/logger.mjs';
 import { canViewSunDial } from '../../utils/permissions.mjs';
 import { CalendariaSocket } from '../../utils/socket.mjs';
 import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
-import { applyWeatherSkyTint, computeStarAlpha, getSkyColorsRgb } from '../../utils/ui/sky-utils.mjs';
+import { applyWeatherSkyTint, buildOpenAppsMenuItem, computeStarAlpha, getSkyColorsRgb } from '../../utils/ui/_module.mjs';
 import { getPreset } from '../../weather/data/weather-presets.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { HudSceneRenderer } from '../hud/hud-scene-renderer.mjs';
@@ -720,6 +720,8 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       });
     }
+    // Open submenu
+    items.push(buildOpenAppsMenuItem());
     // Close
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
     return items;
