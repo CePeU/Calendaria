@@ -81,6 +81,10 @@ Weather conditions render as particle effects directly in the dome, replacing th
 
 Weather particles are influenced by current wind speed and direction. Sky gradient colors can be overridden per-weather-effect (e.g., greenish sky for tornado, orange for sandstorm).
 
+#### Disable Weather Effects
+
+A per-client setting (Settings > HUD tab) disables all weather particle effects in the HUD dome and Sun Dial. Sky, sun, moon, and stars are unaffected. Useful for players on low-end hardware or who prefer a cleaner display.
+
 #### Performance Mode
 
 Particle rendering scales with Foundry's core performance mode:

@@ -6,6 +6,7 @@ A circular floating clock that displays an animated sky and lets GMs drag the su
 
 ## Opening the Sun Dial
 
+- Click the HUD dome (closes when clicking outside the dial)
 - Toolbar button (if enabled in Settings > Advanced > Toolbar Apps)
 - Journal footer button (if enabled)
 - Settings Panel > Calendar tab

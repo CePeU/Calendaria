@@ -243,6 +243,12 @@ await CALENDARIA.api.generateWeather();
 
 // Get forecast
 const forecast = await CALENDARIA.api.getWeatherForecast({ days: 7 });
+
+// Clear all weather history
+await CALENDARIA.api.clearWeatherHistory({ all: true });
+
+// Clear future history only
+await CALENDARIA.api.clearWeatherHistory({ future: true });
 ```
 
 ---

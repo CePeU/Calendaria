@@ -1514,7 +1514,7 @@ export function createGlobalNamespace() {
     get(target, key, receiver) {
       if (typeof key === 'string' && key in DEPRECATION_MAP) {
         const newPath = DEPRECATION_MAP[key];
-        foundry.utils.logCompatibilityWarning(`CALENDARIA.${key} is deprecated. Use CALENDARIA.${newPath} instead.`, { since: 'Calendaria 0.10', until: 'Calendaria 1.1' });
+        foundry.utils.logCompatibilityWarning(`CALENDARIA.${key} is deprecated. Use CALENDARIA.${newPath} instead.`, { since: 'Calendaria 0.10', until: 'Calendaria 1.0' });
         return resolvePath(newPath);
       }
       return Reflect.get(target, key, receiver);

@@ -95,7 +95,11 @@ Wind displays as mph when the temperature unit is set to Fahrenheit, and kph whe
 
 ### Wind Direction
 
+Wind direction uses meteorological convention: the labeled direction indicates where the wind is coming **from**. A "North" wind originates from the north and blows southward.
+
 A 16-point compass system: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW (stored as degrees 0–337.5°).
+
+The wind arrow indicator points in the direction the wind blows (opposite the labeled origin). HUD particles and FXMaster effects also move in the blowing direction.
 
 ### Zone Wind Configuration
 

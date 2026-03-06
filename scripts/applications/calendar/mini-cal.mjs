@@ -22,7 +22,6 @@ import * as WidgetManager from '../../utils/widget-manager.mjs';
 import { getPresetAlias } from '../../weather/data/weather-presets.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { SettingsPanel } from '../settings/settings-panel.mjs';
-import { TimeKeeper } from '../time/time-keeper.mjs';
 import WeatherPickerApp from '../weather/weather-picker.mjs';
 import { BigCal } from './big-cal.mjs';
 

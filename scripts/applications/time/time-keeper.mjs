@@ -12,7 +12,6 @@ import { localize } from '../../utils/localization.mjs';
 import { canChangeDateTime, canViewTimeKeeper } from '../../utils/permissions.mjs';
 import { CalendariaSocket } from '../../utils/socket.mjs';
 import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
-import { MiniCal } from '../calendar/mini-cal.mjs';
 import { SettingsPanel } from '../settings/settings-panel.mjs';
 import { buildOpenAppsMenuItem } from '../../utils/ui/calendar-view-utils.mjs';
 

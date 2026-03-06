@@ -575,6 +575,12 @@ Display all configured moons in the HUD dome (secondary moons trail with size sc
 
 - Default: `false`
 
+#### Disable Weather Effects
+
+Disable weather particle effects in the HUD dome and Sun Dial. Sky, sun, moon, and stars are unaffected. This is a per-client setting.
+
+- Default: `false`
+
 #### Dome Below Bar
 
 Render the dome visual below the info bar instead of above it.

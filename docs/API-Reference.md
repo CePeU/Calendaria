@@ -264,6 +264,23 @@ const metadata = CALENDARIA.api.getAllCalendarMetadata();
 
 ---
 
+### addCalendar(id, definition)
+
+Add a new calendar. GM only.
+
+```javascript
+await CALENDARIA.api.addCalendar('myCalendar', calendarDefinition);
+```
+
+| Parameter    | Type     | Description                |
+| ------------ | -------- | -------------------------- |
+| `id`         | `string` | Unique calendar ID         |
+| `definition` | `object` | Calendar definition object |
+
+**Returns:** `Promise<object|null>` - The created calendar or null if the ID already exists.
+
+---
+
 ### switchCalendar(id)
 
 Switch to a different calendar. GM only.
@@ -1286,6 +1303,7 @@ CALENDARIA.api.toggleTimeKeeper();
 
 // Sun Dial
 CALENDARIA.api.showSunDial();
+CALENDARIA.api.showSunDial({ closeOnClickOutside: true });
 CALENDARIA.api.hideSunDial();
 CALENDARIA.api.toggleSunDial();
 
@@ -1475,6 +1493,39 @@ const history = CALENDARIA.api.getWeatherHistory({ zoneId: 'desert' });
 | `options.zoneId` | `string` | Optional zone filter |
 
 **Returns:** `object` - Nested history structure.
+
+---
+
+### clearWeatherHistory(options)
+
+Clear weather history entries. GM only. Also clears the forecast plan by default to prevent deleted entries from regenerating.
+
+```javascript
+// Clear all history
+await CALENDARIA.api.clearWeatherHistory({ all: true });
+
+// Clear future entries only
+await CALENDARIA.api.clearWeatherHistory({ future: true });
+
+// Clear a specific year
+await CALENDARIA.api.clearWeatherHistory({ year: 1492 });
+
+// Clear a specific month (1-indexed)
+await CALENDARIA.api.clearWeatherHistory({ year: 1492, month: 7 });
+
+// Clear without resetting forecast plan
+await CALENDARIA.api.clearWeatherHistory({ all: true, clearForecast: false });
+```
+
+| Parameter               | Type      | Description                                                     |
+| ----------------------- | --------- | --------------------------------------------------------------- |
+| `options.all`           | `boolean` | Clear all history                                               |
+| `options.future`        | `boolean` | Clear entries after the current date                            |
+| `options.year`          | `number`  | Clear entries for a specific year                               |
+| `options.month`         | `number`  | Clear entries for a specific month (1-indexed, requires `year`) |
+| `options.clearForecast` | `boolean` | Clear the forecast plan (default: `true`)                       |
+
+**Returns:** `Promise<number>` - Number of entries removed.
 
 ---
 

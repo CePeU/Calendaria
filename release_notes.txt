@@ -1,7 +1,18 @@
 ## New Features
-- [#465] Weather Probability dialog — view the effective weight breakdown for each preset by zone and season. Access from Settings, Climate Editor, Weather Picker, or `/weatherprob` chat command
-- [#465] Season-based weight overrides — zone presets now use per-season weight overrides instead of a single flat weight. Select a season in the Climate Editor to set weights per preset with support for relative modifiers (`10+`, `5-`)
+- [#477] Wind direction now uses meteorological convention — labels show where wind comes from, arrow and particles show where it blows
+- [#467] Sun Dial closes when clicking outside it (when opened from the HUD dome)
+- [#460] "Disable Weather Effects" per-client setting turns off HUD/Sun Dial particle animations while keeping sky, sun, moon, and stars
+- [#473] `clearWeatherHistory()` API for managing weather history via macros
+- `addCalendar()` API for programmatic calendar creation
+- All 7 climate zone templates now have explicit weather definitions for all 4 seasons
 
 ## Bug Fixes
-- [#432] Disabled zone presets could still generate. Zone preset list now acts as a whitelist
-- [#468] All notes appeared on the 1st of the month after migration
+- [#470] Weather Picker no longer re-rolls temperature when saving a preset
+- [#476] Climate zone season temperature edits no longer masked by stale overrides
+- [#471] Disabled presets saved correctly; weather generation respects zone preset filters
+- [#475] Rain/cloudy/fog presets no longer tint scenes red (added proper hue values)
+- [#288] BigCal set-date icon changed to thumbtack; disabled when no date selected or on today
+- [#472] Null festival entries no longer crash initialization
+- [#474] HUD combat migration deferred to ready hook; WeatherManager wrapped in try-catch
+- Zero-weight-warning highlight on enabled presets with empty season weight
+- Weather Probability dialog shows the correct zone when opened from the editor

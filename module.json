@@ -77,6 +77,11 @@
       "lang": "ru",
       "name": "Russian",
       "path": "lang/ru.json"
+    },
+    {
+      "lang": "pl",
+      "name": "Polish",
+      "path": "lang/pl.json"
     }
   ],
   "license": "https://github.com/Sayshal/calendaria?tab=MIT-1-ov-file",

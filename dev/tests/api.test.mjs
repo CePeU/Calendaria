@@ -137,9 +137,11 @@ vi.mock('../../scripts/utils/migrations.mjs', () => ({
 }));
 vi.mock('../../scripts/applications/calendar/big-cal.mjs', () => ({
   BigCal: class {
+    /** @returns {object} instance */
     static show() {
       return new this();
     }
+    /** @returns {object} this */
     render() {
       return this;
     }
