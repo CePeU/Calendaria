@@ -102,13 +102,15 @@ export class WeatherProbabilityDialog extends HandlebarsApplicationMixin(Applica
     const seasonObj = seasons.find((s) => s.name === seasonName);
     const seasonClimate = seasonObj?.climate ?? null;
     const allZones = WeatherManager.getCalendarZones();
+    const editorZoneId = this.#zoneConfig?.id;
     const isNoZone = selectedZoneId === 'none';
-    const useEditorData = !isNoZone && (!this.#selectedZoneId || this.#selectedZoneId === this.#zoneConfig?.id);
+    const useEditorData = !isNoZone && (!this.#selectedZoneId || this.#selectedZoneId === editorZoneId);
     const resolvedZoneConfig = isNoZone ? null : useEditorData ? this.#zoneConfig : (allZones.find((z) => z.id === this.#selectedZoneId) ?? this.#zoneConfig);
-    context.zones = [
-      ...allZones.map((z) => ({ id: z.id, name: localize(z.name), selected: z.id === selectedZoneId })),
-      { id: 'none', name: localize('CALENDARIA.Weather.Picker.NoZone'), selected: isNoZone }
-    ];
+    const zoneEntries = allZones.map((z) => ({ id: z.id, name: localize(z.name), selected: z.id === selectedZoneId }));
+    if (editorZoneId && !allZones.some((z) => z.id === editorZoneId)) {
+      zoneEntries.unshift({ id: editorZoneId, name: localize(this.#zoneConfig.name ?? editorZoneId), selected: editorZoneId === selectedZoneId });
+    }
+    context.zones = [...zoneEntries, { id: 'none', name: localize('CALENDARIA.Weather.Picker.NoZone'), selected: isNoZone }];
     context.zoneDisabled = allZones.length === 0;
     context.seasons = seasons.map((s) => ({ name: s.name, label: localize(s.name), selected: s.name === seasonName }));
     const data = WeatherManager.computeProbabilitiesFromRaw({ seasonClimate, zoneConfig: resolvedZoneConfig, season: seasonName, calendarId: this.#calendarId });

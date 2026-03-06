@@ -305,7 +305,7 @@ export function renderWeatherIndicator({ weather, displayMode, canInteract, show
     const temp = showTemp && weather.temperature ? `<span class="weather-temp">${weather.temperature}</span>` : '';
     let windHtml = '';
     if (showLabel && weather.windSpeed > 0) {
-      const rotation = weather.windDirection != null ? weather.windDirection : 0;
+      const rotation = weather.windDirection != null ? (weather.windDirection + 180) % 360 : 0;
       windHtml = `<span class="weather-wind"><i class="fas fa-up-long" style="transform: rotate(${rotation}deg)"></i></span>`;
     }
     let precipHtml = '';

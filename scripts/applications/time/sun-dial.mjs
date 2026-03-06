@@ -14,8 +14,8 @@ import { localize } from '../../utils/localization.mjs';
 import { log } from '../../utils/logger.mjs';
 import { canViewSunDial } from '../../utils/permissions.mjs';
 import { CalendariaSocket } from '../../utils/socket.mjs';
-import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
 import { applyWeatherSkyTint, buildOpenAppsMenuItem, computeStarAlpha, getSkyColorsRgb } from '../../utils/ui/_module.mjs';
+import * as StickyZones from '../../utils/ui/sticky-zones.mjs';
 import { getPreset } from '../../weather/data/weather-presets.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { HudSceneRenderer } from '../hud/hud-scene-renderer.mjs';
@@ -69,6 +69,12 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {string|null} ID of zone the dial is snapped to */
   #snappedZoneId = null;
 
+  /** @type {boolean} Whether to close when clicking outside */
+  #closeOnClickOutside = false;
+
+  /** @type {Function|null} Bound click-outside handler for cleanup */
+  #boundClickOutside = null;
+
   /** @type {boolean} Whether position dragging is locked */
   #stickyPosition = false;
   #lastSize = 300;
@@ -101,8 +107,9 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
    * Show the sun dial (reuses existing instance or creates new).
    * @param {object} [options] - Show options
    * @param {boolean} [options.silent] - If true, don't show permission warning
+   * @param {boolean} [options.closeOnClickOutside] - If true, close when clicking outside the dial
    */
-  static show({ silent = false } = {}) {
+  static show({ silent = false, closeOnClickOutside = false } = {}) {
     if (!canViewSunDial()) {
       if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return;
@@ -112,7 +119,9 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       existing.render({ force: true });
       return;
     }
-    new SunDial().render({ force: true });
+    const dial = new SunDial();
+    dial.#closeOnClickOutside = closeOnClickOutside;
+    dial.render({ force: true });
   }
 
   /** Hide (close) the sun dial. */
@@ -168,7 +177,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#currentHours = components.hour ?? 0;
     this.#currentMinutes = components.minute ?? 0;
     this.#initialTime = game.time.worldTime;
-
     const sunDialStickyStates = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_STICKY_STATES) || {};
     this.#stickyPosition = sunDialStickyStates.position ?? false;
     if (options.isFirstRender) this.#restorePosition();
@@ -176,30 +184,25 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#enableResizing();
     this.#initSceneRenderer();
     this.#setupContextMenu();
-
     const initialAngle = this.#timeToAngle(this.#currentHours, this.#currentMinutes);
     this.#updateDialRotation(initialAngle);
     this.#updateSceneForHour({ hours: this.#currentHours, minutes: this.#currentMinutes });
     this.#setupDialInteraction();
     SunDial.refreshStickyStates();
-
     this.#boundEscape = (e) => {
       if (e.key === 'Escape') this.close();
     };
     window.addEventListener('keydown', this.#boundEscape);
-
-    if (!this.#weatherHookId) {
-      this.#weatherHookId = Hooks.on(HOOKS.WEATHER_CHANGE, () => this.#refreshWeatherEffect());
+    if (this.#closeOnClickOutside && !this.#boundClickOutside) {
+      this.#boundClickOutside = (e) => {
+        if (!this.element.contains(e.target)) this.close();
+      };
+      document.addEventListener('mousedown', this.#boundClickOutside);
     }
-    if (!this.#timeHookId) {
-      this.#timeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, () => this.#onTimeUpdated());
-    }
-    if (!this.#formatsHookId) {
-      this.#formatsHookId = Hooks.on(HOOKS.DISPLAY_FORMATS_CHANGED, () => this.#onTimeUpdated());
-    }
-    if (!this.#clockHookId) {
-      this.#clockHookId = Hooks.on(HOOKS.CLOCK_START_STOP, () => this.render());
-    }
+    if (!this.#weatherHookId) this.#weatherHookId = Hooks.on(HOOKS.WEATHER_CHANGE, () => this.#refreshWeatherEffect());
+    if (!this.#timeHookId) this.#timeHookId = Hooks.on(HOOKS.WORLD_TIME_UPDATED, () => this.#onTimeUpdated());
+    if (!this.#formatsHookId) this.#formatsHookId = Hooks.on(HOOKS.DISPLAY_FORMATS_CHANGED, () => this.#onTimeUpdated());
+    if (!this.#clockHookId) this.#clockHookId = Hooks.on(HOOKS.CLOCK_START_STOP, () => this.render());
   }
 
   /** @override */
@@ -231,9 +234,11 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#boundMouseMove) window.removeEventListener('mousemove', this.#boundMouseMove);
     if (this.#boundMouseUp) window.removeEventListener('mouseup', this.#boundMouseUp);
     if (this.#boundEscape) window.removeEventListener('keydown', this.#boundEscape);
+    if (this.#boundClickOutside) document.removeEventListener('mousedown', this.#boundClickOutside);
     this.#boundMouseMove = null;
     this.#boundMouseUp = null;
     this.#boundEscape = null;
+    this.#boundClickOutside = null;
     StickyZones.unregisterFromZoneUpdates(this);
     StickyZones.unpinFromZone(this.element);
     StickyZones.cleanupSnapIndicator();
@@ -262,12 +267,13 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const preset = weather ? getPreset(weather.id, customPresets) : null;
     const resolved = this.#resolveOverrides(preset);
-    const effect = resolved.hudEffect || preset?.hudEffect || 'clear';
+    const disableFx = game.settings.get(MODULE.ID, SETTINGS.HUD_DISABLE_WEATHER_FX);
+    const effect = disableFx ? 'clear' : resolved.hudEffect || preset?.hudEffect || 'clear';
     const { visualOverrides } = resolved;
     this.#sceneRenderer.setEffect(
       effect,
       { windSpeed: weather?.wind?.speed ?? 0, windDirection: weather?.wind?.direction ?? 0, precipIntensity: weather?.precipitation?.intensity ?? 0 },
-      visualOverrides
+      disableFx ? null : visualOverrides
     );
   }
 
@@ -288,12 +294,13 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const preset = weather ? getPreset(weather.id, customPresets) : null;
     const resolved = this.#resolveOverrides(preset);
-    const effect = resolved.hudEffect || preset?.hudEffect || 'clear';
+    const disableFx = game.settings.get(MODULE.ID, SETTINGS.HUD_DISABLE_WEATHER_FX);
+    const effect = disableFx ? 'clear' : resolved.hudEffect || preset?.hudEffect || 'clear';
     const { visualOverrides } = resolved;
     this.#sceneRenderer.setEffect(
       effect,
       { windSpeed: weather?.wind?.speed ?? 0, windDirection: weather?.wind?.direction ?? 0, precipIntensity: weather?.precipitation?.intensity ?? 0 },
-      visualOverrides
+      disableFx ? null : visualOverrides
     );
     this.#updateSceneForHour({ hours: this.#currentHours, minutes: this.#currentMinutes });
   }

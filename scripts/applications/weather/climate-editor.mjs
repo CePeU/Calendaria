@@ -181,6 +181,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               alias,
               hasAlias: !!alias,
               enabled: saved.enabled ?? false,
+              enabledNoWeight: (saved.enabled ?? false) && !seasonChanceDisplay,
               seasonChance: seasonChanceDisplay,
               isRelativeChance,
               tempMin: ClimateEditor.#formatTempValue(saved.tempMin),
@@ -430,6 +431,10 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       };
     }
     const seasonOverrides = foundry.utils.deepClone(this.#data.seasonOverrides ?? {});
+    for (const season of seasonNames) {
+      if (!seasonOverrides[season]) continue;
+      seasonOverrides[season].temperatures = result.temperatures[season] ? { ...result.temperatures[season] } : null;
+    }
     const selectedSeason = this.#selectedSeason;
     if (selectedSeason) {
       if (!seasonOverrides[selectedSeason]) seasonOverrides[selectedSeason] = {};
@@ -450,7 +455,6 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#data.seasonOverrides = seasonOverrides;
     for (const preset of allPresets) {
       const enabled = !!data[`preset_${preset.id}_enabled`];
-      if (!enabled) continue;
       const pData = { id: preset.id, enabled };
       const tMinRaw = String(data[`preset_${preset.id}_tempMin`] ?? '').trim();
       const tMaxRaw = String(data[`preset_${preset.id}_tempMax`] ?? '').trim();

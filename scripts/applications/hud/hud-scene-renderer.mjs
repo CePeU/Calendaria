@@ -1671,7 +1671,8 @@ export class HudSceneRenderer {
     const w = this.#app.screen.width;
     const h = this.#app.screen.height;
     const windFactor = this.#weatherOptions.windSpeed * 0.4;
-    const windRad = ((this.#weatherOptions.windDirection ?? 0) * Math.PI) / 180;
+    const blowDir = ((this.#weatherOptions.windDirection ?? 0) + 180) % 360;
+    const windRad = (blowDir * Math.PI) / 180;
     const windX = Math.sin(windRad) * windFactor;
     const windY = -Math.cos(windRad) * windFactor * 0.3;
     const centerX = w / 2;

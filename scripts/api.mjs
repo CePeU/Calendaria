@@ -188,6 +188,16 @@ export const CalendariaAPI = {
   },
 
   /**
+   * Add a new calendar.
+   * @param {string} id - Unique calendar ID
+   * @param {object} definition - Calendar definition object
+   * @returns {Promise<object|null>} The created calendar or null if the ID already exists
+   */
+  async addCalendar(id, definition) {
+    return CalendarManager.addCalendar(id, definition);
+  },
+
+  /**
    * Switch to a different calendar.
    * @param {string} id - Calendar ID to switch to
    * @returns {Promise<boolean>} True if calendar was switched successfully
@@ -776,10 +786,12 @@ export const CalendariaAPI = {
 
   /**
    * Show the Sun Dial.
+   * @param {object} [options] - Show options
+   * @param {boolean} [options.closeOnClickOutside] - If true, close when clicking outside the dial
    * @returns {SunDial} The Sun Dial instance
    */
-  showSunDial() {
-    return SunDial.show();
+  showSunDial(options = {}) {
+    return SunDial.show(options);
   },
 
   /** Hide the Sun Dial. */
@@ -1064,6 +1076,22 @@ export const CalendariaAPI = {
    */
   async clearWeather() {
     return WeatherManager.clearWeather();
+  },
+
+  /**
+   * Clear weather history entries and optionally the forecast plan.
+   * @param {object} [options] - Clear options
+   * @param {boolean} [options.future] - Only clear entries after the current date
+   * @param {boolean} [options.all] - Clear all history
+   * @param {number} [options.year] - Clear entries for a specific year (1-indexed display year)
+   * @param {number} [options.month] - Clear entries for a specific month (1-indexed, requires year)
+   * @param {boolean} [options.clearForecast] - Also clear the forecast plan (default: true)
+   * @returns {Promise<number>} Number of entries removed
+   */
+  async clearWeatherHistory(options = {}) {
+    const converted = { ...options };
+    if (converted.month != null) converted.month = converted.month - 1;
+    return WeatherManager.clearWeatherHistory(converted);
   },
 
   /**

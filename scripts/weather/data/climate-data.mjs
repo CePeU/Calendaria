@@ -85,8 +85,10 @@ export const CLIMATE_ZONE_TEMPLATES = {
     description: 'CALENDARIA.Weather.Climate.ArcticDesc',
     temperatures: { Spring: { min: -15, max: 0 }, Summer: { min: -5, max: 8 }, Autumn: { min: -20, max: -5 }, Winter: { min: -45, max: -20 }, _default: { min: -25, max: -5 } },
     weather: {
-      summer: { clear: 3, 'partly-cloudy': 3, snow: 3, blizzard: 2, windy: 3, fog: 1 },
-      winter: { blizzard: 6, snow: 5, overcast: 2, windy: 4 },
+      spring: { snow: 4, overcast: 3, windy: 3, clear: 2, blizzard: 2 },
+      summer: { clear: 3, 'partly-cloudy': 3, snow: 3, overcast: 2, blizzard: 2, windy: 3, fog: 1 },
+      autumn: { snow: 5, blizzard: 3, overcast: 3, windy: 3, clear: 1 },
+      winter: { blizzard: 6, snow: 5, overcast: 2, windy: 4, clear: 1 },
       default: { snow: 5, blizzard: 4, overcast: 3, windy: 3, clear: 1 }
     },
     windSpeedRange: { min: 2, max: 5 },
@@ -104,8 +106,10 @@ export const CLIMATE_ZONE_TEMPLATES = {
     description: 'CALENDARIA.Weather.Climate.SubarcticDesc',
     temperatures: { Spring: { min: -10, max: 8 }, Summer: { min: 5, max: 18 }, Autumn: { min: -5, max: 10 }, Winter: { min: -35, max: -10 }, _default: { min: -10, max: 5 } },
     weather: {
-      summer: { clear: 4, 'partly-cloudy': 4, rain: 3, snow: 1, mist: 2 },
-      winter: { snow: 6, blizzard: 4, overcast: 3, windy: 3 },
+      spring: { snow: 3, cloudy: 3, overcast: 2, windy: 2, clear: 3 },
+      summer: { clear: 4, 'partly-cloudy': 4, rain: 3, snow: 1, cloudy: 2, overcast: 1, windy: 1, mist: 2 },
+      autumn: { snow: 4, cloudy: 4, overcast: 3, windy: 2, clear: 1 },
+      winter: { snow: 6, blizzard: 4, overcast: 3, windy: 3, cloudy: 2, clear: 1 },
       default: { snow: 4, cloudy: 3, overcast: 3, windy: 2, clear: 2 }
     },
     windSpeedRange: { min: 1, max: 4 },
@@ -123,10 +127,10 @@ export const CLIMATE_ZONE_TEMPLATES = {
     description: 'CALENDARIA.Weather.Climate.TemperateDesc',
     temperatures: { Spring: { min: 8, max: 18 }, Summer: { min: 18, max: 30 }, Autumn: { min: 8, max: 18 }, Winter: { min: -5, max: 5 }, _default: { min: 8, max: 20 } },
     weather: {
-      summer: { clear: 6, 'partly-cloudy': 4, thunderstorm: 2, rain: 2 },
-      winter: { snow: 5, blizzard: 2, fog: 2, overcast: 3, clear: 2 },
-      spring: { rain: 4, drizzle: 3, 'partly-cloudy': 3, clear: 2, mist: 2 },
-      autumn: { cloudy: 4, rain: 3, fog: 3, 'partly-cloudy': 2, windy: 2 },
+      spring: { rain: 4, drizzle: 3, 'partly-cloudy': 3, clear: 2, mist: 2, cloudy: 2 },
+      summer: { clear: 6, 'partly-cloudy': 4, thunderstorm: 2, rain: 2, cloudy: 1, mist: 1, drizzle: 1 },
+      autumn: { cloudy: 4, rain: 3, fog: 3, 'partly-cloudy': 2, windy: 2, mist: 1, drizzle: 1, clear: 1 },
+      winter: { snow: 5, blizzard: 2, fog: 2, overcast: 3, clear: 2, rain: 1, cloudy: 2, mist: 1, drizzle: 1 },
       default: { rain: 3, cloudy: 3, mist: 2, drizzle: 2, clear: 3 }
     },
     windSpeedRange: { min: 0, max: 3 },
@@ -144,8 +148,10 @@ export const CLIMATE_ZONE_TEMPLATES = {
     description: 'CALENDARIA.Weather.Climate.SubtropicalDesc',
     temperatures: { Spring: { min: 15, max: 28 }, Summer: { min: 22, max: 35 }, Autumn: { min: 15, max: 28 }, Winter: { min: 5, max: 17 }, _default: { min: 12, max: 28 } },
     weather: {
-      summer: { clear: 5, 'partly-cloudy': 4, rain: 5, drizzle: 2, thunderstorm: 3, sunshower: 1 },
-      winter: { clear: 2, cloudy: 4, rain: 3, mist: 2, fog: 1 },
+      spring: { clear: 4, 'partly-cloudy': 4, cloudy: 3, rain: 3 },
+      summer: { clear: 5, 'partly-cloudy': 4, cloudy: 2, rain: 5, drizzle: 2, thunderstorm: 3, sunshower: 1 },
+      autumn: { clear: 3, 'partly-cloudy': 4, cloudy: 4, rain: 3 },
+      winter: { clear: 2, 'partly-cloudy': 3, cloudy: 4, rain: 3, mist: 2, fog: 1 },
       default: { clear: 4, 'partly-cloudy': 5, cloudy: 3, rain: 2 }
     },
     windSpeedRange: { min: 0, max: 3 },
@@ -162,7 +168,13 @@ export const CLIMATE_ZONE_TEMPLATES = {
     name: 'CALENDARIA.Weather.Climate.Tropical',
     description: 'CALENDARIA.Weather.Climate.TropicalDesc',
     temperatures: { Spring: { min: 24, max: 32 }, Summer: { min: 26, max: 35 }, Autumn: { min: 24, max: 32 }, Winter: { min: 22, max: 30 }, _default: { min: 24, max: 35 } },
-    weather: { default: { clear: 8, 'partly-cloudy': 5, rain: 7, thunderstorm: 3, fog: 2, sunshower: 1 } },
+    weather: {
+      spring: { clear: 7, 'partly-cloudy': 5, rain: 6, thunderstorm: 3, fog: 2, sunshower: 1 },
+      summer: { rain: 8, thunderstorm: 5, clear: 4, 'partly-cloudy': 4, fog: 2, sunshower: 2 },
+      autumn: { rain: 7, 'partly-cloudy': 5, clear: 5, thunderstorm: 4, fog: 2, sunshower: 1 },
+      winter: { clear: 8, 'partly-cloudy': 6, rain: 3, thunderstorm: 1, fog: 1, sunshower: 1 },
+      default: { clear: 8, 'partly-cloudy': 5, rain: 7, thunderstorm: 3, fog: 2, sunshower: 1 }
+    },
     windSpeedRange: { min: 0, max: 2 },
     windDirections: { E: 20, ENE: 15, NE: 12, ESE: 10, SE: 8, N: 5, NNE: 5, S: 5, SSE: 5, SSW: 4, NNW: 3, NW: 3, W: 2, WNW: 1, WSW: 1, SW: 1 },
     brightnessMultiplier: 1.1,
@@ -178,8 +190,10 @@ export const CLIMATE_ZONE_TEMPLATES = {
     description: 'CALENDARIA.Weather.Climate.AridDesc',
     temperatures: { Spring: { min: 18, max: 35 }, Summer: { min: 28, max: 48 }, Autumn: { min: 18, max: 35 }, Winter: { min: 5, max: 22 }, _default: { min: 15, max: 40 } },
     weather: {
+      spring: { clear: 8, 'partly-cloudy': 4, sandstorm: 1, windy: 2 },
       summer: { clear: 10, 'partly-cloudy': 3, sandstorm: 2, windy: 1 },
-      winter: { clear: 6, 'partly-cloudy': 4, cloudy: 2, drizzle: 1 },
+      autumn: { clear: 7, 'partly-cloudy': 4, sandstorm: 2, windy: 1 },
+      winter: { clear: 6, 'partly-cloudy': 4, sandstorm: 1, windy: 1, cloudy: 2, drizzle: 1 },
       default: { clear: 8, 'partly-cloudy': 4, sandstorm: 1, windy: 1 }
     },
     windSpeedRange: { min: 0, max: 4 },
@@ -197,8 +211,10 @@ export const CLIMATE_ZONE_TEMPLATES = {
     description: 'CALENDARIA.Weather.Climate.PolarDesc',
     temperatures: { Spring: { min: -20, max: -5 }, Summer: { min: -5, max: 10 }, Autumn: { min: -25, max: -10 }, Winter: { min: -50, max: -25 }, _default: { min: -30, max: -10 } },
     weather: {
-      summer: { clear: 4, 'partly-cloudy': 3, windy: 2, mist: 1, snow: 2 },
-      winter: { blizzard: 6, snow: 5, overcast: 2, windy: 3 },
+      spring: { snow: 4, overcast: 3, blizzard: 2, windy: 2, clear: 2 },
+      summer: { clear: 4, 'partly-cloudy': 3, snow: 2, overcast: 2, windy: 2, blizzard: 1, mist: 1 },
+      autumn: { snow: 5, overcast: 3, blizzard: 3, windy: 2, clear: 1 },
+      winter: { blizzard: 6, snow: 5, overcast: 2, windy: 3, clear: 1 },
       default: { snow: 4, overcast: 3, blizzard: 2, windy: 2, clear: 1 }
     },
     windSpeedRange: { min: 2, max: 5 },
@@ -250,14 +266,15 @@ export function getDefaultZoneConfig(templateId, seasonNames = ['CALENDARIA.Seas
     presets.push({ id: preset.id, enabled: weight > 0, tempMin: null, tempMax: null });
   }
   const seasonOverrides = {};
+  const defaultWeatherWeights = template.weather?.default ?? {};
   for (const season of seasonNames) {
     const normalizedSeason = normalizeSeasonName(season);
     const seasonWeather = template.weather?.[normalizedSeason];
-    if (!seasonWeather || normalizedSeason === 'default') continue;
-    const seasonTotal = Object.values(seasonWeather).reduce((sum, w) => sum + w, 0);
+    const effectiveWeather = seasonWeather && normalizedSeason !== 'default' ? seasonWeather : defaultWeatherWeights;
+    const seasonTotal = Object.values(effectiveWeather).reduce((sum, w) => sum + w, 0);
     if (seasonTotal <= 0) continue;
     const seasonPresets = {};
-    for (const [presetId, weight] of Object.entries(seasonWeather)) {
+    for (const [presetId, weight] of Object.entries(effectiveWeather)) {
       const chance = Math.round((weight / seasonTotal) * 100 * 100) / 100;
       seasonPresets[presetId] = { id: presetId, chance };
     }

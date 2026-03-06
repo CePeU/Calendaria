@@ -91,6 +91,11 @@
       min-width: 1.5rem;
       height: 1.5rem;
       padding: 0.125rem 0.25rem;
+
+      &:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
     }
 
     .view-select {

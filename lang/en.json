@@ -1609,6 +1609,8 @@
   "CALENDARIA.Settings.HUDDialStyle.Hint": "Choose between the dome or slice.",
   "CALENDARIA.Settings.HUDDialStyle.Name": "Sun/Moon Dial Style",
   "CALENDARIA.Settings.HUDDialStyle.Slice": "Slice (horizontal in bar)",
+  "CALENDARIA.Settings.HUDDisableWeatherFx.Hint": "Disable weather particle effects in the HUD dome and sun dial. Sky, sun, moon, and stars are unaffected.",
+  "CALENDARIA.Settings.HUDDisableWeatherFx.Name": "Disable Weather Effects",
   "CALENDARIA.Settings.HUDDomeBelow.Hint": "Render the sundial dome below the HUD bar instead of above.",
   "CALENDARIA.Settings.HUDDomeBelow.Name": "Dome Below Bar",
   "CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation": "Abbreviation Only",

@@ -53,8 +53,8 @@
       <i class="fas fa-gear"></i>
     </button>
 
-    <button type="button" data-action="closeBigCal" data-tooltip
-      aria-label="{{localize 'CALENDARIA.Common.Close'}}" class="close-btn">
+    <button type="button" data-action="closeBigCal" data-tooltip aria-label="{{localize 'CALENDARIA.Common.Close'}}"
+      class="close-btn">
       <i class="fas fa-times"></i>
     </button>
 
@@ -67,7 +67,8 @@
   {{!-- Row 2: MWY Select | Indicators (flex) | Today + SetDate --}}
   <div class="header-row header-row-bottom">
     <select class="view-select">
-      <option value="month" {{#if (eq displayMode 'month')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Month'}}</option>
+      <option value="month" {{#if (eq displayMode 'month')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Month'}}
+      </option>
       <option value="week" {{#if (eq displayMode 'week')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Week'}}</option>
       <option value="year" {{#if (eq displayMode 'year')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Year'}}</option>
     </select>
@@ -81,15 +82,16 @@
     </div>
 
     <div class="calendar-actions">
-      <button type="button" data-action="today" data-tooltip aria-label="{{localize 'CALENDARIA.CalendarApp.GoToToday'}}">
+      <button type="button" data-action="today" data-tooltip
+        aria-label="{{localize 'CALENDARIA.CalendarApp.GoToToday'}}">
         <i class="fas fa-calendar-day"></i>
       </button>
 
       {{#if editable}}
         <button type="button" data-action="setAsCurrentDate" data-tooltip
-          aria-label="{{#if isToday}}{{localize 'CALENDARIA.CalendarApp.CurrentDateBtn'}}{{else}}{{localize 'CALENDARIA.CalendarApp.SetAsCurrent'}}{{/if}}"
-          class="set-current-date-btn" {{#if isToday}}disabled{{/if}}>
-          <i class="fas fa-calendar-check"></i>
+          aria-label="{{#if disableSetCurrentDate}}{{localize 'CALENDARIA.CalendarApp.CurrentDateBtn'}}{{else}}{{localize 'CALENDARIA.CalendarApp.SetAsCurrent'}}{{/if}}"
+          class="set-current-date-btn" {{#if disableSetCurrentDate}}disabled{{/if}}>
+          <i class="fas fa-thumbtack"></i>
         </button>
       {{/if}}
 

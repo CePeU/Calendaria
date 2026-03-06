@@ -569,6 +569,7 @@ async function migrateDateIndexing() {
     if (cal.festivals) {
       const festivals = Array.isArray(cal.festivals) ? cal.festivals : Object.values(cal.festivals);
       for (const f of festivals) {
+        if (!f || typeof f !== 'object') continue;
         if ('day' in f && !('dayOfMonth' in f)) {
           f.dayOfMonth = (f.day ?? 1) - 1;
           delete f.day;

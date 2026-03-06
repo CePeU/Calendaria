@@ -81,6 +81,15 @@
     </div>
 
     <div class="form-group">
+      <label for="hudDisableWeatherFx">{{localize "CALENDARIA.Settings.HUDDisableWeatherFx.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="hudDisableWeatherFx" name="hudDisableWeatherFx"
+          {{#if hudDisableWeatherFx}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HUDDisableWeatherFx.Hint"}}</p>
+    </div>
+
+    <div class="form-group">
       <label for="hudDomeBelow">{{localize "CALENDARIA.Settings.HUDDomeBelow.Name"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="hudDomeBelow" name="hudDomeBelow" {{#if hudDomeBelow}}checked{{/if}}>
@@ -104,11 +113,21 @@
       <label for="hudCombatMode">{{localize "CALENDARIA.Settings.HUDCombatMode.Name"}}</label>
       <div class="form-fields">
         <select id="hudCombatMode" name="hudCombatMode">
-          <option value="none" {{#if (eq hudCombatMode "none")}}selected{{/if}}>{{localize "CALENDARIA.Settings.HUDCombatMode.None"}}</option>
-          <option value="compactCombat" {{#if (eq hudCombatMode "compactCombat")}}selected{{/if}}>{{localize "CALENDARIA.Settings.HUDCombatMode.CompactCombat"}}</option>
-          <option value="compactEncounter" {{#if (eq hudCombatMode "compactEncounter")}}selected{{/if}}>{{localize "CALENDARIA.Settings.HUDCombatMode.CompactEncounter"}}</option>
-          <option value="hideCombat" {{#if (eq hudCombatMode "hideCombat")}}selected{{/if}}>{{localize "CALENDARIA.Settings.HUDCombatMode.HideCombat"}}</option>
-          <option value="hideEncounter" {{#if (eq hudCombatMode "hideEncounter")}}selected{{/if}}>{{localize "CALENDARIA.Settings.HUDCombatMode.HideEncounter"}}</option>
+          <option value="none" {{#if (eq hudCombatMode "none")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.HUDCombatMode.None"}}
+          </option>
+          <option value="compactCombat" {{#if (eq hudCombatMode "compactCombat")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.HUDCombatMode.CompactCombat"}}
+          </option>
+          <option value="compactEncounter" {{#if (eq hudCombatMode "compactEncounter")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.HUDCombatMode.CompactEncounter"}}
+          </option>
+          <option value="hideCombat" {{#if (eq hudCombatMode "hideCombat")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.HUDCombatMode.HideCombat"}}
+          </option>
+          <option value="hideEncounter" {{#if (eq hudCombatMode "hideEncounter")}}selected{{/if}}>
+            {{localize "CALENDARIA.Settings.HUDCombatMode.HideEncounter"}}
+          </option>
         </select>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.HUDCombatMode.Hint"}}</p>

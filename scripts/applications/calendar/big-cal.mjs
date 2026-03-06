@@ -181,7 +181,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const todayMonth = today.month;
     const todayDayOfMonth = today.dayOfMonth ?? 0;
     if (this._selectedDate) context.isToday = this._selectedDate.year === todayYear && this._selectedDate.month === todayMonth && this._selectedDate.dayOfMonth === todayDayOfMonth;
-    else context.isToday = viewedDate.year === todayYear && viewedDate.month === todayMonth && viewedDate.dayOfMonth === todayDayOfMonth;
+    else context.isToday = true;
+    context.disableSetCurrentDate = !this._selectedDate || context.isToday;
     const allNotes = ViewUtils.getCalendarNotes();
     context.notes = allNotes;
     context.visibleNotes = ViewUtils.getVisibleNotes(allNotes);

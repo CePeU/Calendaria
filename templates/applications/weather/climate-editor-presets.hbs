@@ -65,7 +65,9 @@
                 {{/if}}
               </span>
               <input type="text" name="preset_{{this.id}}_seasonChance" value="{{this.seasonChance}}" placeholder=""
-                class="preset-season-chance {{#if this.isRelativeChance}}modifier-relative{{/if}}">
+                class="preset-season-chance {{#if this.isRelativeChance}}modifier-relative{{/if}} {{#if this.enabledNoWeight}}zero-weight-warning{{/if}}"
+                {{#if this.enabledNoWeight}}data-tooltip
+                aria-label="{{localize 'CALENDARIA.ClimateEditor.Presets.ZeroWeightWarning'}}" {{/if}}>
               <input type="text" name="preset_{{this.id}}_tempMin" value="{{this.tempMin}}" placeholder="—"
                 class="preset-temp-input {{#if this.isRelativeTempMin}}modifier-relative{{/if}}">
               <input type="text" name="preset_{{this.id}}_tempMax" value="{{this.tempMax}}" placeholder="—"

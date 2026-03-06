@@ -292,7 +292,19 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       const nativeSound = preset?.soundFx || '';
       const userPickedSound = this.#soundFx || '';
       const soundOverride = userPickedSound !== nativeSound ? userPickedSound || null : undefined;
-      await WeatherManager.setWeather(this.#selectedPresetId, { wind: windData, precipitation: precipData, fxPreset: fxOverride, soundFx: soundOverride, fxDensity, fxSpeed, fxColor, zoneId });
+      const temp = fd.customTemp;
+      const temperature = temp ? fromDisplayUnit(parseInt(temp, 10)) : undefined;
+      await WeatherManager.setWeather(this.#selectedPresetId, {
+        temperature,
+        wind: windData,
+        precipitation: precipData,
+        fxPreset: fxOverride,
+        soundFx: soundOverride,
+        fxDensity,
+        fxSpeed,
+        fxColor,
+        zoneId
+      });
     } else {
       const data = foundry.utils.expandObject(fd);
       const label = data.customLabel?.trim();

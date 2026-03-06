@@ -77,6 +77,7 @@ export const SETTINGS = {
   HUD_COMBAT_MODE: 'hudCombatMode',
   HUD_CYCLES_DISPLAY_MODE: 'hudCyclesDisplayMode',
   HUD_DIAL_STYLE: 'hudDialStyle',
+  HUD_DISABLE_WEATHER_FX: 'hudDisableWeatherFx',
   HUD_DOME_AUTO_HIDE: 'hudDomeAutoHide',
   HUD_DOME_BELOW: 'hudDomeBelow',
   HUD_SHOW_ALL_MOONS: 'hudShowAllMoons',

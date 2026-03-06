@@ -152,7 +152,16 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
   let { probabilities, tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
   if (Object.keys(probabilities).length === 0) {
-    for (const preset of getAllPresets(customPresets)) probabilities[preset.id] = 1;
+    const rawZonePresets = zoneConfig?.presets;
+    if (rawZonePresets && Object.keys(rawZonePresets).length > 0) {
+      const enabledIds = new Set(
+        Object.values(rawZonePresets)
+          .filter((p) => p?.id && p.enabled !== false)
+          .map((p) => p.id)
+      );
+      for (const preset of getAllPresets(customPresets)) if (enabledIds.has(preset.id)) probabilities[preset.id] = 1;
+    }
+    if (Object.keys(probabilities).length === 0) for (const preset of getAllPresets(customPresets)) probabilities[preset.id] = 1;
     if (Object.keys(probabilities).length === 0) probabilities.clear = 1;
   }
   if (currentWeatherId && inertia > 0) probabilities = applyWeatherInertia(currentWeatherId, probabilities, inertia, customPresets, zoneConfig);

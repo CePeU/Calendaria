@@ -1124,6 +1124,60 @@ export default class WeatherManager {
   }
 
   /**
+   * Clear weather history entries and optionally the forecast plan.
+   * @param {object} [options] - Clear options
+   * @param {boolean} [options.future] - Only clear entries after the current date
+   * @param {boolean} [options.all] - Clear all history (ignores year/month filters)
+   * @param {number} [options.year] - Clear entries for a specific year (0-indexed internal year)
+   * @param {number} [options.month] - Clear entries for a specific month within the year (0-indexed)
+   * @param {boolean} [options.clearForecast] - Also clear the forecast plan (default: true)
+   * @returns {Promise<number>} Number of entries removed
+   */
+  static async clearWeatherHistory(options = {}) {
+    if (!game.user?.isGM) return 0;
+    const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
+    let removed = 0;
+    if (options.all) {
+      for (const y of Object.keys(history)) for (const m of Object.keys(history[y] ?? {})) removed += Object.keys(history[y][m] ?? {}).length;
+      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, {});
+    } else if (options.future) {
+      const calendar = CalendarManager.getActiveCalendar();
+      const components = game.time.components;
+      const yearZero = calendar?.years?.yearZero ?? 0;
+      const todayYear = components.year + yearZero;
+      const todayMonth = components.month;
+      const todayDay = components.dayOfMonth ?? 0;
+      const todayKey = todayYear * 10000 + todayMonth * 100 + todayDay;
+      for (const [y, months] of Object.entries(history)) {
+        for (const [m, days] of Object.entries(months ?? {})) {
+          for (const d of Object.keys(days ?? {})) {
+            const key = Number(y) * 10000 + Number(m) * 100 + Number(d);
+            if (key > todayKey) {
+              delete days[d];
+              removed++;
+            }
+          }
+          if (Object.keys(days).length === 0) delete months[m];
+        }
+        if (Object.keys(months ?? {}).length === 0) delete history[y];
+      }
+      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, history);
+    } else if (options.year != null) {
+      if (options.month != null) {
+        removed = Object.keys(history[options.year]?.[options.month] ?? {}).length;
+        if (history[options.year]) delete history[options.year][options.month];
+      } else {
+        for (const m of Object.keys(history[options.year] ?? {})) removed += Object.keys(history[options.year][m] ?? {}).length;
+        delete history[options.year];
+      }
+      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, history);
+    }
+    if (options.clearForecast !== false) await this.#clearForecastPlan();
+    log(3, `Cleared ${removed} weather history entries`);
+    return removed;
+  }
+
+  /**
    * Get current season object.
    * @returns {object|null} Season object with name, climate, etc.
    * @private

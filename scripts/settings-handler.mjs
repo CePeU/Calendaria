@@ -602,6 +602,14 @@ export default class CalendariaSettings {
           initial: 'compactCombat'
         })
       },
+      [SETTINGS.HUD_DISABLE_WEATHER_FX]: {
+        name: 'CALENDARIA.Settings.HUDDisableWeatherFx.Name',
+        hint: 'CALENDARIA.Settings.HUDDisableWeatherFx.Hint',
+        scope: 'client',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: renderHUD
+      },
       [SETTINGS.HUD_DOME_BELOW]: {
         name: 'CALENDARIA.Settings.HUDDomeBelow.Name',
         hint: 'CALENDARIA.Settings.HUDDomeBelow.Hint',

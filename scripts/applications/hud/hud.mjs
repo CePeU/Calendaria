@@ -578,7 +578,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       dome.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          SunDial.show();
+          SunDial.show({ closeOnClickOutside: true });
         }
       });
     }
@@ -1063,12 +1063,13 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const preset = weather ? getPreset(weather.id, customPresets) : null;
     const resolved = this.#resolveOverrides(preset);
-    const effect = resolved.hudEffect || preset?.hudEffect || 'clear';
+    const disableFx = game.settings.get(MODULE.ID, SETTINGS.HUD_DISABLE_WEATHER_FX);
+    const effect = disableFx ? 'clear' : resolved.hudEffect || preset?.hudEffect || 'clear';
     const { visualOverrides } = resolved;
     this.#sceneRenderer.setEffect(
       effect,
       { windSpeed: weather?.wind?.speed ?? 0, windDirection: weather?.wind?.direction ?? 0, precipIntensity: weather?.precipitation?.intensity ?? 0 },
-      visualOverrides
+      disableFx ? null : visualOverrides
     );
   }
 
@@ -1317,7 +1318,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onOpenSunDial(_event, _target) {
     if (!canChangeDateTime()) return;
-    SunDial.show();
+    SunDial.show({ closeOnClickOutside: true });
   }
 
   /**
@@ -1772,7 +1773,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * Should be called once during module initialization.
    */
   static registerCombatHooks() {
-    this.#migrateCombatSettings();
+    Hooks.once('ready', () => this.#migrateCombatSettings());
 
     Hooks.on('combatStart', () => {
       const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
