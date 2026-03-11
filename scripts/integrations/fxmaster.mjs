@@ -137,6 +137,11 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
   if (visualOnly) return;
   if (!CalendariaSocket.isPrimaryGM()) return;
   if (bulk) {
+    const scene = game.scenes?.active;
+    if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED) || scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+      stopAll();
+      return;
+    }
     const weather = WeatherManager.getCurrentWeather();
     playWeather(weather || null);
     return;

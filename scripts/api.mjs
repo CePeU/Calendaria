@@ -871,7 +871,18 @@ export const CalendariaAPI = {
     if (!calendar) return null;
     const components = calendar.timeToComponents(timestamp);
     const yearZero = calendar.years?.yearZero ?? 0;
-    return { year: components.year + yearZero, month: components.month + 1, day: components.dayOfMonth + 1, hour: components.hour, minute: components.minute };
+    const months = calendar.monthsArray;
+    const monthData = months[components.month];
+    return {
+      year: components.year + yearZero,
+      month: components.month + 1,
+      ordinal: monthData?.ordinal ?? components.month + 1,
+      monthName: monthData?.name ?? '',
+      intercalary: monthData?.type === 'intercalary',
+      day: components.dayOfMonth + 1,
+      hour: components.hour,
+      minute: components.minute
+    };
   },
 
   /**
@@ -884,7 +895,17 @@ export const CalendariaAPI = {
     if (!calendar) return 0;
     const yearZero = calendar.years?.yearZero ?? 0;
     const year = date.year - yearZero;
-    const month = (date.month ?? 1) - 1;
+    let month;
+    if (date.month != null) {
+      month = date.month - 1;
+    } else if (date.ordinal != null) {
+      const months = calendar.monthsArray;
+      const nonIntercalary = months.findIndex((m) => m.ordinal === date.ordinal && m.type !== 'intercalary');
+      const idx = nonIntercalary >= 0 ? nonIntercalary : months.findIndex((m) => m.ordinal === date.ordinal);
+      month = idx >= 0 ? idx : 0;
+    } else {
+      month = 0;
+    }
     const dayOfMonth = (date.day ?? 1) - 1;
     return calendar.componentsToTime({ year, month, dayOfMonth, hour: date.hour ?? 0, minute: date.minute ?? 0, second: date.second ?? 0 });
   },

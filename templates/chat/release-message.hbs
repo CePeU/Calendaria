@@ -13,17 +13,19 @@
 
     <h4>New</h4>
     <ul>
-      <li>PF2E "Rest for the Night" advances world time</li>
-      <li>Starfinder 2E world clock sync</li>
-      <li>Per-scene FX Top-Down Override in scene config</li>
-      <li>Climate zone presets save per-season (enabled, temp, inertia)</li>
+      <li>Weather Picker gear button to open Weather settings</li>
+      <li>API: <code>timestampToDate</code> returns ordinal, monthName, intercalary</li>
+      <li>API: <code>dateToTimestamp</code> accepts ordinal-based month lookup</li>
     </ul>
 
     <h4>Fixes</h4>
     <ul>
-      <li>Blank UI from empty translation strings in fr/it/pl/tr</li>
-      <li>Climate editor inertia values lost on re-render</li>
-      <li>Undefined calendar names with incomplete language packs</li>
+      <li>Temperature of 0 no longer treated as empty</li>
+      <li>"Disable Weather FX" respected on day change</li>
+      <li>Weather sounds work without FXMaster and use Environment volume</li>
+      <li>Forecast wind speeds stable across re-renders</li>
+      <li>Multi-year periodic seasons cycle correctly</li>
+      <li>Extreme wind speed reduced to realistic 250 kph</li>
     </ul>
   </div>
 

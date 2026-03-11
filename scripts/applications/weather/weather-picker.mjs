@@ -5,6 +5,7 @@
  */
 
 import CalendarManager from '../../calendar/calendar-manager.mjs';
+import { CalendarEditor } from '../calendar/calendar-editor.mjs';
 import { COMPASS_DIRECTIONS, PRECIPITATION_TYPES, TEMPLATES, WIND_SPEEDS } from '../../constants.mjs';
 import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/fxmaster.mjs';
 import { localize } from '../../utils/localization.mjs';
@@ -83,14 +84,20 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     id: 'calendaria-weather-picker',
     classes: ['calendaria', 'weather-picker', 'standard-form'],
     tag: 'form',
-    window: { title: 'CALENDARIA.Weather.Picker.Title', icon: 'fas fa-cloud-sun', resizable: false },
+    window: {
+      title: 'CALENDARIA.Weather.Picker.Title',
+      icon: 'fas fa-cloud-sun',
+      resizable: false,
+      controls: [{ action: 'openWeatherSettings', icon: 'fa-solid fa-gear', label: 'CALENDARIA.Weather.Picker.OpenSettings' }]
+    },
     position: { width: 'auto', height: 'auto' },
     form: { handler: WeatherPickerApp._onSave, submitOnChange: false, closeOnSubmit: false },
     actions: {
       selectWeather: WeatherPickerApp._onSelectWeather,
       randomWeather: WeatherPickerApp._onRandomWeather,
       clearWeather: WeatherPickerApp._onClearWeather,
-      viewProbabilities: WeatherPickerApp._onViewProbabilities
+      viewProbabilities: WeatherPickerApp._onViewProbabilities,
+      openWeatherSettings: WeatherPickerApp._onOpenWeatherSettings
     }
   };
 
@@ -293,7 +300,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       const userPickedSound = this.#soundFx || '';
       const soundOverride = userPickedSound !== nativeSound ? userPickedSound || null : undefined;
       const temp = fd.customTemp;
-      const temperature = temp ? fromDisplayUnit(parseInt(temp, 10)) : undefined;
+      const temperature = temp != null && temp !== '' ? fromDisplayUnit(parseInt(temp, 10)) : undefined;
       await WeatherManager.setWeather(this.#selectedPresetId, {
         temperature,
         wind: windData,
@@ -312,7 +319,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
         const temp = data.customTemp;
         const icon = data.customIcon?.trim() || 'fa-question';
         const color = data.customColor || '#888888';
-        const temperature = temp ? fromDisplayUnit(parseInt(temp, 10)) : null;
+        const temperature = temp != null && temp !== '' ? fromDisplayUnit(parseInt(temp, 10)) : null;
         await WeatherManager.setCustomWeather({ label, temperature, icon, color, wind: windData, precipitation: precipData, fxPreset, soundFx, fxDensity, fxSpeed, fxColor, zoneId });
       }
     }
@@ -330,8 +337,8 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
           color: data.customColor || preset?.color || '#888888',
           wind: windData,
           precipitation: precipData,
-          tempMin: data.customTemp ? fromDisplayUnit(parseInt(data.customTemp, 10)) : null,
-          tempMax: data.customTemp ? fromDisplayUnit(parseInt(data.customTemp, 10)) : null,
+          tempMin: data.customTemp != null && data.customTemp !== '' ? fromDisplayUnit(parseInt(data.customTemp, 10)) : null,
+          tempMax: data.customTemp != null && data.customTemp !== '' ? fromDisplayUnit(parseInt(data.customTemp, 10)) : null,
           fxPreset,
           soundFx,
           fxDensity,
@@ -411,6 +418,15 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
    */
   static _onViewProbabilities() {
     WeatherProbabilityDialog.open();
+  }
+
+  /**
+   * Open the calendar editor to the weather tab.
+   */
+  static _onOpenWeatherSettings() {
+    const calendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
+    if (!calendarId) return;
+    new CalendarEditor({ calendarId, initialTab: 'weather' }).render(true);
   }
 
   /**

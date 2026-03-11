@@ -3,7 +3,7 @@
   "name": "CALENDARIA.Calendar.Greyhawk.Name",
   "years": {
     "yearZero": 576,
-    "firstWeekday": 2
+    "firstWeekday": 0
   },
   "months": {
     "values": {
@@ -11,7 +11,7 @@
         "name": "Needfest",
         "abbreviation": "Need",
         "ordinal": 1,
-        "days": 6,
+        "days": 7,
         "type": "intercalary"
       },
       "fireseek00000000": {
@@ -36,7 +36,7 @@
         "name": "Growfest",
         "abbreviation": "Grow",
         "ordinal": 4,
-        "days": 6,
+        "days": 7,
         "type": "intercalary"
       },
       "planting00000000": {
@@ -61,7 +61,7 @@
         "name": "Richfest",
         "abbreviation": "Rich",
         "ordinal": 7,
-        "days": 6,
+        "days": 7,
         "type": "intercalary"
       },
       "reaping000000000": {
@@ -86,7 +86,7 @@
         "name": "Brewfest",
         "abbreviation": "Brew",
         "ordinal": 10,
-        "days": 6,
+        "days": 7,
         "type": "intercalary"
       },
       "patchwall0000000": {
@@ -149,7 +149,7 @@
         "isRestDay": true
       }
     },
-    "daysPerYear": 360,
+    "daysPerYear": 364,
     "hoursPerDay": 24,
     "minutesPerHour": 60,
     "secondsPerMinute": 60
@@ -162,8 +162,8 @@
         "icon": "fas fa-seedling",
         "color": "#90ee90",
         "seasonalType": "spring",
-        "dayStart": 48,
-        "dayEnd": 137,
+        "dayStart": 49,
+        "dayEnd": 139,
         "abbreviation": "Spr"
       },
       "summer0000000000": {
@@ -171,8 +171,8 @@
         "icon": "fas fa-sun",
         "color": "#ffd700",
         "seasonalType": "summer",
-        "dayStart": 138,
-        "dayEnd": 227,
+        "dayStart": 140,
+        "dayEnd": 230,
         "abbreviation": "Sum"
       },
       "fall000000000000": {
@@ -180,8 +180,8 @@
         "icon": "fas fa-leaf",
         "color": "#d2691e",
         "seasonalType": "autumn",
-        "dayStart": 228,
-        "dayEnd": 317,
+        "dayStart": 231,
+        "dayEnd": 321,
         "abbreviation": "Fal"
       },
       "winter0000000000": {
@@ -189,8 +189,8 @@
         "icon": "fas fa-snowflake",
         "color": "#87ceeb",
         "seasonalType": "winter",
-        "dayStart": 318,
-        "dayEnd": 47,
+        "dayStart": 322,
+        "dayEnd": 48,
         "abbreviation": "Win"
       }
     }
@@ -321,7 +321,7 @@
       "referenceDate": {
         "year": 0,
         "month": 2,
-        "dayOfMonth": 11
+        "dayOfMonth": 10
       }
     }
   },
@@ -329,8 +329,8 @@
     "enabled": true,
     "shortestDay": 8,
     "longestDay": 16,
-    "winterSolstice": 354,
-    "summerSolstice": 172
+    "winterSolstice": 358,
+    "summerSolstice": 174
   },
   "cycles": {},
   "canonicalHours": {},

@@ -2246,6 +2246,7 @@
   "CALENDARIA.Weather.PermafrostSurge": "Permafrost Surge",
   "CALENDARIA.Weather.PermafrostSurgeDesc": "Sudden and aggressive extreme cold",
   "CALENDARIA.Weather.Picker.Clear": "Clear",
+  "CALENDARIA.Weather.Picker.OpenSettings": "Weather Settings",
   "CALENDARIA.Weather.Picker.ClearHint": "Remove current weather from the scene.",
   "CALENDARIA.Weather.Picker.Custom": "Custom Weather",
   "CALENDARIA.Weather.Picker.CustomColor": "Color",

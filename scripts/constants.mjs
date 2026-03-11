@@ -311,7 +311,7 @@ export const WIND_SPEEDS = {
   MODERATE: { id: 'moderate', value: 2, label: 'CALENDARIA.Weather.Wind.Moderate', kph: 40 },
   STRONG: { id: 'strong', value: 3, label: 'CALENDARIA.Weather.Wind.Strong', kph: 60 },
   SEVERE: { id: 'severe', value: 4, label: 'CALENDARIA.Weather.Wind.Severe', kph: 90 },
-  EXTREME: { id: 'extreme', value: 5, label: 'CALENDARIA.Weather.Wind.Extreme', kph: 999 }
+  EXTREME: { id: 'extreme', value: 5, label: 'CALENDARIA.Weather.Wind.Extreme', kph: 250 }
 };
 
 /** Precipitation type identifiers */

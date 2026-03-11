@@ -100,7 +100,7 @@ async function fadeOutAndStop(sound) {
  */
 function isSoundDisabledForScene(scene) {
   if (!scene) return false;
-  return scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED) || scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED);
+  return scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED);
 }
 
 /**
@@ -108,8 +108,12 @@ function isSoundDisabledForScene(scene) {
  * @param {object|null} weather - Current weather state
  */
 async function playSound(weather) {
-  if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX) || !game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED)) {
+  if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX)) {
     stopSound();
+    return;
+  }
+  if (game.audio.locked) {
+    game.audio.awaitFirstGesture().then(() => playSound(weather));
     return;
   }
   const soundKey = weather?.soundFx || null;

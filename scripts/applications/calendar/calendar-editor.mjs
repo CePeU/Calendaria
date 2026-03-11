@@ -179,6 +179,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   constructor(options = {}) {
     super(options);
+    if (options.initialTab) this.tabGroups.primary = options.initialTab;
     if (options.calendarId) {
       this.#calendarId = options.calendarId;
       this.#isEditing = true;

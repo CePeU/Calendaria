@@ -25,6 +25,9 @@ export default class WeatherManager {
   /** @type {boolean} Whether the manager is initialized */
   static #initialized = false;
 
+  /** @type {{ key: string, forecast: object[] }|null} Cached legacy forecast to prevent re-randomization on re-render */
+  static #legacyForecastCache = null;
+
   /** @type {string} Default zone key used when no climate zone is configured */
   static DEFAULT_ZONE = '_default';
 
@@ -306,6 +309,7 @@ export default class WeatherManager {
    * @private
    */
   static async #saveWeather(weather, broadcast, zoneId) {
+    this.#legacyForecastCache = null;
     zoneId ??= this.DEFAULT_ZONE;
     const previous = this.#currentWeatherByZone[zoneId] ?? null;
     if (weather) this.#currentWeatherByZone[zoneId] = weather;
@@ -476,18 +480,20 @@ export default class WeatherManager {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return [];
     const zoneId = 'zoneId' in options ? options.zoneId : (this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE);
-    const zoneConfig = this.getActiveZone(zoneId);
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
     const days = Math.min(options.days || maxDays, maxDays);
-    const customPresets = this.getCustomPresets();
     const components = game.time.components;
     const yearZero = calendar.years?.yearZero ?? 0;
+    const accuracy = options.accuracy ?? game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
+    const cacheKey = `${zoneId}|${components.year}|${components.month}|${components.dayOfMonth}|${days}|${accuracy}`;
+    if (this.#legacyForecastCache?.key === cacheKey) return this.#legacyForecastCache.forecast;
+    const zoneConfig = this.getActiveZone(zoneId);
+    const customPresets = this.getCustomPresets();
     const currentWeatherId = this.#currentWeatherByZone[zoneId]?.id ?? null;
     const inertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
-    const accuracy = options.accuracy ?? game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
     const currentWeather = this.#currentWeatherByZone[zoneId];
     const prevWeather = currentWeather ? { temperature: currentWeather.temperature, wind: currentWeather.wind } : null;
-    return generateForecast({
+    const forecast = generateForecast({
       zoneConfig,
       startYear: components.year + yearZero,
       startMonth: components.month,
@@ -501,6 +507,8 @@ export default class WeatherManager {
       getSeasonForDate: this.#makeSeasonResolver(calendar, yearZero),
       getDaysInMonth: this.#makeDaysInMonth(calendar, yearZero)
     });
+    this.#legacyForecastCache = { key: cacheKey, forecast };
+    return forecast;
   }
 
   /**
@@ -509,6 +517,7 @@ export default class WeatherManager {
    * @private
    */
   static async #onDayChange(data) {
+    this.#legacyForecastCache = null;
     if (!CalendariaSocket.isPrimaryGM()) return;
     const calendar = CalendarManager.getActiveCalendar();
     const autoGenerate = game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER) ?? false;
@@ -1637,7 +1646,7 @@ export default class WeatherManager {
     const rows = [];
     const desc = description && description !== label ? esc(description) : '';
     rows.push(`<div class="header"><strong>${esc(label)}</strong>${desc ? ` — ${desc}` : ''}</div>`);
-    if (temp) rows.push(`<div class="row"><i class="fas fa-temperature-half"></i> ${esc(temp)}</div>`);
+    if (temp != null) rows.push(`<div class="row"><i class="fas fa-temperature-half"></i> ${esc(temp)}</div>`);
     if (windSpeed > 0) {
       const windLabel = this.getWindSpeedLabel(windSpeed);
       const windKph = this.getWindSpeedKph(windSpeed);

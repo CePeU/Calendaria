@@ -62,6 +62,8 @@ export default class CalendarManager {
       this.#patchFoundryCalendar();
       log(3, `Synced game.time.calendar to: ${activeCalendar.name} (roundTime: ${CONFIG.time.roundTime}s)`);
     }
+    const resolvedId = CalendarRegistry.getActive()?.metadata?.id;
+    if (resolvedId) Hooks.callAll(HOOKS.CALENDAR_SWITCHED, resolvedId, CalendarRegistry.get(resolvedId));
     log(3, 'Calendar Manager initialized');
   }
 

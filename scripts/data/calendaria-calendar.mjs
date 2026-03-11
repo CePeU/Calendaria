@@ -1463,15 +1463,15 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   _calculatePeriodicSeasonBounds(seasonIndex, totalDays) {
     const seasons = this.seasonsArray;
-    if (!seasons.length || seasonIndex < 0 || seasonIndex >= seasons.length) return { dayStart: 0, dayEnd: 0 };
+    if (!seasons.length || seasonIndex < 0 || seasonIndex >= seasons.length) return { dayStart: 0, dayEnd: 0, cycleLength: 0 };
     totalDays ??= this.getDaysInYear(1);
     const offset = this.seasons?.offset ?? 0;
+    const cycleLength = seasons.reduce((sum, s) => sum + (s.duration ?? Math.floor(totalDays / seasons.length)), 0) || totalDays;
     let dayStart = offset;
     for (let i = 0; i < seasonIndex; i++) dayStart += seasons[i].duration ?? Math.floor(totalDays / seasons.length);
-    dayStart = dayStart % totalDays;
     const duration = seasons[seasonIndex].duration ?? Math.floor(totalDays / seasons.length);
-    let dayEnd = (dayStart + duration - 1) % totalDays;
-    return { dayStart, dayEnd };
+    const dayEnd = dayStart + duration - 1;
+    return { dayStart, dayEnd, cycleLength };
   }
 
   /**
@@ -1488,10 +1488,16 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     for (let i = 0; i < components.month; i++) dayOfYear += months[i]?.days ?? 0;
     if (this.seasons.type === 'periodic') {
       const totalDays = this.getDaysInYear(components.year);
+      const { cycleLength } = this._calculatePeriodicSeasonBounds(0, totalDays);
+      if (cycleLength <= 0) return null;
+      const totalAbsDays = this._componentsToDays(components);
+      const offset = this.seasons?.offset ?? 0;
+      const dayInCycle = (((totalAbsDays - offset) % cycleLength) + cycleLength) % cycleLength;
+      let cumulative = 0;
       for (let i = 0; i < seasons.length; i++) {
-        const { dayStart, dayEnd } = this._calculatePeriodicSeasonBounds(i, totalDays);
-        const inRange = dayStart <= dayEnd ? dayOfYear >= dayStart && dayOfYear <= dayEnd : dayOfYear >= dayStart || dayOfYear <= dayEnd;
-        if (inRange) return seasons[i];
+        const duration = seasons[i].duration ?? Math.floor(totalDays / seasons.length);
+        if (dayInCycle >= cumulative && dayInCycle < cumulative + duration) return seasons[i];
+        cumulative += duration;
       }
       return null;
     }
